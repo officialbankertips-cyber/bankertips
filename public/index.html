@@ -111,7 +111,7 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}.
   <div class="card admin-members"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Membership approvals</h3><p>Verify the customer's payment in your payment provider or transaction records before approving.</p></div><button class="btn secondary small" id="usersReload"><i class="fa-solid fa-rotate"></i> Reload members</button></div><div class="account-summary" style="padding:0 16px 16px"><div class="summary-tile"><strong id="membersPendingCount">—</strong><span>Pending review</span></div><div class="summary-tile"><strong id="membersActiveCount">—</strong><span>Active VIP members</span></div><div class="summary-tile"><strong id="membersExpiredCount">—</strong><span>Rejected / expired</span></div></div><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Selected package</th><th>Status</th><th>Expiry</th><th>Admin action</th></tr></thead><tbody id="adminUsersRows"><tr><td colspan="5">Load members after admin authentication.</td></tr></tbody></table></div><div class="notice" id="membersNotice">Approval activates access for the selected package duration. Payments are not automatically verified by this interface.</div></div>
  </section>
 </main>
-<footer>© <span id="year"></span> Banker Tips · Please gamble responsibly. Predictions are not guarantees.</footer>
+<footer>© <span id="year"></span> © Copyright 2026 | Banker Tips - Rights reserved.</footer>
 <nav class="bottom-nav" aria-label="Main navigation">
  <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Free Tips</span></button>
  <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP Tips</span></button>
@@ -246,7 +246,7 @@ async function loadPremium() {
   } catch(e) {
     $('vipSubheading').textContent='Membership verification required';
     showEmpty('premiumRows',5,e.message);
-    $('premiumNotice').textContent='Access is controlled by the backend. If you have paid, contact support or sign in with the activated account.';
+    $('premiumNotice').textContent='Access is pending verification. If you have paid, contact support or sign in with the activated account.';
   }
 }
 async function checkSession() {
@@ -319,7 +319,7 @@ function showAdminMessage(message,kind='info') { showMessage('adminMessage',mess
 async function loadAdminTips() {
   const user=await checkSession();
   if(!user || String(user.role||'').toLowerCase()!=='admin') {
-    showEmpty('adminRows',4,'Admin permission required. Please sign in with an authorized admin account.');
+    showEmpty('adminRows',4,'Admin permission required. Please sign in with an active account.');
     $('adminNotice').textContent='The server must enforce admin permissions on this endpoint.';
     if(user) alert('Your account does not have admin permissions.');
     else openModal('loginModal');
