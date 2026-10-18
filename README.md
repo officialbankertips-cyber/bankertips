@@ -48,7 +48,7 @@ If you are using the previously generated `banker_tips_fixed.html`, copy it to `
 
 ## 6. API endpoints
 ### Public/member
-- `POST /api/auth/register` — `{ "email", "phoneNumber", "password" }`
+- `POST /api/auth/register` — `{ "email", "phoneNumber", "password", "selectedPackage" }`; package is `daily`, `weekly`, or `monthly`
 - `POST /api/auth/login` — `{ "email", "password" }`
 - `POST /api/auth/logout`
 - `GET /api/auth/me`
@@ -63,7 +63,7 @@ If you are using the previously generated `banker_tips_fixed.html`, copy it to `
 - `PUT /api/admin/tips/:id` — edit match/tip/odds/date/type/result
 - `DELETE /api/admin/tips/:id`
 - `GET /api/admin/users`
-- `PATCH /api/admin/users/:id/vip` — `{ "isActivated": true, "vipExpiresAt": "2026-12-31T23:59:59.000Z" }`
+- `PATCH /api/admin/users/:id/vip` — `{ "action": "approve" }`, `{ "action": "reject" }`, or `{ "action": "revoke" }`. Approval activates Daily for 1 day, Weekly for 7 days, or Monthly for 30 days. Verify payment independently before approving.
 
 Tip payload example:
 ```json
@@ -87,4 +87,16 @@ Tip payload example:
 - Rate limiting is applied to API and authentication routes.
 - The backend validates incoming tip data and never allows public registration to choose a role.
 - Before public production use, consider adding email verification, password reset, audit logs, backups, monitoring, and a dedicated CSRF-token implementation if the frontend and API are hosted on different sites.
-- This is a starter implementation; review and test in your environment before accepting real customer payments. Payment activation is intentionally manual via the admin users endpoint. It does not automatically verify M-Pesa transactions.
+- This is a starter implementation; review and test in your environment before accepting real customer payments. Payment activation is intentionally manual through the Admin membership review table. The interface lists supported payment methods and current M-Pesa instructions, but it does not collect transaction IDs or automatically verify M-Pesa, PayPal, Skrill, Eversend, or Binance payments. Admin must confirm the transaction independently before clicking Approve + activate. The approval endpoint sets the expiry based on the selected package. Existing users may need to log in again after deployment for updated membership status to be reflected.
+
+
+## Fix for admin tip validation
+The backend now splits a combined match string such as `Lyon - Nice` into `homeTeam` and `awayTeam` when separate team fields are not supplied by the frontend. Redeploy this updated `server.js` to fix the required-field validation error.
+
+
+## Membership review workflow
+1. Customer selects a subscription plan before registration.
+2. Registration stores the selected package and leaves VIP access disabled.
+3. Customer is signed in and sent to the Payment & Membership panel.
+4. Admin opens the Admin panel, checks the actual payment record, then approves or rejects the request.
+5. Approval activates VIP access for 1, 7, or 30 days based on the selected package. The backend enforces VIP authorization and expiry on premium-tip API requests.
