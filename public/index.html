@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#075985">
+<meta name="description" content="Banker Tips football predictions and premium membership portal.">
+<title>Banker Tips | Football Predictions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{color-scheme:light;--bg:#f3f7fb;--surface:#fff;--ink:#102033;--muted:#617286;--line:#dce6ef;--blue:#0284c7;--blue2:#075985;--soft:#eaf6fd;--green:#15803d;--greenbg:#dcfce7;--red:#b91c1c;--redbg:#fee2e2;--amber:#a16207;--amberbg:#fef3c7;--radius:16px;--shadow:0 12px 35px rgba(15,53,82,.08)}
+[data-theme=dark]{color-scheme:dark;--bg:#08111e;--surface:#111e30;--ink:#f0f6fc;--muted:#a1b1c4;--line:#26384c;--soft:#172f43;--green:#86efac;--greenbg:#153c2b;--red:#fca5a5;--redbg:#481e27;--amber:#fcd34d;--amberbg:#493719;--shadow:0 12px 35px rgba(0,0,0,.22)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",Arial,sans-serif;line-height:1.5;padding-bottom:86px}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
+header{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.header-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none}.brand-mark{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-size:20px}.brand-name{font:800 1.3rem Outfit,sans-serif;letter-spacing:-.5px}.brand-name span{color:var(--blue)}.head-actions{display:flex;align-items:center;gap:8px}.icon-btn,.menu-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}.menu-btn{display:none}
+.top-links{display:flex;gap:8px;align-items:center}.btn{border:0;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-weight:800;padding:11px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 5px 14px #0284c729}.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}.btn.secondary{background:var(--soft);color:var(--blue2);box-shadow:none;border:1px solid var(--line)}.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:1px solid var(--line)}.btn.danger{background:#b91c1c}.btn.small{padding:8px 11px;font-size:.85rem}
+main{padding:26px 0}.hero{background:linear-gradient(125deg,#075985,#0284c7 70%,#38bdf8);color:white;border-radius:22px;padding:clamp(22px,5vw,38px);display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:var(--shadow);overflow:hidden}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.74rem;font-weight:800;opacity:.8}.hero h1{font:800 clamp(1.8rem,4vw,2.7rem)/1.1 Outfit,sans-serif;margin:9px 0}.hero p{max-width:590px;margin:0;color:#e3f5ff}.hero .btn{background:white;color:#075985;box-shadow:none;margin-top:18px}.hero-icon{font-size:clamp(3rem,8vw,6rem);opacity:.22;padding:0 18px}
+.section{margin-top:27px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-head h2{font:800 1.45rem Outfit,sans-serif;margin:0}.section-head p{margin:3px 0 0;color:var(--muted);font-size:.9rem}.date-chip{background:var(--soft);color:var(--blue2);border:1px solid var(--line);border-radius:99px;padding:6px 11px;font-size:.8rem;font-weight:800;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:570px}th{background:var(--soft);color:var(--muted);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:13px 15px}td{padding:14px 15px;border-top:1px solid var(--line);font-size:.9rem;font-weight:600}tbody tr:hover{background:color-mix(in srgb,var(--soft) 45%,var(--surface))}.match{font-weight:800}.subtext{display:block;font-size:.75rem;color:var(--muted);font-weight:500}.odds{display:inline-block;border:1px solid var(--line);background:var(--soft);padding:4px 9px;border-radius:8px;font-weight:800;color:var(--blue2)}.status{display:inline-flex;padding:4px 9px;border-radius:99px;font-size:.76rem;font-weight:800}.pending{background:var(--amberbg);color:var(--amber)}.won{background:var(--greenbg);color:var(--green)}.lost{background:var(--redbg);color:var(--red)}.notice{padding:13px 15px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.info-card{padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}.info-card i{color:var(--blue);font-size:1.35rem}.info-card h3{margin:10px 0 4px;font:700 1.05rem Outfit,sans-serif}.info-card p{color:var(--muted);font-size:.88rem;margin:0}.banner{margin-top:24px;padding:24px;border-radius:18px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px}.banner h2{font:800 1.35rem Outfit,sans-serif;margin:0 0 4px}.banner p{margin:0;color:var(--muted);font-size:.9rem}.payment-methods{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pay-pill{padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-weight:700}
+.panel{display:none;margin-top:22px}.panel.active{display:block}.hidden{display:none!important}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0284c71f}.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.admin-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.pad{padding:20px}.msg{margin-top:12px;font-size:.88rem;padding:10px 12px;border-radius:10px;display:none}.msg.show{display:block}.msg.error{background:var(--redbg);color:var(--red)}.msg.ok{background:var(--greenbg);color:var(--green)}.msg.info{background:var(--soft);color:var(--blue2)}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:25;display:flex;justify-content:center;gap:0;background:var(--surface);border-top:1px solid var(--line);padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0f172a0b}.bottom-nav button{border:0;background:transparent;color:var(--muted);font-size:.72rem;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;max-width:180px;padding:5px}.bottom-nav button i{font-size:1.15rem}.bottom-nav button.active{color:var(--blue)}
+.modal{display:none;position:fixed;inset:0;z-index:100;background:#071321b8;backdrop-filter:blur(5px);padding:18px;align-items:center;justify-content:center}.modal.open{display:flex}.modal-box{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 25px 80px #0003}.modal-box h2{font:800 1.45rem Outfit,sans-serif;margin:0 40px 6px 0}.modal-box>p{color:var(--muted);font-size:.88rem;margin:0 0 17px}.close{position:absolute;right:15px;top:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px}.modal-box .btn{width:100%;margin-top:14px}
+@media(max-width:700px){.wrap{width:min(100% - 22px,1040px)}.header-inner{min-height:66px}.brand-mark{width:39px;height:39px}.brand-name{font-size:1.12rem}.top-links{display:none;position:absolute;top:66px;left:11px;right:11px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch}.top-links.open{display:flex}.top-links .btn{width:100%}.menu-btn{display:inline-grid;place-items:center}.hero{border-radius:17px}.hero-icon{display:none}.section-head{align-items:flex-start;flex-direction:column}.date-chip{white-space:normal}.grid-3{grid-template-columns:1fr}.banner{align-items:flex-start;flex-direction:column}.admin-layout{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}main{padding-top:16px}.section{margin-top:22px}td{padding:12px 11px}th{padding:12px 11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body data-theme="light">
+<header>
+ <div class="wrap header-inner">
+  <a class="brand" href="#" id="brandHome" aria-label="Banker Tips home"><span class="brand-mark"><i class="fa-solid fa-chart-line"></i></span><span class="brand-name">BANKER <span>TIPS</span></span></a>
+  <div class="head-actions">
+   <nav class="top-links" id="topLinks" aria-label="Account navigation">
+    <button class="btn secondary" data-open="registerModal"><i class="fa-solid fa-user-plus"></i> Register</button>
+    <button class="btn" data-open="loginModal"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+    <button class="btn secondary" id="headerVip"><i class="fa-solid fa-crown"></i> VIP Access</button>
+   </nav>
+   <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
+   <button class="menu-btn" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
+  </div>
+ </div>
+</header>
+<main class="wrap">
+ <section class="hero">
+  <div><div class="eyebrow">Football insights · Daily selections</div><h1>Make every match count.</h1><p>Explore today's free selections, review previous results, and access premium tips with an authorized membership.</p><button class="btn" id="heroVip"><i class="fa-solid fa-crown"></i> Access VIP Tips</button></div>
+  <div class="hero-icon"><i class="fa-solid fa-futbol"></i></div>
+ </section>
+
+ <section class="panel active" id="freePanel">
+  <div class="section">
+   <div class="section-head"><div><h2>Today's Free Tips</h2><p>Selections and results supplied by the tips service.</p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
+   <div class="card"><div class="table-scroll"><table><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Connecting to tips service…</div></div>
+   <div class="form-actions"><button class="btn secondary" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button><button class="btn ghost" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> View history</button></div>
+  </div>
+  <div class="section grid-3">
+   <article class="info-card"><i class="fa-solid fa-magnifying-glass-chart"></i><h3>Thoughtful analysis</h3><p>Review match selections and odds before making your own decisions.</p></article>
+   <article class="info-card"><i class="fa-solid fa-lock"></i><h3>Member access</h3><p>Premium content is provided only after server-side membership verification.</p></article>
+   <article class="info-card"><i class="fa-solid fa-mobile-screen-button"></i><h3>Mobile friendly</h3><p>Responsive layouts for phones, tablets and desktop screens.</p></article>
+  </div>
+  <div class="banner"><div><h2>Join VIP Premium</h2><p>Sign in or verify your membership to access today's premium selections.</p></div><button class="btn" data-open="loginModal"><i class="fa-solid fa-crown"></i> Member login</button></div>
+ </section>
+
+ <section class="panel" id="historyPanel">
+  <div class="section-head"><div><h2>Free Tips History</h2><p>Past selections returned by the server.</p></div><button class="btn secondary small" id="backToday"><i class="fa-solid fa-arrow-left"></i> Today's tips</button></div>
+  <div class="card"><div class="table-scroll"><table><thead><tr><th>Date</th><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="historyRows"><tr><td colspan="6">Load history to view previous tips.</td></tr></tbody></table></div><div class="notice" id="historyNotice">History is provided by the tips service.</div></div>
+ </section>
+
+ <section class="panel" id="premiumPanel">
+  <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
+  <div class="card"><div class="table-scroll"><table><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">Premium tips are loaded only after the server authorizes access.</div></div>
+ </section>
+
+ <section class="panel" id="paymentPanel">
+  <div class="section-head"><div><h2>Payment & Membership</h2><p>Choose a payment method and follow the confirmation instructions.</p></div></div>
+  <div class="card pad"><h3 style="margin-top:0">Accepted payment methods</h3><div class="payment-methods"><div class="pay-pill"><i class="fa-solid fa-mobile-screen-button"></i> M-Pesa</div><div class="pay-pill"><i class="fa-solid fa-wallet"></i> Skrill</div><div class="pay-pill"><i class="fa-brands fa-paypal"></i> PayPal</div></div><div class="banner"><div><h2>M-Pesa payment</h2><p>Use Till Number <strong>8635306</strong>. Send your transaction confirmation to support for verification.</p></div><a class="btn" href="https://wa.me/2547101047400?text=Hello%20Banker%20Tips%2C%20I%20need%20help%20with%20VIP%20membership." target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> Contact support</a></div><p class="subtext" style="margin-top:14px">Payments should be confirmed by an authorized server-side process. Do not share your password or one-time verification codes with anyone.</p></div>
+ </section>
+
+ <section class="panel" id="adminPanel">
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Only authenticated users with server-authorized admin permissions can save changes.</p></div><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div>
+  <div class="admin-layout">
+   <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
+    <input type="hidden" id="tipId">
+    <div class="form-grid">
+     <div class="field"><label for="tipDate">Date</label><input type="date" id="tipDate" required></div>
+     <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
+     <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
+     <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
+     <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
+     <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
+     <div class="field"><label for="tipStatus">Result</label><select id="tipStatus"><option value="Pending">Pending</option><option value="Won">Won</option><option value="Lost">Lost</option><option value="Void">Void</option></select></div>
+    </div>
+    <div class="form-actions"><button class="btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save tip</button><button class="btn ghost" type="button" id="clearTip">Clear form</button></div><div class="msg" id="adminMessage" role="status"></div>
+   </form></div>
+   <div class="card"><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Admin actions are sent to the API; permissions must be enforced by the server.</div></div>
+  </div>
+ </section>
+</main>
+<footer>© <span id="year"></span> Banker Tips · Please gamble responsibly. Predictions are not guarantees.</footer>
+<nav class="bottom-nav" aria-label="Main navigation">
+ <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Free Tips</span></button>
+ <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP Tips</span></button>
+ <button data-panel="paymentPanel"><i class="fa-solid fa-wallet"></i><span>Payment</span></button>
+ <button data-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></button>
+ <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
+</nav>
+
+<div class="modal" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="registerTitle">Create your account</h2><p>Register for a Banker Tips account.</p><form id="registerForm"><div class="field"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" required></div><div class="field" style="margin-top:12px"><label for="regPhone">Phone number</label><input type="tel" id="regPhone" autocomplete="tel" maxlength="24" placeholder="+2547XXXXXXXX" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn" type="submit">Create account</button><div class="msg" id="registerMessage" role="status"></div></form></div></div>
+<div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modal-box"><button class="close" data-close="loginModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="loginTitle">Member login</h2><p>Sign in to check your membership status.</p><form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input type="email" id="loginEmail" autocomplete="username" maxlength="254" required></div><div class="field" style="margin-top:12px"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" maxlength="128" required></div><button class="btn" type="submit">Login securely</button><div class="msg" id="loginMessage" role="status"></div></form></div></div>
+<div class="modal" id="vipModal" role="dialog" aria-modal="true" aria-labelledby="vipTitle"><div class="modal-box"><button class="close" data-close="vipModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="vipTitle">Unlock VIP tips</h2><p>Sign in to verify your subscription. Access is authorized by the server, not by a passcode embedded in this page.</p><button class="btn" id="vipLoginButton"><i class="fa-solid fa-right-to-bracket"></i> Login to verify access</button><div class="msg" id="vipMessage" role="status"></div></div></div>
+
+<script>
+'use strict';
+
+/*
+  BACKEND CONTRACT REQUIRED:
+  GET    /api/tips?type=free&date=YYYY-MM-DD
+  GET    /api/tips/history?type=free
+  GET    /api/tips?type=premium&date=YYYY-MM-DD  (must enforce authenticated VIP access)
+  POST   /api/auth/register       {email, phoneNumber, password}
+  POST   /api/auth/login          {email, password}
+  POST   /api/auth/logout
+  GET    /api/auth/me             -> {success:true,user:{email,role,isActivated}}
+  GET    /api/admin/tips          (admin role required)
+  POST   /api/admin/tips          create tip (admin role required)
+  PUT    /api/admin/tips/:id      update tip (admin role required)
+  DELETE /api/admin/tips/:id      delete tip (admin role required)
+  Server requirements: password hashing, validation, rate limiting, secure HttpOnly/SameSite cookies,
+  CSRF protection for state-changing cookie-authenticated routes, authorization on EVERY request,
+  and database persistence. Do not put database credentials or VIP secrets in this HTML file.
+*/
+const API_BASE = ''; // Set to your backend origin only if API is hosted separately; configure CORS + cookies there.
+const $ = (id) => document.getElementById(id);
+const todayISO = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+};
+const prettyDate = (value) => {
+  if (!value) return '—';
+  const d = new Date(`${value}T12:00:00`);
+  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+};
+const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeStatus = (status) => {
+  const s = String(status || 'Pending').toLowerCase();
+  const cls = s === 'won' ? 'won' : s === 'lost' ? 'lost' : 'pending';
+  return `<span class="status ${cls}">${escapeHTML(status || 'Pending')}</span>`;
+};
+let currentUser = null;
+let lastTips = [];
+
+async function api(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (options.body && !headers.has('Content-Type')) headers.set('Content-Type','application/json');
+  const response = await fetch(API_BASE + path, {
+    ...options, headers, credentials:'include', cache:'no-store'
+  });
+  const contentType = response.headers.get('content-type') || '';
+  const data = contentType.includes('application/json') ? await response.json() : null;
+  if (!response.ok) {
+    const err = new Error(data?.message || `Request failed (${response.status})`);
+    err.status = response.status;
+    throw err;
+  }
+  return data || {};
+}
+function showMessage(id, text, kind='info') {
+  const el = $(id); if (!el) return;
+  el.textContent = text; el.className = `msg show ${kind}`;
+}
+function hideMessage(id) { const el=$(id); if(el) el.className='msg'; }
+function openModal(id) { $(id)?.classList.add('open'); const first=$(id)?.querySelector('input,button'); first?.focus(); }
+function closeModal(id) { $(id)?.classList.remove('open'); }
+function setPanel(panelId) {
+  const permitted = ['freePanel','historyPanel','premiumPanel','paymentPanel','adminPanel'];
+  if (!permitted.includes(panelId)) return;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===panelId));
+  document.querySelectorAll('.bottom-nav [data-panel]').forEach(b=>b.classList.toggle('active',b.dataset.panel===panelId));
+  $('topLinks').classList.remove('open');
+  $('menuToggle').setAttribute('aria-expanded','false');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(panelId==='historyPanel') loadHistory();
+  if(panelId==='premiumPanel') loadPremium();
+  if(panelId==='adminPanel') loadAdminTips();
+}
+function showEmpty(tbodyId, columns, message) {
+  $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
+}
+function renderTipRows(tips, target, withDate=false) {
+  if (!Array.isArray(tips) || tips.length===0) {
+    showEmpty(target,withDate?6:5,'No tips are available for this date.');
+    return;
+  }
+  $(target).innerHTML = tips.map(t => `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
+}
+async function loadFreeTips() {
+  const date=todayISO(); $('todayDate').textContent=prettyDate(date);
+  showEmpty('freeRows',5,'Loading tips…'); $('freeNotice').textContent='Connecting to tips service…';
+  try {
+    const data=await api(`/api/tips?type=free&date=${encodeURIComponent(date)}`);
+    lastTips=Array.isArray(data.tips)?data.tips:[];
+    renderTipRows(lastTips,'freeRows');
+    $('freeNotice').textContent=`${lastTips.length} selection(s) returned by the server.`;
+  } catch(e) {
+    showEmpty('freeRows',5,'Tips could not be loaded.');
+    $('freeNotice').textContent=`Unable to connect to the tips API (${e.message}). Configure the backend endpoints listed in this file. No invented fixtures or results are displayed.`;
+  }
+}
+async function loadHistory() {
+  showEmpty('historyRows',6,'Loading history…'); $('historyNotice').textContent='Loading history from the server…';
+  try {
+    const data=await api('/api/tips/history?type=free');
+    const tips=Array.isArray(data.tips)?data.tips:[];
+    $('historyRows').innerHTML=tips.length?tips.map(t=>`<tr><td>${escapeHTML(prettyDate(t.date))}</td><td>${escapeHTML(t.time||'—')}</td><td class="match">${escapeHTML(t.match||'—')}</td><td>${escapeHTML(t.tip||'—')}</td><td><span class="odds">${escapeHTML(t.odds??'—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join(''):'<tr><td colspan="6">No historical tips found.</td></tr>';
+    $('historyNotice').textContent=`${tips.length} historical selection(s) returned by the server.`;
+  } catch(e) { showEmpty('historyRows',6,'History could not be loaded.'); $('historyNotice').textContent=`History API error: ${e.message}`; }
+}
+async function loadPremium() {
+  $('vipDate').textContent=prettyDate(todayISO()); $('vipSubheading').textContent='Checking membership access…';
+  showEmpty('premiumRows',5,'Verifying access…'); $('premiumNotice').textContent='Premium tips require server authorization.';
+  try {
+    if(!currentUser) await checkSession();
+    if(!currentUser) throw new Error('Please log in first to verify your membership.');
+    const data=await api(`/api/tips?type=premium&date=${encodeURIComponent(todayISO())}`);
+    if(data.authorized===false) throw new Error('Your account does not have an active VIP subscription.');
+    const tips=Array.isArray(data.tips)?data.tips:[];
+    renderTipRows(tips,'premiumRows');
+    $('vipSubheading').textContent='Authorized premium member';
+    $('premiumNotice').textContent=`${tips.length} premium selection(s) returned by the server.`;
+  } catch(e) {
+    $('vipSubheading').textContent='Membership verification required';
+    showEmpty('premiumRows',5,e.message);
+    $('premiumNotice').textContent='Access is controlled by the backend. If you have paid, contact support or sign in with the activated account.';
+  }
+}
+async function checkSession() {
+  try {
+    const data=await api('/api/auth/me');
+    currentUser=data.user||null;
+    updateAccountUI();
+    return currentUser;
+  } catch { currentUser=null; updateAccountUI(); return null; }
+}
+function updateAccountUI() {
+  const admin=!!currentUser && String(currentUser.role||'').toLowerCase()==='admin';
+  $('adminPanel').dataset.allowed=admin?'true':'false';
+  // Admin panel is only opened after server-side session and role check; the API must independently enforce the same role.
+  const adminNav=$('adminNavButton');
+  if(adminNav) adminNav.classList.toggle('hidden',!admin);
+}
+async function handleRegister(event) {
+  event.preventDefault(); hideMessage('registerMessage');
+  const email=$('regEmail').value.trim(), phoneNumber=$('regPhone').value.trim(), password=$('regPassword').value;
+  if(password.length<10) return showMessage('registerMessage','Use a password with at least 10 characters.','error');
+  try {
+    const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email,phoneNumber,password})});
+    showMessage('registerMessage',data.message||'Account created. You can now log in.','ok');
+    $('registerForm').reset();
+  } catch(e) { showMessage('registerMessage',e.message,'error'); }
+}
+async function handleLogin(event) {
+  event.preventDefault(); hideMessage('loginMessage');
+  const email=$('loginEmail').value.trim(), password=$('loginPassword').value;
+  try {
+    const data=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password})});
+    currentUser=data.user||null;
+    if(!currentUser) await checkSession(); else updateAccountUI();
+    $('loginForm').reset(); closeModal('loginModal');
+    if(currentUser?.role?.toLowerCase()==='admin') showMessage('loginMessage','Signed in successfully. Admin access is available.','ok');
+    if(data.isActivated || currentUser?.isActivated) { setPanel('premiumPanel'); await loadPremium(); }
+    else { setPanel('freePanel'); alert('Login successful. VIP access is available after membership activation.'); }
+  } catch(e) { showMessage('loginMessage',e.message,'error'); }
+}
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; }
+function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
+async function loadAdminTips() {
+  const user=await checkSession();
+  if(!user || String(user.role||'').toLowerCase()!=='admin') {
+    showEmpty('adminRows',4,'Admin permission required. Please sign in with an authorized admin account.');
+    $('adminNotice').textContent='The server must enforce admin permissions on this endpoint.';
+    if(user) alert('Your account does not have admin permissions.');
+    else openModal('loginModal');
+    setPanel('freePanel'); return;
+  }
+  showEmpty('adminRows',4,'Loading admin tips…');
+  try {
+    const data=await api('/api/admin/tips');
+    const tips=Array.isArray(data.tips)?data.tips:[];
+    $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span></td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips found.</td></tr>';
+    $('adminNotice').textContent=`${tips.length} tip(s) loaded. Changes are saved to the connected backend database.`;
+  } catch(e) { showEmpty('adminRows',4,'Could not load admin tips.'); $('adminNotice').textContent=`Admin API error: ${e.message}`; }
+}
+async function saveTip(event) {
+  event.preventDefault(); hideMessage('adminMessage');
+  const id=$('tipId').value;
+  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
+  try {
+    const user=await checkSession();
+    if(!user || String(user.role||'').toLowerCase()!=='admin') throw new Error('Admin authentication is required.');
+    const path=id?`/api/admin/tips/${encodeURIComponent(id)}`:'/api/admin/tips';
+    const data=await api(path,{method:id?'PUT':'POST',body:JSON.stringify(payload)});
+    showAdminMessage(data.message||(id?'Tip updated.':'Tip saved.'),'ok'); clearTipForm(); await loadAdminTips(); await loadFreeTips();
+  } catch(e) { showAdminMessage(e.message,'error'); }
+}
+async function adminRowAction(event) {
+  const edit=event.target.closest('[data-edit-tip]'), del=event.target.closest('[data-delete-tip]');
+  if(!edit&&!del) return;
+  const id=(edit||del).dataset[edit?'editTip':'deleteTip'];
+  try {
+    const user=await checkSession();
+    if(!user||String(user.role||'').toLowerCase()!=='admin') throw new Error('Admin authentication is required.');
+    if(del) {
+      if(!confirm('Delete this tip from the database?')) return;
+      await api(`/api/admin/tips/${encodeURIComponent(id)}`,{method:'DELETE'});
+      await loadAdminTips(); await loadFreeTips(); return;
+    }
+    const data=await api('/api/admin/tips');
+    const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
+    if(!tip) throw new Error('Tip not found. Reload the list and try again.');
+    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    $('tipMatch').focus();
+  } catch(e) { showAdminMessage(e.message,'error'); }
+}
+
+document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openModal(b.dataset.open)));
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>closeModal(m.id))});
+document.querySelectorAll('.bottom-nav [data-panel]').forEach(b=>b.addEventListener('click',()=>setPanel(b.dataset.panel)));
+$('themeToggle').addEventListener('click',()=>{const dark=document.body.dataset.theme!=='dark';document.body.dataset.theme=dark?'dark':'light';$('themeToggle').innerHTML=dark?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';});
+$('menuToggle').addEventListener('click',()=>{const open=$('topLinks').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));});
+$('brandHome').addEventListener('click',e=>{e.preventDefault();setPanel('freePanel')});
+$('headerVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel'):openModal('vipModal'));
+$('heroVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel'):openModal('vipModal'));
+$('bottomVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel'):openModal('vipModal'));
+$('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
+$('refreshTips').addEventListener('click',loadFreeTips);
+$('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
+$('backToday').addEventListener('click',()=>setPanel('freePanel'));
+$('registerForm').addEventListener('submit',handleRegister);
+$('loginForm').addEventListener('submit',handleLogin);
+$('tipForm').addEventListener('submit',saveTip);
+$('clearTip').addEventListener('click',clearTipForm);
+$('adminReload').addEventListener('click',loadAdminTips);
+$('adminRows').addEventListener('click',adminRowAction);
+$('year').textContent=new Date().getFullYear();
+$('tipDate').value=todayISO();
+$('todayDate').textContent=prettyDate(todayISO());
+$('vipDate').textContent=prettyDate(todayISO());
+checkSession().then(loadFreeTips);
+</script>
+</body>
+</html>
