@@ -78,6 +78,8 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true, select: false },
   role: { type: String, enum: ["user", "admin"], default: "user", index: true },
   isActivated: { type: Boolean, default: false, index: true },
+  membershipStatus: { type: String, enum: ["pending_approval", "active", "rejected", "expired"], default: "pending_approval", index: true },
+  selectedPackage: { type: String, enum: ["daily", "weekly", "monthly"], default: null, index: true },
   vipExpiresAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 }, { versionKey: false });
@@ -114,6 +116,8 @@ function safeUser(user) {
     phoneNumber: user.phoneNumber || "",
     role: user.role,
     isActivated: Boolean(user.isActivated),
+    membershipStatus: user.membershipStatus || (user.isActivated ? "active" : "pending_approval"),
+    selectedPackage: user.selectedPackage || null,
     vipExpiresAt: user.vipExpiresAt || null
   };
 }
@@ -180,7 +184,15 @@ function requireAdmin(req, res, next) {
   next();
 }
 function hasActiveVip(user) {
-  return user.role === "admin" || (user.isActivated && (!user.vipExpiresAt || user.vipExpiresAt.getTime() > Date.now()));
+  if (user.role === "admin") return true;
+  const validStatus = user.membershipStatus === "active" || (!user.membershipStatus && user.isActivated);
+  const notExpired = !user.vipExpiresAt || user.vipExpiresAt.getTime() > Date.now();
+  if (user.isActivated && !notExpired && user.membershipStatus !== "expired") {
+    user.isActivated = false;
+    user.membershipStatus = "expired";
+    user.save().catch(err => console.error("Membership expiry update failed:", err.message));
+  }
+  return Boolean(user.isActivated && validStatus && notExpired);
 }
 function cleanTipInput(body) {
   const type = body.type;
@@ -240,6 +252,8 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
     const email = String(req.body.email || "").trim().toLowerCase();
     const phoneNumber = String(req.body.phoneNumber || "").trim();
     const password = req.body.password;
+    const selectedPackage = String(req.body.selectedPackage || "").toLowerCase();
+    if (!["daily", "weekly", "monthly"].includes(selectedPackage)) return res.status(400).json({ success: false, message: "Choose a valid subscription package before registering." });
     if (!validEmail(email)) return res.status(400).json({ success: false, message: "Enter a valid email address." });
     if (typeof password !== "string" || password.length < 10 || password.length > 128) {
       return res.status(400).json({ success: false, message: "Password must be 10–128 characters." });
@@ -248,7 +262,7 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ success: false, message: "An account with that email already exists." });
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await User.create({ email, phoneNumber, passwordHash, role: "user", isActivated: false });
+    const user = await User.create({ email, phoneNumber, passwordHash, role: "user", selectedPackage, isActivated: false, membershipStatus: "pending_approval", vipExpiresAt: null });
     setSession(res, user);
     res.status(201).json({ success: true, message: "Account created. VIP access remains locked until an administrator activates it.", user: safeUser(user) });
   } catch (err) {
@@ -333,24 +347,41 @@ app.get("/api/admin/users", requireAuth, requireAdmin, async (req, res) => {
   const users = await User.find({}).sort({ createdAt: -1 }).limit(1000).lean();
   res.json({ success: true, users: users.map(u => ({
     id: String(u._id), email: u.email, phoneNumber: u.phoneNumber,
-    role: u.role, isActivated: u.isActivated, vipExpiresAt: u.vipExpiresAt,
+    role: u.role, selectedPackage: u.selectedPackage || null, isActivated: u.isActivated, membershipStatus: u.membershipStatus || (u.isActivated ? "active" : "pending_approval"), vipExpiresAt: u.vipExpiresAt,
     createdAt: u.createdAt
   })) });
 });
 
 app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
-    const active = Boolean(req.body.isActivated);
-    let expiresAt = null;
-    if (req.body.vipExpiresAt) {
-      expiresAt = new Date(req.body.vipExpiresAt);
-      if (Number.isNaN(expiresAt.getTime())) return res.status(400).json({ success: false, message: "Invalid VIP expiry date." });
-    }
-    const user = await User.findByIdAndUpdate(req.params.id, { isActivated: active, vipExpiresAt: expiresAt }, { new: true });
+    const action = String(req.body.action || "").toLowerCase();
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found." });
-    res.json({ success: true, user: safeUser(user) });
+    if (user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts cannot be changed from membership review." });
+    if (action === "approve") {
+      // Admin should verify payment against the real transaction record before activating.
+      const durations = { daily: 1, weekly: 7, monthly: 30 };
+      const days = durations[user.selectedPackage];
+      if (!days) return res.status(400).json({ success: false, message: "This user has no valid selected package." });
+      user.isActivated = true;
+      user.membershipStatus = "active";
+      user.vipExpiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    } else if (action === "reject") {
+      user.isActivated = false;
+      user.membershipStatus = "rejected";
+      user.vipExpiresAt = null;
+    } else if (action === "revoke") {
+      user.isActivated = false;
+      user.membershipStatus = "expired";
+      user.vipExpiresAt = null;
+    } else {
+      return res.status(400).json({ success: false, message: "Choose approve, reject, or revoke." });
+    }
+    await user.save();
+    res.json({ success: true, message: action === "approve" ? "Membership approved and activated." : action === "reject" ? "Membership request rejected." : "VIP access revoked.", user: safeUser(user) });
   } catch (err) {
-    res.status(400).json({ success: false, message: "Could not update VIP access." });
+    console.error("VIP membership update error:", err.message);
+    res.status(400).json({ success: false, message: "Could not update VIP membership." });
   }
 });
 
