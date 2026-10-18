@@ -1,0 +1,15 @@
+BANKER TIPS DEPLOYMENT CHECKLIST
+
+[ ] MongoDB database created and connection URI copied
+[ ] Unique JWT_SECRET configured in Render environment
+[ ] Unique ADMIN_EMAIL and strong ADMIN_PASSWORD configured
+[ ] NODE_ENV=production
+[ ] COOKIE_SECURE=true
+[ ] FRONTEND_ORIGIN set to exact HTTPS site origin
+[ ] public/index.html contains the Banker Tips frontend
+[ ] /api/health returns success and database connected
+[ ] Admin can log in through normal login form
+[ ] Admin API routes reject normal user accounts
+[ ] Premium API routes reject users without active VIP
+[ ] Test registration, login, logout, add/edit/delete tips, and VIP activation
+[ ] Never commit .env or put admin password in frontend HTML
