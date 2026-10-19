@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "Banker Tips",
+  "short_name": "Banker Tips",
+  "description": "Football tips, historical results and VIP membership.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f9fc",
+  "theme_color": "#075985",
+  "icons": [
+    {"src":"/images/bankertipslogo.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/images/bankertipslogo.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
