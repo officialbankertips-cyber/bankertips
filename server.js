@@ -553,6 +553,42 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
   }
 });
 
+// Customer payment history. Sensitive provider payloads and credentials are never exposed.
+app.get("/api/payments/history", requireAuth, async (req, res) => {
+  try {
+    const payments = await Payment.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100).lean();
+    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), package: p.package, amount: p.amount, phone: p.phone, reference: p.reference, status: p.status, transactionCode: p.transactionCode, message: p.providerMessage, createdAt: p.createdAt, completedAt: p.completedAt })) });
+  } catch (err) { res.status(500).json({ success: false, message: "Could not load payment history." }); }
+});
+
+// Public historical performance summary. Only settled tips count in the win-rate denominator.
+app.get("/api/stats/performance", async (req, res) => {
+  try {
+    const rows = await Tip.aggregate([{ $match: { result: { $in: ["Win", "Lose", "Void"] } } }, { $group: { _id: "$type", total: { $sum: 1 }, wins: { $sum: { $cond: [{ $eq: ["$result", "Win"] }, 1, 0] } }, losses: { $sum: { $cond: [{ $eq: ["$result", "Lose"] }, 1, 0] } }, voids: { $sum: { $cond: [{ $eq: ["$result", "Void"] }, 1, 0] } } } }]);
+    const total = rows.reduce((a, r) => ({ settled: a.settled + r.total, wins: a.wins + r.wins, losses: a.losses + r.losses, voids: a.voids + r.voids }), { settled: 0, wins: 0, losses: 0, voids: 0 });
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ success: true, ...total, winRate: total.wins + total.losses ? Math.round(total.wins / (total.wins + total.losses) * 1000) / 10 : null, methodology: "Settled recorded tips only; void tips excluded from win-rate denominator. Historical results do not guarantee future outcomes." });
+  } catch (err) { res.status(500).json({ success: false, message: "Performance statistics unavailable." }); }
+});
+
+// Admin business overview and payment ledger.
+app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const [users, payments, tips] = await Promise.all([
+      User.aggregate([{ $group: { _id: null, total: { $sum: 1 }, active: { $sum: { $cond: [{ $and: [{ $eq: ["$isActivated", true] }, { $gt: ["$vipExpiresAt", new Date()] }] }, 1, 0] } } } }]),
+      Payment.aggregate([{ $group: { _id: "$status", count: { $sum: 1 }, amount: { $sum: "$amount" } } }]),
+      Tip.aggregate([{ $group: { _id: "$result", count: { $sum: 1 } } }])
+    ]);
+    res.json({ success: true, users: users[0] || { total: 0, active: 0 }, payments: payments.map(p => ({ status: p._id, count: p.count, amount: p.amount })), tips: tips.map(t => ({ result: t._id, count: t.count })) });
+  } catch (err) { res.status(500).json({ success: false, message: "Admin overview unavailable." }); }
+});
+app.get("/api/admin/payments", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const payments = await Payment.find({}).populate("user", "email phoneNumber").sort({ createdAt: -1 }).limit(500).lean();
+    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), email: p.user?.email || "Deleted user", userPhone: p.user?.phoneNumber || "", phone: p.phone, package: p.package, amount: p.amount, reference: p.reference, transactionCode: p.transactionCode, status: p.status, createdAt: p.createdAt, completedAt: p.completedAt, message: p.providerMessage })) });
+  } catch (err) { res.status(500).json({ success: false, message: "Could not load payment ledger." }); }
+});
+
 app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   const tips = await Tip.find({}).sort({ date: -1, createdAt: 1 }).limit(2000).lean();
   res.json({ success: true, tips: tips.map(publicTip) });
