@@ -104,3 +104,20 @@ The backend now splits a combined match string such as `Lyon - Nice` into `homeT
 3. Customer is signed in and sent to the Payment & Membership panel; enters their Kenyan M-Pesa phone number and starts the STK Push.
 4. Customer completes the prompt on their phone. The frontend polls the authenticated status endpoint, while the backend queries OptimaPay's status API.
 5. On verified completion with matching phone and amount, the backend activates VIP for 1, 7, or 30 days based on the package. Pending payments do not grant access. The backend enforces VIP authorization and expiry on premium-tip API requests.
+
+
+## Professional upgrade additions
+
+This release adds the following features on top of the existing Banker Tips app:
+
+- **PWA shell:** `public/manifest.webmanifest` and `public/service-worker.js` enable installation where supported and cache the app shell/logo. API responses are intentionally not cached, so private account/payment data is not stored in the service-worker cache. Offline mode is limited to the shell; live tips and account operations still require a connection.
+- **Historical performance API:** `GET /api/stats/performance` aggregates recorded settled tips. Win rate excludes voids and is `null` when there are no wins/losses. Displayed performance is descriptive, not a guarantee.
+- **Customer payment history:** `GET /api/payments/history` returns the signed-in user's recent payment records only.
+- **Admin overview and ledger:** `GET /api/admin/overview` and `GET /api/admin/payments` require server-side admin authorization. The overview's completed-payment amount is a database total and should be reconciled against OptimaPay reports.
+- **Notifications:** users can opt into browser notifications; when permission is granted, the app can show an in-browser reminder when a known VIP expiry is within three days. This is not a background push-notification service and requires the app to be opened with a supported browser.
+
+## Validation and production notes
+
+Run `npm install` and `npm start` with valid environment variables and a reachable MongoDB database. Static checks performed for this archive include `node --check server.js` and syntax checking of the inline frontend JavaScript. Live M-Pesa/STK Push, merchant status checks, browser push delivery, and database-backed end-to-end flows have **not** been tested in this environment. Complete a controlled low-value transaction in your own OptimaPay merchant account before production launch.
+
+The public performance endpoint summarizes recorded tips; keep all outcomes accurately updated and disclose the measurement method. Browser notification permission is optional. For true background push notifications, add a push provider and server-side subscription storage rather than relying on browser notifications while the page is open.
