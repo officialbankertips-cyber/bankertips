@@ -63,7 +63,9 @@ If you are using the previously generated `banker_tips_fixed.html`, copy it to `
 - `PUT /api/admin/tips/:id` — edit match/tip/odds/date/type/result
 - `DELETE /api/admin/tips/:id`
 - `GET /api/admin/users`
-- `PATCH /api/admin/users/:id/vip` — `{ "action": "approve" }`, `{ "action": "reject" }`, or `{ "action": "revoke" }`. Approval activates Daily for 1 day, Weekly for 7 days, or Monthly for 30 days. Verify payment independently before approving.
+- `POST /api/payments/optimapay/stkpush` — authenticated user initiates an OptimaPay STK Push for their registered package; body: `{ "phone": "0712345678" }`.
+- `GET /api/payments/:paymentId/status` — authenticated owner checks status; backend queries OptimaPay and activates membership only when the provider reports `completed` and the amount and phone match the pending payment.
+- `PATCH /api/admin/users/:id/vip` — `{ "action": "approve" }`, `{ "action": "reject" }`, or `{ "action": "revoke" }`. Admin review remains available as a manual fallback.
 
 Tip payload example:
 ```json
@@ -87,7 +89,9 @@ Tip payload example:
 - Rate limiting is applied to API and authentication routes.
 - The backend validates incoming tip data and never allows public registration to choose a role.
 - Before public production use, consider adding email verification, password reset, audit logs, backups, monitoring, and a dedicated CSRF-token implementation if the frontend and API are hosted on different sites.
-- This is a starter implementation; review and test in your environment before accepting real customer payments. Payment activation is intentionally manual through the Admin membership review table. The interface lists supported payment methods and current M-Pesa instructions, but it does not collect transaction IDs or automatically verify M-Pesa, PayPal, Skrill, Eversend, or Binance payments. Admin must confirm the transaction independently before clicking Approve + activate. The approval endpoint sets the expiry based on the selected package. Existing users may need to log in again after deployment for updated membership status to be reflected.
+- This is a starter implementation; review and test in your environment before accepting real customer payments. OptimaPay M-Pesa STK Push and server-side status polling are integrated. PayPal, Skrill, Eversend, and Binance are display-only and are not integrated.
+- Configure `OPTIMAPAY_API_KEY`, `OPTIMAPAY_API_SECRET`, and `OPTIMAPAY_PAYMENT_ACCOUNT_ID` in your hosting provider's environment settings. Do not place real credentials in frontend code, commit them to source control, or send them in chat. The API key and secret are sent only from the backend to `https://optimapaybridge.co.ke/api/v2/stkpush.php` and `status.php`.
+- The current OptimaPay documentation describes status polling but does not document a callback/webhook contract, so this implementation uses server-side status polling instead of assuming an undocumented callback format. Membership is activated only when OptimaPay reports `completed` and the reported amount and phone match the stored payment. Test with a low amount and a test account first; confirm current package prices and your payment account ID before production use.
 
 
 ## Fix for admin tip validation
@@ -97,6 +101,6 @@ The backend now splits a combined match string such as `Lyon - Nice` into `homeT
 ## Membership review workflow
 1. Customer selects a subscription plan before registration.
 2. Registration stores the selected package and leaves VIP access disabled.
-3. Customer is signed in and sent to the Payment & Membership panel.
-4. Admin opens the Admin panel, checks the actual payment record, then approves or rejects the request.
-5. Approval activates VIP access for 1, 7, or 30 days based on the selected package. The backend enforces VIP authorization and expiry on premium-tip API requests.
+3. Customer is signed in and sent to the Payment & Membership panel; enters their Kenyan M-Pesa phone number and starts the STK Push.
+4. Customer completes the prompt on their phone. The frontend polls the authenticated status endpoint, while the backend queries OptimaPay's status API.
+5. On verified completion with matching phone and amount, the backend activates VIP for 1, 7, or 30 days based on the package. Pending payments do not grant access. The backend enforces VIP authorization and expiry on premium-tip API requests.
