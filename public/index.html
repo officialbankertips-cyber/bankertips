@@ -156,7 +156,7 @@ main{padding:24px 0 30px}.hero{border-radius:24px;background:linear-gradient(120
  <section class="panel" id="paymentPanel">
   <div class="section-head"><div><h2>Payment & Membership</h2><p>Choose a payment method and follow the confirmation instructions.</p></div></div>
   <div class="card pad" style="margin-bottom:16px"><h3 style="margin-top:0">Your membership status</h3><div class="account-summary"><div class="summary-tile"><strong id="memberPlanValue">Not selected</strong><span>Selected package</span></div><div class="summary-tile"><strong id="memberStatusValue">Guest</strong><span>Membership status</span></div><div class="summary-tile"><strong id="memberExpiryValue">—</strong><span>VIP expiry</span></div></div><div class="notice" id="memberStatusNotice" style="margin-top:12px">Register and choose a package to view your membership status here.</div></div>
-  <div class="card pad"><h3 style="margin-top:0">Accepted payment methods</h3><div class="payment-methods"><div class="pay-pill"><i class="fa-solid fa-mobile-screen-button"></i> M-Pesa</div><div class="pay-pill"><i class="fa-solid fa-wallet"></i> Skrill</div><div class="pay-pill"><i class="fa-brands fa-paypal"></i> PayPal</div><div class="pay-pill"><i class="fa-solid fa-money-bill-transfer"></i> Eversend</div><div class="pay-pill"><i class="fa-brands fa-bitcoin"></i> Binance</div></div><div class="banner"><div><h2>M-Pesa payment</h2><p>Use Till Number <strong>8635306</strong>. Send your transaction confirmation to support for verification.</p></div><a class="btn" href="https://wa.me/254114172820?text=Hello%20Banker%20Tips%2C%20I%20need%20help%20with%20VIP%20membership." target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> Contact support</a></div><p class="subtext" style="margin-top:14px">Payments should be confirmed by an authorized server-side process. Do not share your password or one-time verification codes with anyone.</p></div>
+  <div class="card pad"><h3 style="margin-top:0">Accepted payment methods</h3><div class="payment-methods"><div class="pay-pill"><i class="fa-solid fa-mobile-screen-button"></i> M-Pesa</div><div class="pay-pill"><i class="fa-solid fa-wallet"></i> Skrill</div><div class="pay-pill"><i class="fa-brands fa-paypal"></i> PayPal</div><div class="pay-pill"><i class="fa-solid fa-money-bill-transfer"></i> Eversend</div><div class="pay-pill"><i class="fa-brands fa-bitcoin"></i> Binance</div></div><div class="banner"><div><h2>M-Pesa STK Push</h2><p>Enter your M-Pesa number and we will send a secure payment prompt to your phone.</p></div><i class="fa-solid fa-mobile-screen-button" style="font-size:2rem;color:var(--blue)"></i></div><form id="mpesaPaymentForm" style="margin-top:16px"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20"><small class="subtext">Use a Kenyan Safaricom number that can receive an STK prompt.</small></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Pay with M-Pesa</button></div></div></form><div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div><p class="subtext" style="margin-top:14px">Never share your M-Pesa PIN or one-time verification codes with anyone. Your payment credentials are handled securely by the server.</p></div>
  </section>
 
  <section class="panel" id="adminPanel">
@@ -340,7 +340,8 @@ function updateAccountUI() {
   if(planEl) planEl.textContent=currentUser ? packageLabel(currentUser.selectedPackage) : 'Not selected';
   if(statusEl) statusEl.textContent=currentUser ? ({pending_approval:'Pending review',active:'Active',rejected:'Rejected',expired:'Expired'}[currentUser.membershipStatus] || (currentUser.isActivated?'Active':'Pending review')) : 'Guest';
   if(expiryEl) expiryEl.textContent=currentUser?.vipExpiresAt ? new Date(currentUser.vipExpiresAt).toLocaleDateString() : '—';
-  if(noticeEl) noticeEl.textContent=!currentUser ? 'Register and choose a package to view your membership status here.' : currentUser.membershipStatus==='active' ? 'Your VIP membership is active until the expiry date shown above.' : currentUser.membershipStatus==='rejected' ? 'Your membership request was rejected. Contact support if you believe this is an error.' : 'Your selected package is recorded. Complete payment and wait for Admin approval. VIP Tips remain locked until approval.';
+  if(noticeEl) noticeEl.textContent=!currentUser ? 'Register and choose a package to view your membership status here.' : currentUser.membershipStatus==='active' ? 'Your VIP membership is active until the expiry date shown above.' : currentUser.membershipStatus==='rejected' ? 'Your membership request was rejected. Contact support if you believe this is an error.' : 'Your selected package is recorded. Complete M-Pesa payment; VIP access unlocks after server-side payment verification.';
+  updatePaymentUI();
 }
 const packageNames={daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'};
 function packageLabel(key){ return packageNames[key]||'Not selected'; }
@@ -348,9 +349,52 @@ function beginRegistration(packageKey){
   if(!['daily','weekly','monthly'].includes(packageKey)){ setPanel('subscriptionPanel'); return; }
   $('selectedPackage').value=packageKey;
   $('registerTitle').textContent='Register for '+packageLabel(packageKey);
-  const message=$('registerPackageNotice'); if(message) message.textContent='Selected package: '+packageLabel(packageKey)+'. Your account will remain pending until admin approval.';
+  const message=$('registerPackageNotice'); if(message) message.textContent='Selected package: '+packageLabel(packageKey)+'. Your account remains locked until your M-Pesa payment is verified.';
   setPanel('subscriptionPanel'); openModal('registerModal');
 }
+const packagePrices={daily:250,weekly:1500,monthly:3500};
+function updatePaymentUI(){
+  const input=$('mpesaPhone');
+  if(input && currentUser && !input.value) input.value=currentUser.phoneNumber||'';
+  const notice=$('mpesaPaymentNotice');
+  if(!notice) return;
+  if(!currentUser){ notice.textContent='Sign in or register with a selected package before starting an M-Pesa payment.'; return; }
+  const amount=packagePrices[currentUser.selectedPackage];
+  notice.textContent=amount?`Selected package: ${packageLabel(currentUser.selectedPackage)} — KSh ${amount.toLocaleString('en-KE')}. Complete the STK prompt on your phone.`:'Your account has no package selected. Please contact support to select a VIP package.';
+}
+async function handleMpesaPayment(event){
+  event.preventDefault();
+  const notice=$('mpesaPaymentNotice'), button=$('mpesaPayButton');
+  if(!currentUser){ notice.textContent='Please log in first, then start your payment.'; openModal('loginModal'); return; }
+  if(!packagePrices[currentUser.selectedPackage]){ notice.textContent='No VIP package is selected for this account.'; return; }
+  const phone=$('mpesaPhone').value.trim();
+  if(!phone){ notice.textContent='Enter your M-Pesa phone number.'; return; }
+  button.disabled=true; notice.textContent='Sending STK Push request…';
+  try{
+    const started=await api('/api/payments/optimapay/stkpush',{method:'POST',body:JSON.stringify({phone})});
+    notice.textContent=`${started.message||'STK Push sent.'} Amount: KSh ${Number(started.amount).toLocaleString('en-KE')}.`;
+    for(let attempt=0;attempt<24;attempt++){
+      await new Promise(resolve=>setTimeout(resolve,5000));
+      let result;
+      try{ result=await api(`/api/payments/${encodeURIComponent(started.paymentId)}/status`); }
+      catch(err){ notice.textContent=`Waiting for payment confirmation. ${err.message}`; continue; }
+      const payment=result.payment||{};
+      if(payment.status==='completed'){
+        currentUser=result.user||currentUser; updateAccountUI(); updatePaymentUI();
+        notice.textContent=`Payment confirmed${payment.transactionCode?` (receipt ${payment.transactionCode})`:''}. Your ${packageLabel(payment.package)} membership is now active.`;
+        alert('M-Pesa payment confirmed. Your VIP membership is active.');
+        setPanel('premiumPanel'); await loadPremium(); return;
+      }
+      if(payment.status==='failed'||payment.status==='verification_error'){
+        notice.textContent=payment.message||'Payment could not be verified. If money was deducted, contact support with your M-Pesa receipt.'; return;
+      }
+      notice.textContent=`Payment status: ${payment.status==='verifying'?'checking with OptimaPay':'waiting for your M-Pesa PIN / confirmation'} (${attempt+1}/24).`;
+    }
+    notice.textContent='We have not received a final confirmation yet. You can stay on this page and try checking again shortly; do not pay again if your M-Pesa prompt was accepted.';
+  }catch(err){ notice.textContent=err.message||'Could not start the M-Pesa payment.'; }
+  finally{ button.disabled=false; }
+}
+
 async function handleAuthButton(){
   if(!currentUser){ openModal('loginModal'); return; }
   try { await api('/api/auth/logout',{method:'POST'}); currentUser=null; updateAccountUI(); closeModal('loginModal'); setPanel('freePanel'); alert('You have been logged out.'); }
@@ -365,7 +409,7 @@ async function handleRegister(event) {
   try {
     const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email,phoneNumber,password,selectedPackage})});
     currentUser=data.user||null; updateAccountUI();
-    showMessage('registerMessage',(data.message||'Account created.')+' Selected package: '+packageLabel(selectedPackage)+'. Please complete payment and wait for Admin approval before VIP access is enabled.', 'ok');
+    showMessage('registerMessage',(data.message||'Account created.')+' Selected package: '+packageLabel(selectedPackage)+'. Complete M-Pesa payment; VIP access will be enabled after server-side verification.', 'ok');
     $('registerForm').reset(); $('selectedPackage').value='';
     setTimeout(()=>{ closeModal('registerModal'); setPanel('paymentPanel'); }, 1200);
   } catch(e) { showMessage('registerMessage',e.message,'error'); }
@@ -380,7 +424,7 @@ async function handleLogin(event) {
     $('loginForm').reset(); closeModal('loginModal');
     if(currentUser?.role?.toLowerCase()==='admin') showMessage('loginMessage','Signed in successfully. Admin access is available.','ok');
     if(data.isActivated || currentUser?.isActivated) { setPanel('premiumPanel'); await loadPremium(); }
-    else { setPanel('freePanel'); alert('Login successful. Your VIP Tips remain locked until an administrator approves your subscription.'); }
+    else { setPanel('freePanel'); alert('Login successful. Your VIP Tips remain locked until your payment is verified. Open Payment to complete or check your M-Pesa payment.'); }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
 function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; }
@@ -426,7 +470,7 @@ async function loadAdminUsers() {
       const actions=status==='active'?`<button class="btn danger small" data-membership-action="revoke" data-user-id="${escapeHTML(u.id)}">Revoke</button>`:`<button class="btn small" data-membership-action="approve" data-user-id="${escapeHTML(u.id)}">Approve + activate</button> <button class="btn danger small" data-membership-action="reject" data-user-id="${escapeHTML(u.id)}">Reject</button>`;
       return `<tr><td><strong>${escapeHTML(u.email)}</strong><span class="subtext">${escapeHTML(u.phoneNumber||'No phone')} · Joined ${escapeHTML(u.createdAt?new Date(u.createdAt).toLocaleDateString():'—')}</span></td><td>${escapeHTML(pkg)}</td><td>${formatMembershipStatus(status,u.isActivated)}</td><td>${escapeHTML(expiry)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap">${actions}</div></td></tr>`;
     }).join(''):'<tr><td colspan="5">No customer memberships found.</td></tr>';
-    $('membersNotice').textContent='Before approving, confirm payment in the actual payment channel. Approval activates the selected package for 1, 7 or 30 days.';
+    $('membersNotice').textContent='M-Pesa payments are activated automatically after server-side verification. Use manual approval only after independently confirming an offline/external payment.';
   } catch(e) { showEmpty('adminUsersRows',5,e.message); $('membersNotice').textContent='Membership data could not be loaded.'; }
 }
 async function handleMembershipAction(event) {
@@ -479,6 +523,7 @@ document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',(
 $('registerNavButton').addEventListener('click',()=>setPanel('subscriptionPanel'));
 $('authNavButton').addEventListener('click',handleAuthButton);
 document.querySelectorAll('.choose-package').forEach(b=>b.addEventListener('click',()=>beginRegistration(b.dataset.package)));
+$('mpesaPaymentForm').addEventListener('submit',handleMpesaPayment);
 document.querySelectorAll('[data-open="registerModal"]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();setPanel('subscriptionPanel')}));
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
