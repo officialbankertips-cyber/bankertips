@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#075985">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/images/bankertipslogo.png">
-<meta name="description" content="Banker Tips football predictions and premium membership portal.">
-<title>Banker Tips | Football Predictions</title>
+<meta name="description" content="Banker Tips delivers daily football match insights, free predictions, results history and member-only premium tips.">
+<title>Banker Tips — Football Intelligence & Match Insights</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -98,12 +98,42 @@ main{padding:24px 0 30px}.hero{border-radius:24px;background:linear-gradient(120
 }
 @media(max-width:360px){.wrap{width:calc(100% - 18px)}.tips-table tbody tr{padding:13px 11px;gap:0 8px}.tips-table .status{min-width:78px;padding:7px 8px}.tips-table .odds{min-width:62px;padding:6px 8px}.brand-name{font-size:1rem}}
 
+
+/* Banker Tips app-style landing experience */
+:root{--bg:#f3f6fb;--surface:#fff;--ink:#10223b;--muted:#687b93;--line:#e1e8f1;--blue:#0879c9;--blue2:#064c83;--soft:#edf5fc;--radius:20px;--shadow:0 10px 30px rgba(17,48,84,.06)}
+body{background:var(--bg);font-size:14px;letter-spacing:-.01em;padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+header{background:rgba(255,255,255,.94);box-shadow:0 3px 18px rgba(18,45,75,.045);border-bottom-color:#e5edf5}
+.header-inner{min-height:78px}.brand{gap:12px}.brand-mark{width:46px;height:46px;background:linear-gradient(145deg,#fff,#eaf5ff);border:1px solid #d7e9f8;border-radius:15px}
+.brand-copy{display:flex;flex-direction:column;gap:0}.brand-name{font-size:1.22rem;line-height:1.15;letter-spacing:-.7px}.brand-name span{color:#0784d2}.brand-tagline{font-size:.58rem;font-weight:800;letter-spacing:.14em;color:#7c8da3;margin-top:4px}
+.icon-btn,.menu-btn{border-color:#e2eaf3;border-radius:14px;box-shadow:0 2px 7px rgba(25,58,91,.035)}
+.btn{background:linear-gradient(135deg,#0788d5,#075985);box-shadow:0 7px 16px rgba(7,121,185,.17);border-radius:13px}
+main.wrap{padding-top:25px}
+.hero{position:relative;isolation:isolate;min-height:255px;padding:clamp(25px,5vw,42px);border-radius:26px;background:radial-gradient(circle at 88% 20%,rgba(66,183,255,.3),transparent 27%),linear-gradient(120deg,#092e52 0%,#075985 54%,#087fc0 100%);box-shadow:0 18px 38px rgba(5,69,112,.19)}
+.hero:after{content:"";position:absolute;z-index:-1;width:230px;height:230px;border:1px solid rgba(255,255,255,.11);border-radius:50%;right:-65px;bottom:-125px;box-shadow:0 0 0 25px rgba(255,255,255,.035),0 0 0 52px rgba(255,255,255,.025)}
+.hero .eyebrow{display:flex;align-items:center;gap:8px;font-size:.69rem;letter-spacing:.15em;color:#bce8ff}
+.hero h1{font-size:clamp(2rem,5vw,3rem);letter-spacing:-.055em;line-height:1.04;margin:14px 0 13px}
+.hero p{font-size:.96rem;line-height:1.7;max-width:560px;color:#e1f3ff}
+.hero .btn{margin-top:22px;padding:13px 18px;border-radius:13px;color:#064c83;box-shadow:0 7px 18px rgba(0,0,0,.12)}
+.hero-icon{font-size:clamp(4rem,9vw,7rem);opacity:.24}
+.section{margin-top:32px}.section-head{align-items:center;margin-bottom:16px}.section-head h2{font-size:1.42rem;letter-spacing:-.045em}.section-head p{font-size:.84rem}
+.date-chip{background:#e8f4ff;color:#075985;border:1px solid #d5eafd;padding:7px 12px}
+.card,.info-card{border-color:#e0e8f1;box-shadow:0 6px 22px rgba(22,54,84,.045)}
+.tips-table thead th{background:#f5f8fc;color:#718198;font-size:.7rem;letter-spacing:.08em}.tips-table tbody td{padding-top:18px;padding-bottom:18px}.tips-table .odds{background:#eaf5ff;color:#075985}
+.info-card{padding:21px;border-radius:19px;transition:transform .18s ease,box-shadow .18s ease}.info-card i{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:#eaf5ff;color:#0879c9;font-size:1.1rem}.info-card h3{margin-top:15px}
+.banner{background:linear-gradient(115deg,#eaf5ff,#f7fbff);border-color:#d8eaf8;border-radius:20px;padding:23px}
+.bottom-nav{justify-content:stretch;gap:3px;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);border-top:1px solid #e2eaf3;padding:8px max(9px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 28px rgba(15,38,66,.07)}
+.bottom-nav button{position:relative;max-width:none;gap:5px;padding:7px 4px;color:#8492a5;border-radius:13px;font-size:.69rem;letter-spacing:-.01em}.bottom-nav button i{font-size:1.12rem}.bottom-nav button.active{color:#0879c9;background:#eaf5ff}.bottom-nav button.active:before{content:"";position:absolute;top:-8px;left:35%;right:35%;height:3px;background:#0879c9;border-radius:0 0 4px 4px}
+.modal-box{box-shadow:0 25px 90px rgba(4,22,42,.25);border-radius:24px}footer{padding-bottom:25px}
+@media(min-width:701px){.bottom-nav{left:50%;right:auto;transform:translateX(-50%);width:min(620px,calc(100% - 32px));border:1px solid #e2eaf3;border-bottom:0;border-radius:20px 20px 0 0}.bottom-nav button{padding:9px 12px}.hero{min-height:280px}.hero-icon{margin-right:20px}}
+@media(max-width:700px){body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}.header-inner{min-height:70px}.brand-mark{width:42px;height:42px}.brand-name{font-size:1.08rem}.brand-tagline{font-size:.52rem}main.wrap{padding-top:15px}.hero{min-height:0;padding:26px 21px;border-radius:22px}.hero h1{font-size:2.05rem}.hero p{font-size:.88rem;line-height:1.65}.hero .btn{margin-top:18px}.section{margin-top:26px}.section-head{flex-direction:row;align-items:center}.section-head h2{font-size:1.25rem}.section-head p{font-size:.78rem}.date-chip{font-size:.72rem;padding:6px 9px;max-width:45%;text-align:center}.tips-table tbody tr{padding:16px 15px}.tips-table tbody td:nth-child(2){font-size:.98rem}.grid-3{gap:11px}.info-card{padding:18px}.banner{padding:20px}}
+@media(max-width:360px){.brand-tagline{letter-spacing:.09em}.hero h1{font-size:1.8rem}.bottom-nav button{font-size:.62rem}}
+
 </style>
 </head>
 <body data-theme="light">
 <header>
  <div class="wrap header-inner">
-  <a class="brand" href="#" id="brandHome" aria-label="Banker Tips home"><span class="brand-mark"><img src="images/bankertipslogo.png" alt="Banker Tips logo"></span><span class="brand-name">BANKER <span>TIPS</span></span></a>
+  <a class="brand" href="#" id="brandHome" aria-label="Banker Tips home"><span class="brand-mark"><img src="images/bankertipslogo.png" alt="Banker Tips logo"></span><span class="brand-copy"><span class="brand-name">BANKER <span>TIPS</span></span><span class="brand-tagline">FOOTBALL INTELLIGENCE</span></span></a>
   <div class="head-actions">
    <nav class="top-links" id="topLinks" aria-label="Account navigation">
     <button class="btn secondary" id="registerNavButton"><i class="fa-solid fa-user-plus"></i> Register</button>
@@ -119,7 +149,7 @@ main{padding:24px 0 30px}.hero{border-radius:24px;background:linear-gradient(120
 </header>
 <main class="wrap">
  <section class="hero">
-  <div><div class="eyebrow">Football insights · Daily selections</div><h1>Make every match count.</h1><p>Explore today's free selections, review previous results, and access premium tips with an authorized membership.</p><button class="btn" id="heroVip"><i class="fa-solid fa-crown"></i> Access VIP Tips</button></div>
+  <div><div class="eyebrow"><i class="fa-solid fa-chart-line"></i> DAILY MATCH INTELLIGENCE</div><h1>Best!<br>Soccer Predictions</h1><p>Your daily destination for football selections, match analysis and transparent results. Review every pick and make your own informed decisions.</p><button class="btn" id="heroVip"><i class="fa-solid fa-crown"></i> Access VIP Tips</button></div>
   <div class="hero-icon"><i class="fa-solid fa-futbol"></i></div>
  </section>
 
@@ -135,7 +165,7 @@ main{padding:24px 0 30px}.hero{border-radius:24px;background:linear-gradient(120
 
  <section class="panel active" id="freePanel">
   <div class="section">
-   <div class="section-head"><div><h2>Today's Free Tips</h2><p>Selections and results supplied by the tips service.</p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
+   <div class="section-head"><div><h2>Today's Free Tips</h2><p>Best selection for today </p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
    <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Connecting to tips service…</div></div>
    <div class="form-actions"><button class="btn secondary" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button><button class="btn ghost" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> View history</button></div>
   </div>
@@ -145,7 +175,7 @@ main{padding:24px 0 30px}.hero{border-radius:24px;background:linear-gradient(120
    <article class="info-card"><i class="fa-solid fa-lock"></i><h3>Member access</h3><p>Premium content is provided only after server-side membership verification.</p></article>
    <article class="info-card"><i class="fa-solid fa-mobile-screen-button"></i><h3>Mobile friendly</h3><p>Responsive layouts for phones, tablets and desktop screens.</p></article>
   </div>
-  <div class="banner"><div><h2>Join VIP Premium</h2><p>Sign in or verify your membership to access today's premium selections.</p></div><button class="btn" data-open="loginModal"><i class="fa-solid fa-crown"></i> Member login</button></div>
+  <div class="banner"><div><h2>Join VIP Premium</h2><p>Sign in to access today's premium tips.</p></div><button class="btn" data-open="loginModal"><i class="fa-solid fa-crown"></i> Member login</button></div>
  </section>
 
  <section class="panel" id="historyPanel">
@@ -190,16 +220,16 @@ main{padding:24px 0 30px}.hero{border-radius:24px;background:linear-gradient(120
 </main>
 <footer>© Copyright <span id="year"></span> | Banker Tips - Rights reserved.</footer>
 <nav class="bottom-nav" aria-label="Main navigation">
- <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Free Tips</span></button>
- <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP Tips</span></button>
- <button data-panel="paymentPanel"><i class="fa-solid fa-wallet"></i><span>Payment</span></button>
- <button data-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></button>
+ <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Home</span></button>
+ <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP</span></button>
+ <button data-panel="paymentPanel"><i class="fa-solid fa-wallet"></i><span>Wallet</span></button>
+ <button data-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i><span>Results</span></button>
  <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
 </nav>
 
 <div class="modal" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="registerTitle">Create your account</h2><p>Register for a Banker Tips account.</p><form id="registerForm"><input type="hidden" id="selectedPackage" value=""><div class="notice" id="registerPackageNotice" style="margin-bottom:12px">Your selected package will appear here.</div><div class="field"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" required></div><div class="field" style="margin-top:12px"><label for="regPhone">Phone number</label><input type="tel" id="regPhone" autocomplete="tel" maxlength="24" placeholder="+2547XXXXXXXX" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn" type="submit">Create account</button><div class="msg" id="registerMessage" role="status"></div></form></div></div>
 <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modal-box"><button class="close" data-close="loginModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="loginTitle">Member login</h2><p>Sign in to check your membership status.</p><form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input type="email" id="loginEmail" autocomplete="username" maxlength="254" required></div><div class="field" style="margin-top:12px"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" maxlength="128" required></div><button class="btn" type="submit">Login securely</button><div class="msg" id="loginMessage" role="status"></div></form></div></div>
-<div class="modal" id="vipModal" role="dialog" aria-modal="true" aria-labelledby="vipTitle"><div class="modal-box"><button class="close" data-close="vipModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="vipTitle">Unlock VIP tips</h2><p>Sign in to verify your subscription. Access is authorized by the server, not by a passcode embedded in this page.</p><button class="btn" id="vipLoginButton"><i class="fa-solid fa-right-to-bracket"></i> Login to verify access</button><div class="msg" id="vipMessage" role="status"></div></div></div>
+<div class="modal" id="vipModal" role="dialog" aria-modal="true" aria-labelledby="vipTitle"><div class="modal-box"><button class="close" data-close="vipModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="vipTitle">Unlock VIP tips</h2><p>Sign in to access today's Premium Tips.</p><button class="btn" id="vipLoginButton"><i class="fa-solid fa-right-to-bracket"></i> Login to verify access</button><div class="msg" id="vipMessage" role="status"></div></div></div>
 
 <script>
 'use strict';
@@ -297,7 +327,7 @@ async function loadFreeTips() {
     $('freeNotice').textContent=`${lastTips.length} selection(s) returned by the server.`;
   } catch(e) {
     showEmpty('freeRows',5,'Tips could not be loaded.');
-    $('freeNotice').textContent=`Unable to connect to the tips API (${e.message}). Configure the backend endpoints listed in this file. No invented fixtures or results are displayed.`;
+    $('freeNotice').textContent=`No invented fixtures or results are displayed.`;
   }
 }
 async function loadHistory() {
