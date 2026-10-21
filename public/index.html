@@ -140,6 +140,108 @@ main.wrap{padding-top:25px}
 @media(max-width:420px){.payment-hero-icon{display:none}.payment-trust{flex-direction:column}.membership-card .account-summary{grid-template-columns:1fr}.membership-card .summary-tile{display:flex;justify-content:space-between;align-items:center;gap:8px}.membership-card .summary-tile span{text-align:right}.pay-pill{padding:9px 10px;font-size:.77rem}.recommended-label{font-size:.59rem}}
 [data-theme=dark] .tips-table th{background:#172f43;color:#b9d7ed;border-bottom-color:var(--line)}[data-theme=dark] .tips-table .odds{background:#17374b;color:#a9e1ff;border-color:#28536d}[data-theme=dark] .mpesa-panel{background:linear-gradient(135deg,#102c22,#12251f);border-color:#285a42;color:#e0fff0}[data-theme=dark] .mpesa-panel>p,[data-theme=dark] .mpesa-brand small{color:#a4c9b6}[data-theme=dark] .recommended-label{background:#194b34;color:#b7f7d0}
 
+
+/* Refactored light-blue match-table theme inspired by the supplied reference */
+:root{
+  --table-blue:#72c9f2;
+  --table-blue-deep:#168fc9;
+  --table-blue-pale:#e5f5ff;
+  --table-blue-cell:#d8efff;
+  --table-blue-border:#a8d7f0;
+  --table-blue-text:#315d7c;
+}
+.card:has(.tips-table),
+.admin-members,
+.admin-layout>.card{overflow:hidden}
+.table-scroll{overflow-x:auto;overscroll-behavior-x:contain}
+.tips-table,
+.adminPanel table,
+#adminPanel table,
+#paymentPanel table{
+  border-collapse:separate;
+  border-spacing:3px 3px;
+  width:100%;
+}
+.tips-table{min-width:610px;background:var(--surface)}
+.tips-table thead th,
+#adminPanel table thead th,
+#paymentPanel table thead th,
+.admin-layout table thead th{
+  position:static;
+  background:linear-gradient(180deg,#8bd7f8 0%,#55b9e9 100%);
+  color:#fff;
+  text-transform:none;
+  letter-spacing:0;
+  font-size:.86rem;
+  font-weight:800;
+  text-align:center;
+  padding:14px 12px;
+  border:1px solid #65bde9;
+  border-radius:5px 5px 0 0;
+  white-space:normal;
+}
+.tips-table tbody td,
+#adminPanel table tbody td,
+#paymentPanel table tbody td,
+.admin-layout table tbody td{
+  background:var(--table-blue-pale);
+  color:var(--table-blue-text);
+  padding:13px 12px;
+  border:1px solid var(--table-blue-border);
+  border-radius:3px;
+  border-top:1px solid var(--table-blue-border);
+  font-size:.88rem;
+  line-height:1.45;
+  vertical-align:middle;
+}
+.tips-table tbody tr:nth-child(even) td,
+#adminPanel table tbody tr:nth-child(even) td,
+#paymentPanel table tbody tr:nth-child(even) td,
+.admin-layout table tbody tr:nth-child(even) td{background:#d5edfc}
+.tips-table tbody tr:hover td,
+#adminPanel table tbody tr:hover td,
+#paymentPanel table tbody tr:hover td,
+.admin-layout table tbody tr:hover td{background:#c5e8fb}
+.tips-table .match{color:#315d7c;font-weight:800}
+.tips-table .odds{background:#c8eaff;color:#075985;border:1px solid #a4d9f4;border-radius:7px}
+.tips-table .status{border-radius:6px;padding:6px 10px}
+.tips-table .pending{background:#fff0c2;color:#925d00}
+.tips-table .won{background:#d8f8e6;color:#17663a}
+.tips-table .lost{background:#ffe0e2;color:#a51e2b}
+.tips-table .void{background:#e7edf2;color:#4b5966}
+.tips-table .subtext{color:#52758e}
+.tips-table .notice{background:#f0f9ff;border-top:1px solid var(--table-blue-border)}
+@media(max-width:700px){
+  .tips-table{min-width:0;border-spacing:0}
+  .tips-table thead{display:none}
+  .tips-table tbody tr{
+    background:var(--table-blue-pale)!important;
+    border:1px solid var(--table-blue-border);
+    border-radius:7px;
+    margin:7px;
+    padding:13px 14px;
+  }
+  .tips-table tbody tr:nth-child(even){background:#d5edfc!important}
+  .tips-table tbody td{background:transparent!important;color:var(--table-blue-text);border:0;padding:2px 0}
+  .tips-table tbody td:nth-child(1),
+  .tips-table.history-table tbody td:nth-child(1),
+  .tips-table.history-table tbody td:nth-child(2){color:#52758e}
+  .tips-table tbody td:nth-child(2){color:#244f70}
+  .tips-table .odds{background:#c8eaff}
+}
+[data-theme=dark] .tips-table tbody td,
+[data-theme=dark] #adminPanel table tbody td,
+[data-theme=dark] #paymentPanel table tbody td,
+[data-theme=dark] .admin-layout table tbody td{background:#17364c;color:#d6efff;border-color:#315b76}
+[data-theme=dark] .tips-table tbody tr:nth-child(even) td,
+[data-theme=dark] #adminPanel table tbody tr:nth-child(even) td,
+[data-theme=dark] #paymentPanel table tbody tr:nth-child(even) td,
+[data-theme=dark] .admin-layout table tbody tr:nth-child(even) td{background:#1b4059}
+[data-theme=dark] .tips-table thead th,
+[data-theme=dark] #adminPanel table thead th,
+[data-theme=dark] #paymentPanel table thead th,
+[data-theme=dark] .admin-layout table thead th{background:linear-gradient(180deg,#287ba6,#17638d);color:#fff;border-color:#2d86b3}
+
 </style>
 </head>
 <body data-theme="light">
