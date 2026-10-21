@@ -55,7 +55,7 @@ If you are using the previously generated `banker_tips_fixed.html`, copy it to `
 - `GET /api/tips?type=free&date=YYYY-MM-DD`
 - `GET /api/tips/history?type=free`
 - `GET /api/tips?type=premium&date=YYYY-MM-DD` — requires active VIP or admin
-- `GET /api/tips/history?type=premium` — requires active VIP or admin
+- `GET /api/tips/history?type=premium` — requires active VIP or admin; returns up to 500 newest-date records with `authorized`, `type`, and `count` metadata. History responses use private no-store cache headers.
 
 ### Admin (all require a logged-in admin)
 - `GET /api/admin/tips`
