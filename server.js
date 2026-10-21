@@ -171,9 +171,9 @@ function csrfCheck(req, res, next) {
   const origin = req.get("origin");
   const referer = req.get("referer");
   const expected = (process.env.FRONTEND_ORIGIN || "").split(",").map(v => v.trim()).filter(Boolean);
-  if (expected.length && (origin || referer)) {
+  if (expected.length) {
     const candidate = origin || (() => { try { return new URL(referer).origin; } catch { return ""; } })();
-    if (candidate && !expected.includes(candidate)) {
+    if (!candidate || !expected.includes(candidate)) {
       return res.status(403).json({ success: false, message: "Request origin rejected." });
     }
   }
