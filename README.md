@@ -121,3 +121,14 @@ This release adds the following features on top of the existing Banker Tips app:
 Run `npm install` and `npm start` with valid environment variables and a reachable MongoDB database. Static checks performed for this archive include `node --check server.js` and syntax checking of the inline frontend JavaScript. Live M-Pesa/STK Push, merchant status checks, browser push delivery, and database-backed end-to-end flows have **not** been tested in this environment. Complete a controlled low-value transaction in your own OptimaPay merchant account before production launch.
 
 The public performance endpoint summarizes recorded tips; keep all outcomes accurately updated and disclose the measurement method. Browser notification permission is optional. For true background push notifications, add a push provider and server-side subscription storage rather than relying on browser notifications while the page is open.
+
+
+## VIP subscription expiry rules
+
+- Daily VIP plans expire at **00:00 Africa/Nairobi (EAT)** when the expiry date begins. A fresh daily activation is set to the next Nairobi midnight.
+- Weekly and monthly plans retain their configured 7-day and 30-day durations.
+- The account page displays the expiry date/time in EAT and a live countdown.
+- The backend denies VIP access as soon as `vipExpiresAt` is reached, persists expired status on authenticated requests, and runs a database sweep every 60 seconds to set `isActivated=false` and `membershipStatus=expired`.
+- The countdown is informational UI; server-side authorization and expiry timestamps are authoritative.
+
+After deployment, verify with a test account: daily activation near midnight, access at 00:00 EAT, expired membership status, and renewal. Do not use a production customer to test expiry.
