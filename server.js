@@ -19,6 +19,8 @@ const TOKEN_TTL = "12h";
 const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2";
 const PACKAGE_PRICES = Object.freeze({ daily: 250, weekly: 1500, monthly: 3500 });
 const PACKAGE_DAYS = Object.freeze({ daily: 1, weekly: 7, monthly: 30 });
+const MEMBERSHIP_TIME_ZONE = "Africa/Nairobi";
+const MEMBERSHIP_SWEEP_INTERVAL_MS = 60 * 1000;
 
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
   console.error("FATAL: Set JWT_SECRET to a random secret of at least 32 characters.");
@@ -189,6 +191,8 @@ async function requireAuth(req, res, next) {
       clearSession(res);
       return res.status(401).json({ success: false, message: "Session is no longer valid." });
     }
+    // Persist expiry immediately on the first authenticated request at/after the deadline.
+    await expireUserIfNeeded(user);
     req.user = user;
     next();
   } catch (err) {
@@ -202,15 +206,59 @@ function requireAdmin(req, res, next) {
   }
   next();
 }
+function nairobiDateParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: MEMBERSHIP_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return { year: Number(values.year), month: Number(values.month), day: Number(values.day) };
+}
+
+// Kenya has no daylight-saving changes. 00:00 Africa/Nairobi is 21:00 UTC on the prior date.
+function nextNairobiMidnight(from = new Date()) {
+  const { year, month, day } = nairobiDateParts(from);
+  return new Date(Date.UTC(year, month - 1, day + 1, -3, 0, 0, 0));
+}
+
+function calculatePackageExpiry(packageKey, existingExpiry = null, currentlyActive = false, now = new Date()) {
+  const validExistingExpiry = currentlyActive && existingExpiry && new Date(existingExpiry).getTime() > now.getTime();
+  const base = validExistingExpiry ? new Date(existingExpiry) : now;
+  if (packageKey === "daily") {
+    // A fresh daily plan ends at the next midnight in Kenya. Renewals add one calendar day
+    // to the still-active expiry so paying early does not discard remaining subscription time.
+    return validExistingExpiry
+      ? new Date(base.getTime() + 24 * 60 * 60 * 1000)
+      : nextNairobiMidnight(now);
+  }
+  const days = PACKAGE_DAYS[packageKey];
+  if (!days) throw new Error("Invalid subscription package.");
+  return new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+async function expireUserIfNeeded(user, now = new Date()) {
+  if (!user || user.role === "admin" || !user.isActivated || !user.vipExpiresAt) return false;
+  if (new Date(user.vipExpiresAt).getTime() > now.getTime()) return false;
+  if (user.membershipStatus !== "expired" || user.isActivated) {
+    user.isActivated = false;
+    user.membershipStatus = "expired";
+    await user.save();
+  }
+  return true;
+}
+
+async function expireMemberships(now = new Date()) {
+  const result = await User.updateMany(
+    { role: { $ne: "admin" }, isActivated: true, vipExpiresAt: { $ne: null, $lte: now }, membershipStatus: { $ne: "expired" } },
+    { $set: { isActivated: false, membershipStatus: "expired" } }
+  );
+  if (result.modifiedCount) console.log(`Automatically suspended ${result.modifiedCount} expired VIP membership(s).`);
+  return result.modifiedCount || 0;
+}
+
 function hasActiveVip(user) {
   if (user.role === "admin") return true;
   const validStatus = user.membershipStatus === "active" || (!user.membershipStatus && user.isActivated);
-  const notExpired = !user.vipExpiresAt || user.vipExpiresAt.getTime() > Date.now();
-  if (user.isActivated && !notExpired && user.membershipStatus !== "expired") {
-    user.isActivated = false;
-    user.membershipStatus = "expired";
-    user.save().catch(err => console.error("Membership expiry update failed:", err.message));
-  }
+  const notExpired = !user.vipExpiresAt || new Date(user.vipExpiresAt).getTime() > Date.now();
   return Boolean(user.isActivated && validStatus && notExpired);
 }
 function cleanTipInput(body) {
@@ -303,11 +351,11 @@ async function activatePaidMembership(payment, providerStatus) {
       return false;
     }
     // Activate only the package actually paid for; do not trust browser-supplied amounts or package names.
+    const wasActive = user.isActivated && user.membershipStatus === "active";
+    user.vipExpiresAt = calculatePackageExpiry(payment.package, user.vipExpiresAt, wasActive);
     user.selectedPackage = payment.package;
     user.isActivated = true;
     user.membershipStatus = "active";
-    const baseTime = user.vipExpiresAt && user.vipExpiresAt.getTime() > Date.now() ? user.vipExpiresAt.getTime() : Date.now();
-    user.vipExpiresAt = new Date(baseTime + PACKAGE_DAYS[payment.package] * 24 * 60 * 60 * 1000);
     await user.save();
     payment.status = "completed";
     payment.transactionCode = String(providerStatus.transaction_code || "").slice(0, 100) || null;
@@ -550,12 +598,11 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
     if (user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts cannot be changed from membership review." });
     if (action === "approve") {
       // Admin should verify payment against the real transaction record before activating.
-      const durations = { daily: 1, weekly: 7, monthly: 30 };
-      const days = durations[user.selectedPackage];
-      if (!days) return res.status(400).json({ success: false, message: "This user has no valid selected package." });
+      if (!PACKAGE_DAYS[user.selectedPackage]) return res.status(400).json({ success: false, message: "This user has no valid selected package." });
+      const wasActive = user.isActivated && user.membershipStatus === "active";
+      user.vipExpiresAt = calculatePackageExpiry(user.selectedPackage, user.vipExpiresAt, wasActive);
       user.isActivated = true;
       user.membershipStatus = "active";
-      user.vipExpiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
     } else if (action === "reject") {
       user.isActivated = false;
       user.membershipStatus = "rejected";
@@ -679,6 +726,13 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("MongoDB connected.");
     await bootstrapAdmin();
+    // Sweep immediately at startup and then every minute. Access checks also enforce expiry
+    // synchronously, so an expired member cannot keep VIP access while waiting for this sweep.
+    await expireMemberships().catch(err => console.error("Initial membership expiry sweep failed:", err.message));
+    const expirySweep = setInterval(() => {
+      expireMemberships().catch(err => console.error("Membership expiry sweep failed:", err.message));
+    }, MEMBERSHIP_SWEEP_INTERVAL_MS);
+    if (typeof expirySweep.unref === "function") expirySweep.unref();
     app.listen(PORT, () => console.log(`Banker Tips server listening on port ${PORT}`));
   })
   .catch(err => {
