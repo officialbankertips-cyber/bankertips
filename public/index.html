@@ -301,6 +301,25 @@ main.wrap{padding-top:25px}
  .history-separator{padding:13px 5px;gap:9px}
 }
 
+
+/* VIP premium history: distinct premium identity, theme-aware contrast and mobile-safe tables */
+.premium-history-banner{display:flex;align-items:center;gap:13px;margin:0 0 16px;padding:16px;border:1px solid #c7e4f7;border-radius:16px;background:linear-gradient(120deg,#e8f5ff,#f7fbff);color:#164567}
+.premium-history-banner-icon{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:14px;background:#d4ecff;color:#0879b9;font-size:1.15rem}
+.premium-history-banner strong{font:800 1rem Outfit,sans-serif}.premium-history-banner p{margin:3px 0 0;color:#55748b;font-size:.83rem}
+.premium-history-day-card{border-color:#c9dff1}.premium-history-heading{background:linear-gradient(115deg,#e8f3ff,#f8fbff)}
+.premium-history-icon{background:#dbeafe;color:#174e91}.premium-history-rule{background:linear-gradient(90deg,#174e91 0%,#4da4e8 48%,#e4f1ff 100%)}
+.premium-history-day-card .tips-table thead th{background:#dcecff;color:#214e78;border-bottom:1px solid #c6dcf4}
+.premium-history-day-card .tips-table tbody tr:nth-child(even){background:#f3f8ff}
+.premium-history-day-card .tips-table tbody td{border-bottom:1px solid #e0eaf6}
+[data-theme=dark] .premium-history-banner{background:linear-gradient(120deg,#132d47,#142438);border-color:#294b6b;color:#e6f3ff}
+[data-theme=dark] .premium-history-banner p{color:#a8c2d8}
+[data-theme=dark] .premium-history-banner-icon,[data-theme=dark] .premium-history-icon{background:#1a3d60;color:#b8dcff}
+[data-theme=dark] .premium-history-day-card .tips-table thead th{background:#183b5b;color:#d5eaff;border-color:#2c5274}
+[data-theme=dark] .premium-history-day-card .tips-table tbody tr:nth-child(even){background:#142a40}
+[data-theme=dark] .premium-history-day-card .tips-table tbody td{border-color:#253f58}
+[data-theme=dark] .premium-history-day-card .tips-table tbody tr:hover{background:#1b3853}
+@media(max-width:700px){.premium-history-banner{align-items:flex-start;padding:13px}.premium-history-day-card .tips-table{min-width:590px}.bottom-nav button span{white-space:nowrap;font-size:.62rem}.bottom-nav button{padding-left:1px;padding-right:1px}}
+
 </style>
 </head>
 <body data-theme="light">
@@ -359,6 +378,16 @@ main.wrap{padding-top:25px}
   <div class="notice history-overall-notice" id="historyNotice">Your previous selections and recorded results appear here.</div>
  </section>
 
+ <section class="panel" id="premiumHistoryPanel">
+  <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips History</h2><p>Review past premium selections and their recorded outcomes, grouped into separate tables by date.</p></div><button class="btn secondary small" id="premiumHistoryRefresh"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+  <div class="premium-history-banner"><span class="premium-history-banner-icon"><i class="fa-solid fa-shield-halved"></i></span><div><strong>Premium history for members</strong><p>Each date has its own table. Access is checked before the history is requested.</p></div></div>
+  <div class="history-list" id="premiumHistoryGroups" aria-live="polite">
+   <div class="history-empty"><i class="fa-solid fa-spinner fa-spin"></i><strong>VIP Premium Tips History</strong><span>Loading a separate table for each date…</span></div>
+  </div>
+  <div class="notice history-overall-notice" id="premiumHistoryNotice">Sign in with an active VIP membership to view premium history.</div>
+  <div class="form-actions"><button class="btn secondary" id="premiumHistoryBack"><i class="fa-solid fa-arrow-left"></i> Back to VIP Tips</button></div>
+ </section>
+
  <section class="panel" id="premiumPanel">
   <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
   <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div>
@@ -400,7 +429,8 @@ main.wrap{padding-top:25px}
  <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Home</span></button>
  <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP</span></button>
  <button data-panel="paymentPanel"><i class="fa-solid fa-wallet"></i><span>Wallet</span></button>
- <button data-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i><span>Results</span></button>
+ <button data-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i><span>Free History</span></button>
+ <button data-panel="premiumHistoryPanel" id="bottomPremiumHistory"><i class="fa-solid fa-crown"></i><span>VIP History</span></button>
  <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
 </nav>
 
@@ -472,7 +502,7 @@ function hideMessage(id) { const el=$(id); if(el) el.className='msg'; }
 function openModal(id) { $(id)?.classList.add('open'); const first=$(id)?.querySelector('input,button'); first?.focus(); }
 function closeModal(id) { $(id)?.classList.remove('open'); }
 function setPanel(panelId) {
-  const permitted = ['freePanel','historyPanel','premiumPanel','paymentPanel','adminPanel','subscriptionPanel'];
+  const permitted = ['freePanel','historyPanel','premiumHistoryPanel','premiumPanel','paymentPanel','adminPanel','subscriptionPanel'];
   if (!permitted.includes(panelId)) return;
   if (panelId === 'adminPanel' && String(currentUser?.role || '').toLowerCase() !== 'admin') {
     if (currentUser) alert('Your account does not have admin permissions.');
@@ -485,6 +515,7 @@ function setPanel(panelId) {
   $('menuToggle').setAttribute('aria-expanded','false');
   window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='historyPanel') loadHistory();
+  if(panelId==='premiumHistoryPanel') loadPremiumHistory();
   if(panelId==='subscriptionPanel') window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='paymentPanel' && typeof loadCustomerPayments==='function') loadCustomerPayments();
   if(panelId==='premiumPanel') loadPremium();
@@ -582,6 +613,68 @@ async function loadHistory() {
     $('historyNotice').textContent = 'There was a problem loading your history.';
   }
 }
+async function loadPremiumHistory() {
+  const host = $('premiumHistoryGroups');
+  const notice = $('premiumHistoryNotice');
+  host.innerHTML = `<div class="history-empty"><i class="fa-solid fa-spinner fa-spin"></i><strong>Checking VIP access</strong><span>Verifying your account before loading premium history…</span></div>`;
+  notice.textContent = 'Checking your membership status…';
+  try {
+    if (!currentUser) await checkSession();
+    if (!currentUser) {
+      host.innerHTML = `<div class="history-empty"><i class="fa-solid fa-lock"></i><strong>Member login required</strong><span>Sign in with your Banker Tips account to view VIP Premium Tips history.</span><button class="btn" type="button" id="premiumHistoryLogin"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button></div>`;
+      $('premiumHistoryLogin')?.addEventListener('click', () => openModal('loginModal'));
+      notice.textContent = 'Premium history is private to authorized members.';
+      return;
+    }
+    const active = currentUser.isActivated === true || String(currentUser.membershipStatus || '').toLowerCase() === 'active';
+    if (!active) {
+      host.innerHTML = `<div class="history-empty"><i class="fa-solid fa-crown"></i><strong>Active VIP membership required</strong><span>Your account needs an approved, active membership to view premium history. Check your membership status in Wallet.</span><button class="btn secondary" type="button" id="premiumHistoryWallet"><i class="fa-solid fa-wallet"></i> View membership</button></div>`;
+      $('premiumHistoryWallet')?.addEventListener('click', () => setPanel('paymentPanel'));
+      notice.textContent = 'Access was not granted. No premium history has been displayed.';
+      return;
+    }
+
+    const data = await api('/api/tips/history?type=premium');
+    if (data.authorized === false) throw new Error('Your account is not authorized to view VIP history.');
+    const tips = Array.isArray(data.tips) ? data.tips : [];
+    if (!tips.length) {
+      host.innerHTML = `<div class="history-empty"><i class="fa-regular fa-calendar-xmark"></i><strong>No VIP history yet</strong><span>Past premium selections will appear here after the server has saved them to history.</span></div>`;
+      notice.textContent = 'No historical premium selections are currently available.';
+      return;
+    }
+
+    const grouped = new Map();
+    tips.forEach(tip => {
+      const value = String(tip.date || '').trim();
+      const iso = value.match(/^(\d{4}-\d{2}-\d{2})/);
+      const alt = value.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+      let key = iso ? iso[1] : (value || 'undated');
+      if (!iso && alt) key = `${alt[3]}-${alt[2].padStart(2,'0')}-${alt[1].padStart(2,'0')}`;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push(tip);
+    });
+    const dayKeys = [...grouped.keys()].sort((a,b) => {
+      if (a === 'undated') return 1;
+      if (b === 'undated') return -1;
+      return b.localeCompare(a);
+    });
+    host.innerHTML = dayKeys.map((dayKey, index) => {
+      const dayTips = grouped.get(dayKey);
+      const displayDate = dayKey === 'undated' ? 'Date not provided' : prettyDate(dayKey);
+      const rows = dayTips.map(t => `<tr><td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
+      return `<section class="history-day-card premium-history-day-card" aria-labelledby="premium-history-day-${index}">
+        <div class="history-day-heading premium-history-heading"><span class="history-day-icon premium-history-icon"><i class="fa-solid fa-crown"></i></span><div class="history-day-title"><h3 id="premium-history-day-${index}">VIP Premium Tips — ${escapeHTML(displayDate)}</h3><p><span>${escapeHTML(displayDate)}</span><span class="history-count">${dayTips.length} ${dayTips.length === 1 ? 'match' : 'matches'}</span></p></div><span class="history-day-badge">${dayTips.length}</span></div>
+        <div class="history-day-rule premium-history-rule" aria-hidden="true"></div>
+        <div class="table-scroll"><table class="tips-table history-table" aria-label="VIP Premium Tips for ${escapeHTML(displayDate)}"><thead><tr><th>Kick-off</th><th>Match</th><th>Premium Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody>${rows}</tbody></table></div>
+      </section>`;
+    }).join('<div class="history-separator" role="separator" aria-label="Separate VIP history dates"><span></span><i class="fa-solid fa-crown"></i><span></span></div>');
+    notice.textContent = `${tips.length} historical premium selection(s) shown across ${dayKeys.length} separate daily table(s).`;
+  } catch (e) {
+    host.innerHTML = `<div class="history-empty error"><i class="fa-solid fa-triangle-exclamation"></i><strong>VIP history could not be loaded</strong><span>${escapeHTML(e.message || 'Please try again later.')}</span></div>`;
+    notice.textContent = 'Could not load premium history. Confirm that the server supports /api/tips/history?type=premium and enforces membership authorization.';
+  }
+}
+
 async function loadPremium() {
   $('vipDate').textContent=prettyDate(todayISO()); $('vipSubheading').textContent='Checking membership access…';
   showEmpty('premiumRows',5,'Verifying access…'); $('premiumNotice').textContent='Checking your VIP membership…';
@@ -825,6 +918,8 @@ $('bottomVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel')
 $('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
 $('refreshTips').addEventListener('click',loadFreeTips);
 $('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
+$('premiumHistoryRefresh').addEventListener('click',loadPremiumHistory);
+$('premiumHistoryBack').addEventListener('click',()=>setPanel('premiumPanel'));
 $('backToday').addEventListener('click',()=>setPanel('freePanel'));
 $('registerForm').addEventListener('submit',handleRegister);
 $('loginForm').addEventListener('submit',handleLogin);
