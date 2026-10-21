@@ -491,22 +491,44 @@ app.get("/api/tips", async (req, res) => {
 });
 
 app.get("/api/tips/history", async (req, res) => {
+  // History may contain member-only premium selections: never let a browser or proxy cache it.
+  res.set("Cache-Control", "private, no-store, max-age=0");
+  res.set("Pragma", "no-cache");
   try {
-    const type = String(req.query.type || "free");
-    if (!["free", "premium"].includes(type)) return res.status(400).json({ success: false, message: "Invalid tips type." });
+    const type = String(req.query.type || "free").toLowerCase();
+    if (!["free", "premium"].includes(type)) {
+      return res.status(400).json({ success: false, authorized: false, message: "Invalid tips type." });
+    }
+
+    let authorized = type === "free";
     if (type === "premium") {
       const token = req.cookies[COOKIE_NAME];
-      if (!token) return res.status(401).json({ success: false, message: "Log in to access premium history." });
+      if (!token) {
+        return res.status(401).json({ success: false, authorized: false, message: "Log in to access premium history." });
+      }
       let decoded;
-      try { decoded = jwt.verify(token, JWT_SECRET); } catch { return res.status(401).json({ success: false, message: "Please log in again." }); }
+      try {
+        decoded = jwt.verify(token, JWT_SECRET);
+      } catch {
+        clearSession(res);
+        return res.status(401).json({ success: false, authorized: false, message: "Your session has expired. Please log in again." });
+      }
       const user = await User.findById(decoded.sub);
-      if (!user || !hasActiveVip(user)) return res.status(403).json({ success: false, message: "VIP access is not active." });
+      if (!user || !hasActiveVip(user)) {
+        return res.status(403).json({ success: false, authorized: false, message: "Active VIP membership is required to view premium history." });
+      }
+      authorized = true;
     }
-    const tips = await Tip.find({ type }).sort({ date: -1, createdAt: 1 }).limit(500).lean();
-    res.json({ success: true, tips: tips.map(publicTip) });
+
+    // Keep a bounded history response; sort newest dates first and preserve entry order within a date.
+    const tips = await Tip.find({ type })
+      .sort({ date: -1, createdAt: 1, _id: 1 })
+      .limit(500)
+      .lean();
+    return res.json({ success: true, authorized, type, count: tips.length, tips: tips.map(publicTip) });
   } catch (err) {
     console.error("History error:", err.message);
-    res.status(500).json({ success: false, message: "Could not load history." });
+    return res.status(500).json({ success: false, authorized: false, message: "Could not load history." });
   }
 });
 
