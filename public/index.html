@@ -242,6 +242,65 @@ main.wrap{padding-top:25px}
 [data-theme=dark] #paymentPanel table thead th,
 [data-theme=dark] .admin-layout table thead th{background:linear-gradient(180deg,#287ba6,#17638d);color:#fff;border-color:#2d86b3}
 
+
+/* Daily history: one clearly separated, individually headed table per date */
+.history-list{display:flex;flex-direction:column;gap:0}
+.history-day-card{background:var(--surface);border:1px solid #cfe7f8;border-radius:17px;overflow:hidden;box-shadow:0 7px 22px rgba(24,101,151,.07)}
+.history-day-heading{display:flex;align-items:center;gap:12px;padding:17px 18px;background:linear-gradient(115deg,#eaf6ff,#f8fcff)}
+.history-day-icon{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:13px;background:#d8efff;color:#0879b9;font-size:1.05rem}
+.history-day-title{min-width:0;flex:1}.history-day-title h3{margin:0;color:#123e60;font:800 1rem Outfit,sans-serif;letter-spacing:-.02em}.history-day-title p{margin:4px 0 0;color:#607d94;font-size:.77rem;font-weight:700;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.history-count{display:inline-flex;align-items:center;border:1px solid #c9e7fb;background:#fff;color:#17638f;border-radius:99px;padding:3px 8px;font-size:.69rem}
+.history-day-badge{display:grid;place-items:center;min-width:34px;height:34px;padding:0 8px;border-radius:11px;background:#d8efff;color:#075985;font-weight:900;font-size:.85rem}
+.history-day-rule{height:3px;background:linear-gradient(90deg,#0b91d0 0%,#8dd8ff 45%,#e5f5ff 100%)}
+.history-day-card .table-scroll{overflow-x:auto;border-radius:0 0 17px 17px}
+.history-day-card .tips-table{width:100%;min-width:610px;border-spacing:0;border-radius:0;box-shadow:none}
+.history-day-card .tips-table thead th{background:#e7f4ff;color:#315c78;border-bottom:1px solid #cfe7f8}
+.history-day-card .tips-table tbody tr:nth-child(even){background:#f5faff}
+.history-day-card .tips-table tbody tr:hover{background:#eaf6ff}
+.history-day-card .tips-table tbody td{border-bottom:1px solid #e0eef8}
+.history-day-card .tips-table tbody tr:last-child td{border-bottom:0}
+.history-separator{display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 8px;color:#7aa8c6}
+.history-separator span{height:1px;flex:1;background:linear-gradient(90deg,transparent,#b8d8ec)}
+.history-separator span:last-child{background:linear-gradient(90deg,#b8d8ec,transparent)}
+.history-separator i{width:30px;height:30px;display:grid;place-items:center;border:1px solid #cfe7f8;border-radius:50%;background:#eff8ff;color:#2586b8;font-size:.75rem}
+.history-overall-notice{margin-top:13px;border:1px solid #d9eaf6;border-radius:12px;background:#f8fcff}
+.history-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:32px 18px;background:var(--surface);border:1px dashed #b9d9ee;border-radius:16px;color:#66849b}
+.history-empty>i{font-size:1.6rem;color:#2788bb}.history-empty strong{font:800 1rem Outfit,sans-serif;color:#194866}.history-empty span{font-size:.84rem}.history-empty.error>i{color:#c24141}
+[data-theme=dark] .history-day-card{border-color:var(--line)}
+[data-theme=dark] .history-day-heading{background:linear-gradient(115deg,#142e42,#142638)}
+[data-theme=dark] .history-day-title h3,[data-theme=dark] .history-empty strong{color:#e3f4ff}
+[data-theme=dark] .history-day-title p{color:#a4c2d8}
+[data-theme=dark] .history-day-icon,[data-theme=dark] .history-day-badge{background:#1a4058;color:#bceaff}
+[data-theme=dark] .history-count{background:#132b3d;color:#bceaff;border-color:#28516b}
+[data-theme=dark] .history-day-rule{background:linear-gradient(90deg,#168dc4,#24506b)}
+[data-theme=dark] .history-day-card .tips-table thead th{background:#17374d;color:#c2e6fa;border-color:var(--line)}
+[data-theme=dark] .history-day-card .tips-table tbody tr:nth-child(even){background:#132438}
+[data-theme=dark] .history-day-card .tips-table tbody tr:hover{background:#18364b}
+[data-theme=dark] .history-day-card .tips-table tbody td{border-color:var(--line)}
+[data-theme=dark] .history-separator i{background:#142b3d;border-color:#29465d;color:#9ddcff}
+[data-theme=dark] .history-separator span{background:linear-gradient(90deg,transparent,#2b506a)}
+[data-theme=dark] .history-separator span:last-child{background:linear-gradient(90deg,#2b506a,transparent)}
+[data-theme=dark] .history-overall-notice{background:var(--surface);border-color:var(--line)}
+@media(max-width:700px){
+ .history-day-card{border-radius:15px}.history-day-heading{padding:14px 13px;gap:10px}.history-day-icon{width:38px;height:38px;flex-basis:38px;border-radius:11px}
+ .history-day-title h3{font-size:.94rem}.history-day-badge{min-width:30px;height:30px;border-radius:10px}
+ .history-day-card .table-scroll{overflow:visible}
+ .history-day-card .tips-table{min-width:0;width:100%;table-layout:auto}
+ .history-day-card .tips-table thead{display:none}
+ .history-day-card .tips-table,.history-day-card .tips-table tbody{display:block;width:100%}
+ .history-day-card .tips-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px;padding:13px 13px;border-bottom:1px solid #dcecf7;background:var(--surface)}
+ .history-day-card .tips-table tbody tr:last-child{border-bottom:0}
+ .history-day-card .tips-table tbody td{display:block;min-width:0;padding:2px 0;border:0;font-size:.82rem;overflow-wrap:anywhere}
+ .history-day-card .tips-table tbody td:nth-child(1){grid-column:1;grid-row:1;color:var(--muted);font-size:.74rem;font-weight:800}
+ .history-day-card .tips-table tbody td:nth-child(2){grid-column:1;grid-row:2;font-size:.96rem;line-height:1.35;font-weight:800;color:var(--ink);padding:3px 0}
+ .history-day-card .tips-table tbody td:nth-child(3){grid-column:1;grid-row:3;color:var(--muted);font-size:.81rem}
+ .history-day-card .tips-table tbody td:nth-child(4){grid-column:2;grid-row:1;align-self:center;justify-self:end}
+ .history-day-card .tips-table tbody td:nth-child(5){grid-column:2;grid-row:2 / span 2;align-self:center;justify-self:end}
+ .history-day-card .tips-table .odds{min-width:60px;padding:6px 9px;font-size:.82rem}
+ .history-day-card .tips-table .status{min-width:74px;padding:6px 8px;font-size:.7rem}
+ .history-separator{padding:13px 5px;gap:9px}
+}
+
 </style>
 </head>
 <body data-theme="light">
@@ -294,7 +353,10 @@ main.wrap{padding-top:25px}
 
  <section class="panel" id="historyPanel">
   <div class="section-head"><div><h2>Free Tips History</h2><p>Review previous selections and recorded results.</p></div><button class="btn secondary small" id="backToday"><i class="fa-solid fa-arrow-left"></i> Today's tips</button></div>
-  <div class="card"><div class="table-scroll"><table class="tips-table history-table"><thead><tr><th>Date</th><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="historyRows"><tr><td colspan="6">Load history to view previous tips.</td></tr></tbody></table></div><div class="notice" id="historyNotice">Your previous selections and recorded results appear here.</div></div>
+  <div class="history-list" id="historyGroups" aria-live="polite">
+   <div class="history-empty"><i class="fa-solid fa-spinner fa-spin"></i><strong>Daily Free Tips History</strong><span>Loading a separate table for each date…</span></div>
+  </div>
+  <div class="notice history-overall-notice" id="historyNotice">Your previous selections and recorded results appear here.</div>
  </section>
 
  <section class="panel" id="premiumPanel">
@@ -452,13 +514,73 @@ async function loadFreeTips() {
   }
 }
 async function loadHistory() {
-  showEmpty('historyRows',6,'Loading history…'); $('historyNotice').textContent='Loading previous selections…';
+  const host = $('historyGroups');
+  host.innerHTML = `<div class="history-empty"><i class="fa-solid fa-spinner fa-spin"></i><strong>Loading daily history</strong><span>Preparing a separate match table for every date…</span></div>`;
+  $('historyNotice').textContent = 'Loading previous free-tip records…';
   try {
-    const data=await api('/api/tips/history?type=free');
-    const tips=Array.isArray(data.tips)?data.tips:[];
-    $('historyRows').innerHTML=tips.length?tips.map(t=>`<tr><td>${escapeHTML(prettyDate(t.date))}</td><td>${escapeHTML(t.time||'—')}</td><td class="match">${escapeHTML(t.match||'—')}</td><td>${escapeHTML(t.tip||'—')}</td><td><span class="odds">${escapeHTML(t.odds??'—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join(''):'<tr><td colspan="6">No historical tips found.</td></tr>';
-    $('historyNotice').textContent=`${tips.length} historical selection(s) available.`;
-  } catch(e) { showEmpty('historyRows',6,'History could not be loaded.'); $('historyNotice').textContent=`History API error: ${e.message}`; }
+    const data = await api('/api/tips/history?type=free');
+    const tips = Array.isArray(data.tips) ? data.tips : [];
+    if (!tips.length) {
+      host.innerHTML = `<div class="history-empty"><i class="fa-regular fa-calendar-xmark"></i><strong>No history yet</strong><span>Each day's free tips will appear here in its own table once records are available.</span></div>`;
+      $('historyNotice').textContent = 'No historical selections are currently available.';
+      return;
+    }
+
+    // Normalize each record to a calendar-day key, then render one independent table per day.
+    const grouped = new Map();
+    tips.forEach(tip => {
+      const value = String(tip.date || '').trim();
+      const iso = value.match(/^(\d{4}-\d{2}-\d{2})/);
+      const alt = value.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+      let key = iso ? iso[1] : (value || 'undated');
+      if (!iso && alt) key = `${alt[3]}-${alt[2].padStart(2,'0')}-${alt[1].padStart(2,'0')}`;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push(tip);
+    });
+
+    const dateOnly = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const yesterday = dateOnly(new Date());
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth()+1).padStart(2,'0')}-${String(yesterday.getDate()).padStart(2,'0')}`;
+    const dayKeys = [...grouped.keys()].sort((a,b) => {
+      if (a === 'undated') return 1;
+      if (b === 'undated') return -1;
+      return b.localeCompare(a);
+    });
+
+    host.innerHTML = dayKeys.map((dayKey, index) => {
+      const dayTips = grouped.get(dayKey);
+      const displayDate = dayKey === 'undated' ? 'Date not provided' : prettyDate(dayKey);
+      const heading = dayKey === yesterdayKey ? `Yesterday’s Free Tips` : `Free Tips — ${displayDate}`;
+      const rows = dayTips.map(t => `<tr>
+        <td>${escapeHTML(t.time || '—')}</td>
+        <td class="match">${escapeHTML(t.match || '—')}</td>
+        <td>${escapeHTML(t.tip || '—')}</td>
+        <td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td>
+        <td>${safeStatus(t.status)}</td>
+      </tr>`).join('');
+      return `<section class="history-day-card" aria-labelledby="history-day-${index}">
+        <div class="history-day-heading">
+          <span class="history-day-icon"><i class="fa-solid fa-calendar-day"></i></span>
+          <div class="history-day-title">
+            <h3 id="history-day-${index}">${escapeHTML(heading)}</h3>
+            <p><span>${escapeHTML(displayDate)}</span><span class="history-count">${dayTips.length} ${dayTips.length === 1 ? 'match' : 'matches'}</span></p>
+          </div>
+          <span class="history-day-badge" aria-label="${dayTips.length} matches">${dayTips.length}</span>
+        </div>
+        <div class="history-day-rule" aria-hidden="true"></div>
+        <div class="table-scroll"><table class="tips-table history-table" aria-label="${escapeHTML(heading)}">
+          <thead><tr><th>Kick-off</th><th>Match</th><th>Free Tip</th><th>Odds</th><th>Result</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </section>`;
+    }).join('<div class="history-separator" role="separator" aria-label="Separate daily history tables"><span></span><i class="fa-solid fa-calendar-days"></i><span></span></div>');
+
+    $('historyNotice').textContent = `${tips.length} historical free tip(s) shown in ${dayKeys.length} separate daily table(s).`;
+  } catch(e) {
+    host.innerHTML = `<div class="history-empty error"><i class="fa-solid fa-triangle-exclamation"></i><strong>History could not be loaded</strong><span>${escapeHTML(e.message || 'Please try again later.')}</span></div>`;
+    $('historyNotice').textContent = 'There was a problem loading your history.';
+  }
 }
 async function loadPremium() {
   $('vipDate').textContent=prettyDate(todayISO()); $('vipSubheading').textContent='Checking membership access…';
