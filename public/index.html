@@ -495,18 +495,6 @@ main.wrap{padding-top:25px}
   <div class="card pad membership-card" style="margin-bottom:16px"><div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-id-card"></i></span><div><h3 style="margin:0">Your membership</h3><p>Plan details and current access status</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="memberPlanValue">Not selected</strong><span>Selected package</span></div><div class="summary-tile"><strong id="memberStatusValue">Guest</strong><span>Membership status</span></div><div class="summary-tile"><strong id="memberExpiryValue">—</strong><span>Expiry date & time (EAT)</span></div><div class="summary-tile countdown-tile"><strong id="memberCountdownValue">—</strong><span>Time remaining</span></div></div><div class="notice" id="memberStatusNotice" style="margin-top:12px">Register and choose a package to view your membership status here.</div></div>
   <div class="card admin-members payment-history-card"><div class="section-head" style="padding:20px 20px 0"><div><h3 style="margin:0">Payment history</h3><p>Review recent payments and their confirmation status.</p></div><button class="btn secondary small" id="paymentHistoryReload"><i class="fa-solid fa-rotate"></i> Refresh</button></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Status</th><th>Receipt / Reference</th></tr></thead><tbody id="customerPaymentsRows"><tr><td colspan="5">Sign in to view your payment history.</td></tr></tbody></table></div><div class="notice" id="customerPaymentsNotice">Your VIP access is activated after your payment has been confirmed.</div></div>
   <div class="card pad payment-method-card"><div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-credit-card"></i></span><div><h3 style="margin:0">Payment options</h3><p>Choose the method that works best for you.</p></div></div><div class="payment-methods"><div class="pay-pill"><i class="fa-solid fa-mobile-screen-button"></i> M-Pesa</div><div class="pay-pill"><i class="fa-solid fa-wallet"></i> Skrill</div><div class="pay-pill"><i class="fa-brands fa-paypal"></i> PayPal</div><div class="pay-pill"><i class="fa-solid fa-money-bill-transfer"></i> Eversend</div><div class="pay-pill"><i class="fa-brands fa-bitcoin"></i> Binance</div></div><div class="mpesa-panel"><div class="mpesa-brand"><span class="mpesa-logo"><i class="fa-solid fa-mobile-screen-button"></i></span><div><strong>M-Pesa</strong><small>Instant phone prompt</small></div><span class="recommended-label">Recommended</span></div><h3>Pay with M-Pesa</h3><p>Enter your Safaricom number below. Check your phone and follow the payment prompt to complete your transaction.</p></div><form id="mpesaPaymentForm" style="margin-top:16px"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20"><small class="subtext">Use a Kenyan Safaricom number that can receive an STK prompt.</small></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Pay with M-Pesa</button></div></div></form><div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div><p class="subtext" style="margin-top:14px">Never share your M-Pesa PIN or one-time verification codes with anyone.</p></div>
-  <div class="card pad payment-method-card" id="tanzaniaPaymentCard" style="margin-top:16px">
-   <div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-earth-africa"></i></span><div><h3 style="margin:0">Tanzania Mobile Money</h3><p>Country: Tanzania · Provider: OptimaPay Global · Currency: TZS</p></div></div>
-   <div class="notice" id="tzConfigNotice" role="status" aria-live="polite">Tanzania checkout is disabled until merchant credentials and your TZS package prices are configured.</div>
-   <div class="account-summary" style="margin-top:12px"><div class="summary-tile"><strong id="tzSelectedPlan">Not selected</strong><span>Selected Tanzania plan</span></div><div class="summary-tile"><strong id="tzSelectedPrice">—</strong><span>Price (TZS)</span></div></div>
-   <form id="tzPaymentForm" style="margin-top:16px"><div class="form-grid">
-    <div class="field full"><label for="tzOperator">Mobile money network</label><select id="tzOperator" name="operator" required><option value="VODACOM">Vodacom Tanzania — M-Pesa</option><option value="YAS">YAS Tanzania — Mixx</option><option value="AIRTEL">Airtel Tanzania — Airtel Money</option><option value="HALOTEL">Halotel — HaloPesa</option></select><small class="subtext">Choose the network registered to the phone number. Network availability depends on your OptimaPay merchant account.</small></div>
-    <div class="field full"><label for="tzPhone">Tanzania mobile number</label><input id="tzPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 255712345678" maxlength="20" required><small class="subtext">Enter a Tanzanian mobile number. The server normalizes it to international format.</small></div>
-    <div class="field full"><button class="btn" id="tzPayButton" type="submit" disabled><i class="fa-solid fa-lock"></i> Pay with Tanzania Mobile Money</button></div>
-   </div></form>
-   <div class="notice" id="tzPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Tanzania payments are not active yet. Your VIP access will only unlock after the provider confirms successful payment.</div>
-   <p class="subtext" style="margin-top:14px">Never share your mobile money PIN or one-time verification codes. An accepted request is not proof of payment.</p>
-  </div>
  </section>
 
  <section class="panel" id="adminPanel">
@@ -833,7 +821,6 @@ function updateAccountUI() {
   if(countdownEl) { countdownEl.dataset.expiry=currentUser?.vipExpiresAt ? new Date(currentUser.vipExpiresAt).toISOString() : ''; countdownEl.textContent=currentUser?.vipExpiresAt && currentUser.membershipStatus==='active' ? 'Calculating…' : currentUser?.membershipStatus==='expired' ? 'Expired' : '—'; const tile=countdownEl.closest('.countdown-tile'); if(tile) tile.classList.toggle('expired',currentUser?.membershipStatus==='expired'); }
   if(noticeEl) noticeEl.textContent=!currentUser ? 'Register and choose a package to view your membership status here.' : currentUser.membershipStatus==='active' ? (currentUser.selectedPackage==='daily' ? 'Your Daily VIP access ends at 00:00 East Africa Time when the expiry date begins.' : 'Your VIP membership is active until the expiry date and time shown above.') : currentUser.membershipStatus==='expired' ? 'Your package has expired and VIP access is suspended. Renew your subscription to restore access.' : currentUser.membershipStatus==='rejected' ? 'Your membership request was rejected. Contact support if you believe this is an error.' : 'Your package is selected. Complete payment and wait for confirmation before VIP access is unlocked.';
   updatePaymentUI();
-  if(typeof updateTzPriceSummary==='function') updateTzPriceSummary();
   renderMembershipCountdown();
 }
 function renderMembershipCountdown(){
@@ -911,62 +898,6 @@ async function handleMpesaPayment(event){
     notice.textContent='We have not received a final confirmation yet. You can stay on this page and try checking again shortly; do not pay again if your M-Pesa prompt was accepted.';
   }catch(err){ notice.textContent=err.message||'Could not start the M-Pesa payment.'; }
   finally{ button.disabled=false; }
-}
-
-let tzPaymentConfig = { enabled:false, prices:null };
-function updateTzPriceSummary(){
-  const plan=$('tzSelectedPlan'), price=$('tzSelectedPrice');
-  if(plan) plan.textContent=currentUser?packageLabel(currentUser.selectedPackage):'Not selected';
-  const amount=tzPaymentConfig.enabled&&tzPaymentConfig.prices&&currentUser?tzPaymentConfig.prices[currentUser.selectedPackage]:null;
-  if(price) price.textContent=amount?Number(amount).toLocaleString('en-TZ'):'Not configured';
-}
-async function loadTzPaymentConfig(){
-  const notice=$('tzConfigNotice'), button=$('tzPayButton');
-  try{
-    const config=await api('/api/payments/tz/config');
-    tzPaymentConfig=config;
-    updateTzPriceSummary();
-    if(config.enabled && config.prices){
-      notice.textContent='Tanzania checkout is available. Choose the correct network and confirm the amount before approving the prompt.';
-      button.disabled=false;
-    }else{
-      notice.textContent=config.message||'Tanzania checkout is disabled until merchant credentials and all three TZS prices are configured.';
-      button.disabled=true;
-    }
-  }catch(e){ notice.textContent='Could not check Tanzania payment availability. Tanzania checkout remains disabled.'; button.disabled=true; }
-}
-async function handleTzPayment(event){
-  event.preventDefault();
-  const notice=$('tzPaymentNotice'), button=$('tzPayButton');
-  if(!currentUser){ notice.textContent='Please log in or register and choose a VIP package before paying.'; openModal('loginModal'); return; }
-  if(!tzPaymentConfig.enabled || !tzPaymentConfig.prices){ notice.textContent='Tanzania payments are not configured yet. Please contact support.'; return; }
-  const phone=$('tzPhone').value.trim(), operator=$('tzOperator').value;
-  if(!phone){notice.textContent='Enter your Tanzania mobile number.';return;}
-  button.disabled=true; notice.textContent='Sending secure payment request to OptimaPay…';
-  try{
-    const started=await api('/api/payments/tz/initiate',{method:'POST',body:JSON.stringify({phone,operator})});
-    if(!started.paymentId) throw new Error(started.message||'Payment service did not return a transaction reference.');
-    notice.textContent=`${started.message||'Payment prompt submitted.'} Amount: TZS ${Number(started.amount).toLocaleString('en-TZ')}. Approve the prompt on your phone.`;
-    for(let attempt=0;attempt<24;attempt++){
-      await new Promise(resolve=>setTimeout(resolve,5000));
-      let result;
-      try{result=await api(`/api/payments/${encodeURIComponent(started.paymentId)}/status`);}
-      catch(err){notice.textContent=`Waiting for server-side payment verification. ${err.message}`;continue;}
-      const payment=result.payment||{};
-      if(payment.status==='completed'){
-        currentUser=result.user||currentUser; updateAccountUI(); updatePaymentUI();
-        notice.textContent=`Tanzania payment verified${payment.transactionCode?` (reference ${payment.transactionCode})`:''}. Your ${packageLabel(payment.package)} membership is now active.`;
-        if(typeof loadCustomerPayments==='function') loadCustomerPayments();
-        setPanel('premiumPanel'); await loadPremium(); return;
-      }
-      if(payment.status==='failed'||payment.status==='verification_error'){
-        notice.textContent=payment.message||'Payment could not be verified. If money was deducted, contact support with your transaction reference.'; return;
-      }
-      notice.textContent=`Tanzania payment status: ${payment.status==='verifying'?'verifying with OptimaPay':'pending customer authorization'} (${attempt+1}/24).`;
-    }
-    notice.textContent='Final confirmation has not arrived yet. Do not initiate another payment if you already approved the prompt; check again shortly.';
-  }catch(err){notice.textContent=err.message||'Could not start Tanzania mobile money payment.';}
-  finally{button.disabled=!tzPaymentConfig.enabled;}
 }
 
 async function handleAuthButton(){
@@ -1099,8 +1030,6 @@ $('registerNavButton').addEventListener('click',()=>setPanel('subscriptionPanel'
 $('authNavButton').addEventListener('click',handleAuthButton);
 document.querySelectorAll('.choose-package').forEach(b=>b.addEventListener('click',()=>beginRegistration(b.dataset.package)));
 $('mpesaPaymentForm').addEventListener('submit',handleMpesaPayment);
-$('tzPaymentForm').addEventListener('submit',handleTzPayment);
-loadTzPaymentConfig();
 document.querySelectorAll('[data-open="registerModal"]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();setPanel('subscriptionPanel')}));
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
@@ -1142,11 +1071,11 @@ $('tipDate').value=todayISO();
 $('todayDate').textContent=prettyDate(todayISO());
 $('vipDate').textContent=prettyDate(todayISO());
 function renderUserProfile(){const u=currentUser||{};const email=String(u.email||u.emailAddress||'').trim();const name=String(u.name||u.fullName||u.displayName||'').trim()||(email?email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Your Profile');const pkg=({daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'})[String(u.selectedPackage||u.package||'').toLowerCase()]||'No active plan';const active=u.isActivated===true||String(u.membershipStatus||'').toLowerCase()==='active';const expiry=u.vipExpiresAt?new Date(u.vipExpiresAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Not set';const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'BT';const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};set('profileAvatar',initials);set('profileTitle',name);set('profileEmail',email||'Sign in to view your account details');set('profileEmailDetail',email||'—');set('profilePlan',active?pkg:(u.selectedPackage?pkg+' · Pending':'No active plan'));set('profileExpiry',expiry);const status=$('profileStatus');if(status){status.classList.toggle('is-active',active);status.innerHTML='<span class="status-dot"></span> '+(currentUser?(active?'Active':String(u.membershipStatus||'Pending').replace(/_/g,' ')):'Guest');}}
-async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>${escapeHTML(p.currency||'KES')} ${Number(p.amount).toLocaleString(p.currency==='TZS'?'en-TZ':'en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
+async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
 function checkExpiryReminder(){try{if(!currentUser?.vipExpiresAt||!('Notification'in window)||Notification.permission!=='granted')return;const expiry=new Date(currentUser.vipExpiresAt);const remaining=expiry-Date.now();if(remaining>0&&remaining<=3*86400000){const key='bt-expiry-reminder-'+currentUser.id+'-'+expiry.toISOString().slice(0,10);if(!sessionStorage.getItem(key)){new Notification('Banker Tips VIP expiry reminder',{body:'Your VIP membership expires '+expiry.toLocaleDateString()+'. Review your subscription to avoid interruption.'});sessionStorage.setItem(key,'1');}}}catch(e){console.debug('Expiry reminder unavailable',e);}}
 async function loadPerformanceStats(){try{const d=await api('/api/stats/performance');$('statsSettled').textContent=d.settled;$('statsWins').textContent=d.wins;$('statsWinRate').textContent=d.winRate===null?'—':d.winRate+'%';$('statsMethod').textContent=d.methodology;}catch(e){$('statsMethod').textContent='Performance statistics are temporarily unavailable.';}}
 async function loadAdminOverview(){try{const d=await api('/api/admin/overview');$('overviewUsers').textContent=d.users.total||0;$('overviewVip').textContent=d.users.active||0;const paid=(d.payments||[]).filter(x=>String(x.status||'').toLowerCase()==='completed').reduce((a,x)=>a+(Number(x.amount)||0),0);$('overviewPaid').textContent='KES '+paid.toLocaleString('en-KE');$('overviewNotice').textContent='Revenue estimate sums completed payment records; reconcile with your provider statement.';}catch(e){$('overviewNotice').textContent=e.message||'Overview unavailable.';}}
-async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)return;body.innerHTML='<tr><td colspan="5">Loading payment records…</td></tr>';try{const d=await api('/api/admin/payments');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.email)}<span class="subtext">${escapeHTML(p.phone||'')}</span></td><td>${escapeHTML(packageLabel(p.package))}</td><td>${escapeHTML(p.currency||'KES')} ${Number(p.amount).toLocaleString(p.currency==='TZS'?'en-TZ':'en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference)}<span class="subtext">${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'')}</span></td></tr>`).join(''):'<tr><td colspan="5">No payment records found.</td></tr>';$('paymentsNotice').textContent=`${ps.length} recent payment record(s).`;}catch(e){body.innerHTML=`<tr><td colspan="5">${escapeHTML(e.message)}</td></tr>`;}}
+async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)return;body.innerHTML='<tr><td colspan="5">Loading payment records…</td></tr>';try{const d=await api('/api/admin/payments');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.email)}<span class="subtext">${escapeHTML(p.phone||'')}</span></td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference)}<span class="subtext">${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'')}</span></td></tr>`).join(''):'<tr><td colspan="5">No payment records found.</td></tr>';$('paymentsNotice').textContent=`${ps.length} recent payment record(s).`;}catch(e){body.innerHTML=`<tr><td colspan="5">${escapeHTML(e.message)}</td></tr>`;}}
 let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installAppButton').style.display='inline-grid';});$('installAppButton').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installAppButton').style.display='none';});
 $('notifyButton').addEventListener('click',async()=>{if(!('Notification'in window)){alert('Notifications are not supported by this browser.');return;}const permission=await Notification.requestPermission();if(permission==='granted'){new Notification('Banker Tips notifications enabled',{body:'You can receive reminders while using this device.'});$('notifyButton').innerHTML='<i class="fa-solid fa-bell"></i>';}else alert('Notifications were not enabled. You can change this in browser settings.');});
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(e=>console.warn('PWA service worker registration failed',e)));}
