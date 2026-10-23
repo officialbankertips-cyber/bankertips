@@ -114,11 +114,6 @@ tipSchema.pre("save", function(next) {
 const paymentSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
   package: { type: String, enum: ["daily", "weekly", "monthly"], required: true },
-  country: { type: String, enum: ["KE", "TZ"], default: "KE", index: true },
-  currency: { type: String, enum: ["KES", "TZS"], default: "KES" },
-  operator: { type: String, default: null },
-  providerReference: { type: String, default: null },
-  providerTransactionId: { type: String, default: null },
   amount: { type: Number, required: true, min: 1 },
   phone: { type: String, required: true },
   reference: { type: String, required: true, unique: true },
@@ -311,87 +306,63 @@ function normalizeKenyanPhone(value) {
   if (!/^254[17]\d{8}$/.test(phone)) return null;
   return phone;
 }
-function normalizeTanzanianPhone(value) {
-  let phone = String(value || "").replace(/[\s()-]/g, "");
-  if (phone.startsWith("+")) phone = phone.slice(1);
-  if (/^0[67]\d{8}$/.test(phone)) phone = "255" + phone.slice(1);
-  return /^255[67]\d{8}$/.test(phone) ? phone : null;
+function paymentConfigReady() {
+  const accountId = Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID);
+  return Boolean(process.env.OPTIMAPAY_API_KEY && process.env.OPTIMAPAY_API_SECRET && Number.isInteger(accountId) && accountId > 0);
 }
-const TZ_OPERATORS = Object.freeze({ VODACOM: "Vodacom M-Pesa", YAS: "YAS / Mixx", AIRTEL: "Airtel Money", HALOTEL: "HaloPesa" });
-function tzPackagePrices() {
-  return {
-    daily: Number(process.env.TZ_DAILY_PRICE_TZS) || 0,
-    weekly: Number(process.env.TZ_WEEKLY_PRICE_TZS) || 0,
-    monthly: Number(process.env.TZ_MONTHLY_PRICE_TZS) || 0
-  };
-}
-function tzPaymentProviderReady() {
-  return Boolean(process.env.TZ_PAYMENT_API_KEY && process.env.TZ_PAYMENT_API_SECRET) &&
-    (process.env.TZ_PAYMENT_API_BASE_URL || "https://global.optimapaybridge.co.ke").startsWith("https://");
-}
-function tzPaymentConfigReady() {
-  const prices = tzPackagePrices();
-  return process.env.TZ_PAYMENTS_ENABLED === "true" && tzPaymentProviderReady() &&
-    Number.isSafeInteger(prices.daily) && prices.daily > 0 &&
-    Number.isSafeInteger(prices.weekly) && prices.weekly > 0 &&
-    Number.isSafeInteger(prices.monthly) && prices.monthly > 0;
-}
-async function tzOptimaPayRequest(endpoint, options = {}) {
-  const base = (process.env.TZ_PAYMENT_API_BASE_URL || "https://global.optimapaybridge.co.ke").replace(/\/+$/, "");
-  const response = await fetch(`${base}${endpoint}`, {
-    method: options.method || "GET",
+async function optimapayPost(endpoint, payload) {
+  const response = await fetch(`${OPTIMAPAY_BASE_URL}/${endpoint}`, {
+    method: "POST",
     headers: {
-      "X-API-KEY": process.env.TZ_PAYMENT_API_KEY,
-      "X-API-SECRET": process.env.TZ_PAYMENT_API_SECRET,
-      "Accept": "application/json",
-      "Content-Type": "application/json"
+      "X-API-Key": process.env.OPTIMAPAY_API_KEY,
+      "X-API-Secret": process.env.OPTIMAPAY_API_SECRET,
+      "Content-Type": "application/json",
+      "Accept": "application/json"
     },
-    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
-    signal: AbortSignal.timeout(20000)
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(15000)
   });
   let data;
   try { data = await response.json(); } catch { data = null; }
   if (!response.ok || !data || data.success === false) {
-    const err = new Error((data && typeof data.message === "string" ? data.message : `OptimaPay Tanzania request failed (HTTP ${response.status}).`));
-    err.status = response.status;
-    throw err;
+    const message = data && typeof data.message === "string" ? data.message : `OptimaPay request failed (HTTP ${response.status}).`;
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
   return data;
 }
-async function activateTanzaniaMembership(payment, providerStatus) {
-  const status = String(providerStatus.status || "").toUpperCase();
-  const dataAmount = Number(providerStatus.amount);
-  const dataPhone = normalizeTanzanianPhone(providerStatus.phone);
-  const dataCurrency = String(providerStatus.currency || "TZS").toUpperCase();
-  const reportedClientReference = String(providerStatus.client_reference || "");
-  const reportedReference = String(providerStatus.reference || "");
-  if (status !== "SUCCESSFUL") return false;
-  if (!Number.isFinite(dataAmount) || dataAmount !== payment.amount || !dataPhone || dataPhone !== payment.phone || dataCurrency !== "TZS" || (reportedClientReference && reportedClientReference !== payment.reference) || (payment.providerReference && reportedReference && reportedReference !== payment.providerReference)) {
+async function activatePaidMembership(payment, providerStatus) {
+  const reportedAmount = Number(providerStatus.amount);
+  const reportedPhone = normalizeKenyanPhone(providerStatus.phone);
+  if (String(providerStatus.status || "").toLowerCase() !== "completed") return false;
+  if (!Number.isFinite(reportedAmount) || reportedAmount !== payment.amount || !reportedPhone || reportedPhone !== payment.phone) {
     payment.status = "verification_error";
-    payment.providerMessage = "Provider status did not match expected TZS amount, currency, phone or reference; membership was not activated.";
+    payment.providerMessage = "Provider status did not match the expected amount and phone; membership was not activated.";
     await payment.save();
     return false;
   }
-  if (payment.status === "completed") return true;
-  // The polling route atomically claims pending -> verifying, so only one request can reach this activation path.
-  const user = await User.findById(payment.user);
-  if (!user) {
-    payment.status = "verification_error";
-    payment.providerMessage = "Payment user no longer exists.";
+  if (payment.status !== "completed") {
+    const user = await User.findById(payment.user);
+    if (!user) {
+      payment.status = "verification_error";
+      payment.providerMessage = "Payment user no longer exists.";
+      await payment.save();
+      return false;
+    }
+    // Activate only the package actually paid for; do not trust browser-supplied amounts or package names.
+    const wasActive = user.isActivated && user.membershipStatus === "active";
+    user.vipExpiresAt = calculatePackageExpiry(payment.package, user.vipExpiresAt, wasActive);
+    user.selectedPackage = payment.package;
+    user.isActivated = true;
+    user.membershipStatus = "active";
+    await user.save();
+    payment.status = "completed";
+    payment.transactionCode = String(providerStatus.transaction_code || "").slice(0, 100) || null;
+    payment.providerMessage = "Payment verified with OptimaPay.";
+    payment.completedAt = new Date();
     await payment.save();
-    return false;
   }
-  const wasActive = user.isActivated && user.membershipStatus === "active";
-  user.vipExpiresAt = calculatePackageExpiry(payment.package, user.vipExpiresAt, wasActive);
-  user.selectedPackage = payment.package;
-  user.isActivated = true;
-  user.membershipStatus = "active";
-  await user.save();
-  payment.status = "completed";
-  payment.transactionCode = String(providerStatus.gateway_transaction_id || providerStatus.transaction_id || providerStatus.reference || "").slice(0, 100) || null;
-  payment.providerMessage = "Tanzania payment verified with OptimaPay status API.";
-  payment.completedAt = new Date();
-  await payment.save();
   return true;
 }
 
@@ -483,54 +454,6 @@ app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, re
   }
 });
 
-// Tanzania checkout is isolated from the existing Kenya M-Pesa adapter.
-app.get("/api/payments/tz/config", (req, res) => {
-  const prices = tzPackagePrices();
-  const ready = tzPaymentConfigReady();
-  res.set("Cache-Control", "no-store");
-  res.json({ enabled: ready, country: "TZ", currency: "TZS", prices: ready ? prices : null, operators: ready ? Object.entries(TZ_OPERATORS).map(([code, label]) => ({ code, label })) : [], message: ready ? "Tanzania mobile money checkout is available." : "Tanzania payments are not enabled or are awaiting prices and merchant configuration." });
-});
-app.post("/api/payments/tz/initiate", requireAuth, csrfCheck, async (req, res) => {
-  let payment;
-  try {
-    if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP payment." });
-    if (!tzPaymentConfigReady()) return res.status(503).json({ success: false, message: "Tanzania payments are not configured yet. Please contact support." });
-    const packageKey = req.user.selectedPackage;
-    const prices = tzPackagePrices();
-    if (!Object.prototype.hasOwnProperty.call(prices, packageKey) || !Number.isSafeInteger(prices[packageKey]) || prices[packageKey] <= 0) return res.status(400).json({ success: false, message: "Choose a valid VIP package with a configured Tanzania price." });
-    const phone = normalizeTanzanianPhone(req.body.phone);
-    if (!phone) return res.status(400).json({ success: false, message: "Enter a valid Tanzania mobile number, e.g. 0712345678 or 255712345678." });
-    const operator = String(req.body.operator || "").toUpperCase();
-    if (!Object.prototype.hasOwnProperty.call(TZ_OPERATORS, operator)) return res.status(400).json({ success: false, message: "Choose a supported Tanzania mobile money network." });
-    const reference = `BTTZ${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(5).toString("hex").toUpperCase()}`.slice(0, 40);
-    payment = await Payment.create({ user: req.user._id, package: packageKey, country: "TZ", currency: "TZS", operator, amount: prices[packageKey], phone, reference, status: "initiating" });
-    let provider;
-    try {
-      provider = await tzOptimaPayRequest("/api/v2/godigital/tz/collect", { method: "POST", body: { providerCode: operator, phone, amount: payment.amount, reference, description: `Banker Tips ${packageKey} VIP subscription` } });
-    } catch (providerError) {
-      // A timeout can mean the provider accepted the request; keep the transaction unconfirmed for reconciliation.
-      payment.status = providerError.name === "TimeoutError" || providerError.name === "AbortError" ? "verification_error" : "failed";
-      payment.providerMessage = "OptimaPay could not confirm the initiation response. Check the transaction reference with the provider before retrying.";
-      await payment.save();
-      console.error("OptimaPay Tanzania initiation error:", providerError.message);
-      return res.status(502).json({ success: false, paymentId: String(payment._id), reference, status: payment.status, message: payment.providerMessage });
-    }
-    const data = provider.data || {};
-    if (data.amount != null && Number(data.amount) !== payment.amount) throw new Error("OptimaPay initiation amount did not match the configured TZS amount.");
-    if (data.phone && normalizeTanzanianPhone(data.phone) !== phone) throw new Error("OptimaPay initiation phone did not match the requested number.");
-    payment.providerReference = String(data.reference || data.client_reference || reference).slice(0, 200);
-    payment.providerTransactionId = data.transaction_id != null ? String(data.transaction_id).slice(0, 100) : null;
-    payment.status = ["FAILED", "REJECTED", "CANCELLED"].includes(String(data.status || "").toUpperCase()) ? "failed" : "pending";
-    payment.providerMessage = String(provider.message || "Payment prompt submitted. Complete the authorization on your phone.").slice(0, 300);
-    await payment.save();
-    res.status(202).json({ success: true, message: payment.providerMessage, paymentId: String(payment._id), amount: payment.amount, currency: "TZS", package: payment.package, operator, status: payment.status, reference: payment.reference });
-  } catch (err) {
-    if (payment && payment.status === "initiating") { payment.status = "failed"; payment.providerMessage = "Could not safely initiate Tanzania payment."; await payment.save().catch(() => {}); }
-    console.error("OptimaPay Tanzania initiation error:", err.message);
-    res.status(502).json({ success: false, message: "Could not initiate Tanzania mobile money payment. Please try again later or contact support." });
-  }
-});
-
 // OptimaPay STK Push. Provider credentials are read only from server environment variables.
 app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, res) => {
   let payment;
@@ -573,43 +496,25 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
   try {
     let payment = await Payment.findOne({ _id: req.params.paymentId, user: req.user._id });
     if (!payment) return res.status(404).json({ success: false, message: "Payment not found." });
-    if (payment.status === "pending" && (payment.country === "TZ" ? (payment.providerTransactionId || payment.providerReference || payment.reference) : payment.checkoutRequestId)) {
-      if (payment.country === "TZ" ? !tzPaymentProviderReady() : !paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
+    if (payment.status === "pending" && payment.checkoutRequestId) {
+      if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
       // Claim the pending record atomically so concurrent polls cannot activate the same purchase twice.
       const claimed = await Payment.findOneAndUpdate({ _id: payment._id, status: "pending" }, { $set: { status: "verifying" } }, { new: true });
       if (claimed) {
         payment = await Payment.findById(payment._id);
         try {
-          if (payment.country === "TZ") {
-            const identifier = payment.providerTransactionId || payment.providerReference || payment.reference;
-            const providerResponse = await tzOptimaPayRequest(`/api/v2/godigital/tz/status/${encodeURIComponent(identifier)}`);
-            const provider = providerResponse.data || providerResponse;
-            const status = String(provider.status || "").toUpperCase();
-            if (status === "SUCCESSFUL") {
-              await activateTanzaniaMembership(payment, provider);
-            } else if (["FAILED", "CANCELLED", "REJECTED", "EXPIRED"].includes(status)) {
-              payment.status = "failed";
-              payment.providerMessage = String(provider.message || `Tanzania payment ${status.toLowerCase()}.`).slice(0, 300);
-              await payment.save();
-            } else {
-              payment.status = "pending";
-              payment.providerMessage = String(provider.message || "Tanzania payment is still pending.").slice(0, 300);
-              await payment.save();
-            }
+          const provider = await optimapayPost("status.php", { checkout_request_id: payment.checkoutRequestId });
+          const status = String(provider.status || "").toLowerCase();
+          if (status === "completed") {
+            await activatePaidMembership(payment, provider);
+          } else if (status === "failed") {
+            payment.status = "failed";
+            payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment failed or was cancelled.").slice(0, 300);
+            await payment.save();
           } else {
-            const provider = await optimapayPost("status.php", { checkout_request_id: payment.checkoutRequestId });
-            const status = String(provider.status || "").toLowerCase();
-            if (status === "completed") {
-              await activatePaidMembership(payment, provider);
-            } else if (status === "failed") {
-              payment.status = "failed";
-              payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment failed or was cancelled.").slice(0, 300);
-              await payment.save();
-            } else {
-              payment.status = "pending";
-              payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment is still pending.").slice(0, 300);
-              await payment.save();
-            }
+            payment.status = "pending";
+            payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment is still pending.").slice(0, 300);
+            await payment.save();
           }
         } catch (providerError) {
           // Keep the payment pending on transient provider/network errors; do not grant access.
@@ -739,7 +644,7 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
 app.get("/api/payments/history", requireAuth, async (req, res) => {
   try {
     const payments = await Payment.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100).lean();
-    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), package: p.package, amount: p.amount, currency: p.currency || "KES", country: p.country || "KE", operator: p.operator || null, phone: p.phone, reference: p.reference, status: p.status, transactionCode: p.transactionCode, message: p.providerMessage, createdAt: p.createdAt, completedAt: p.completedAt })) });
+    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), package: p.package, amount: p.amount, phone: p.phone, reference: p.reference, status: p.status, transactionCode: p.transactionCode, message: p.providerMessage, createdAt: p.createdAt, completedAt: p.completedAt })) });
   } catch (err) { res.status(500).json({ success: false, message: "Could not load payment history." }); }
 });
 
@@ -767,7 +672,7 @@ app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
 app.get("/api/admin/payments", requireAuth, requireAdmin, async (req, res) => {
   try {
     const payments = await Payment.find({}).populate("user", "email phoneNumber").sort({ createdAt: -1 }).limit(500).lean();
-    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), email: p.user?.email || "Deleted user", userPhone: p.user?.phoneNumber || "", phone: p.phone, package: p.package, amount: p.amount, currency: p.currency || "KES", country: p.country || "KE", operator: p.operator || null, reference: p.reference, transactionCode: p.transactionCode, status: p.status, createdAt: p.createdAt, completedAt: p.completedAt, message: p.providerMessage })) });
+    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), email: p.user?.email || "Deleted user", userPhone: p.user?.phoneNumber || "", phone: p.phone, package: p.package, amount: p.amount, reference: p.reference, transactionCode: p.transactionCode, status: p.status, createdAt: p.createdAt, completedAt: p.completedAt, message: p.providerMessage })) });
   } catch (err) { res.status(500).json({ success: false, message: "Could not load payment ledger." }); }
 });
 
