@@ -1,4 +1,4 @@
-const CACHE_NAME = 'banker-tips-shell-v3';
+const CACHE_NAME = 'bankertips-v5-profile';
 const SHELL = ['/', '/manifest.webmanifest', '/images/bankertipslogo.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
