@@ -349,13 +349,13 @@ main.wrap{padding-top:25px}
  </section>
 
  <section class="panel" id="subscriptionPanel">
-  <div class="section-head"><div><h2>Choose Your VIP Subscription</h2><p>Select your preferred package. Your choice will be attached to your account registration for admin review.</p></div></div>
+  <div class="section-head"><div><h2>Choose Your VIP Subscription</h2><p>Choose a plan to renew your access. Payment confirmation is required before premium tips unlock.</p></div></div>
   <div class="grid-3">
    <article class="info-card subscription-card"><i class="fa-solid fa-bolt"></i><h3>Daily VIP</h3><p class="package-price">Ksh 250 <span>/ $3</span></p><p>2–5 odds · One-day package</p><button class="btn choose-package" data-package="daily">Choose Daily</button></article>
    <article class="info-card subscription-card featured-package"><i class="fa-solid fa-calendar-week"></i><h3>Weekly VIP</h3><p class="package-price">Ksh 1,500 <span>/ $15</span></p><p>5–10 odds · Two tickets daily · 7-day access</p><button class="btn choose-package" data-package="weekly">Choose Weekly</button></article>
    <article class="info-card subscription-card"><i class="fa-solid fa-crown"></i><h3>Monthly VIP</h3><p class="package-price">Ksh 3,500 <span>/ $35</span></p><p>10–15 odds · HT/FT and Correct Score · VIP support</p><button class="btn choose-package" data-package="monthly">Choose Monthly</button></article>
   </div>
-  <div class="notice" style="margin-top:16px"><i class="fa-solid fa-lock"></i> Choose a package to create your account. VIP Tips unlock after your membership is reviewed and approved.</div>
+  <div class="notice" style="margin-top:16px"><i class="fa-solid fa-shield-halved"></i> Existing members can select a package to continue to secure payment. VIP access is restored only after payment is verified.</div>
  </section>
 
  <section class="panel active" id="freePanel">
@@ -439,6 +439,7 @@ main.wrap{padding-top:25px}
 
 <div class="modal" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="registerTitle">Create your account</h2><p>Register for a Banker Tips account.</p><form id="registerForm"><input type="hidden" id="selectedPackage" value=""><div class="notice" id="registerPackageNotice" style="margin-bottom:12px">Your selected package will appear here.</div><div class="field"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" required></div><div class="field" style="margin-top:12px"><label for="regPhone">Phone number</label><input type="tel" id="regPhone" autocomplete="tel" maxlength="24" placeholder="+2547XXXXXXXX" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn" type="submit">Create account</button><div class="msg" id="registerMessage" role="status"></div></form></div></div>
 <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modal-box"><button class="close" data-close="loginModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="loginTitle">Member login</h2><p>Sign in to check your membership status.</p><form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input type="email" id="loginEmail" autocomplete="username" maxlength="254" required></div><div class="field" style="margin-top:12px"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" maxlength="128" required></div><button class="btn" type="submit">Login securely</button><div class="msg" id="loginMessage" role="status"></div></form></div></div>
+<div class="modal" id="renewModal" role="dialog" aria-modal="true" aria-labelledby="renewTitle"><div class="modal-box" style="max-width:520px"><button class="close" data-close="renewModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div style="width:58px;height:58px;border-radius:18px;background:#fff7df;color:#b77908;display:grid;place-items:center;font-size:1.5rem;margin-bottom:16px"><i class="fa-solid fa-crown"></i></div><span class="eyebrow">BANKER TIPS VIP MEMBERSHIP</span><h2 id="renewTitle">Your VIP subscription needs renewal</h2><p>Your membership has expired or is awaiting approval, so premium tips are currently locked. Choose a plan below to continue to payment. Access returns after the payment is successfully verified.</p><div style="display:grid;gap:10px;margin:18px 0"><button class="btn choose-package" data-package="daily"><i class="fa-solid fa-bolt"></i> Renew Daily VIP · KSh 250</button><button class="btn choose-package" data-package="weekly"><i class="fa-solid fa-calendar-week"></i> Renew Weekly VIP · KSh 1,500</button><button class="btn choose-package" data-package="monthly"><i class="fa-solid fa-crown"></i> Renew Monthly VIP · KSh 3,500</button></div><div class="notice"><i class="fa-solid fa-lock"></i> Secure checkout · No access is granted from a pending payment.</div></div></div>
 <div class="modal" id="vipModal" role="dialog" aria-modal="true" aria-labelledby="vipTitle"><div class="modal-box"><button class="close" data-close="vipModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="vipTitle">Unlock VIP tips</h2><p>Sign in to access today's Premium Tips.</p><button class="btn" id="vipLoginButton"><i class="fa-solid fa-right-to-bracket"></i> Login to verify access</button><div class="msg" id="vipMessage" role="status"></div></div></div>
 
 <script>
@@ -738,8 +739,16 @@ setInterval(renderMembershipCountdown,1000);
 
 const packageNames={daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'};
 function packageLabel(key){ return packageNames[key]||'Not selected'; }
-function beginRegistration(packageKey){
+async function beginRegistration(packageKey){
   if(!['daily','weekly','monthly'].includes(packageKey)){ setPanel('subscriptionPanel'); return; }
+  if(currentUser){
+    try { const renewal=await api('/api/membership/renew-package',{method:'POST',body:JSON.stringify({selectedPackage:packageKey})}); currentUser=renewal.user||({...currentUser,selectedPackage:packageKey}); }
+    catch(err){ const note=$('renewalPaymentNotice'); if(note) note.textContent=err.message||'Could not select this renewal package. Please try again.'; openModal('renewModal'); return; }
+    updateAccountUI(); updatePaymentUI();
+    closeModal('renewModal'); setPanel('paymentPanel');
+    const msg=$('mpesaPaymentNotice'); if(msg) msg.textContent='Renewing '+packageLabel(packageKey)+'. Complete payment and wait for verified confirmation before access is restored.';
+    return;
+  }
   $('selectedPackage').value=packageKey;
   $('registerTitle').textContent='Register for '+packageLabel(packageKey);
   const message=$('registerPackageNotice'); if(message) message.textContent='Selected package: '+packageLabel(packageKey)+'. Your account remains locked until your M-Pesa payment is verified.';
@@ -930,9 +939,16 @@ document.querySelectorAll('.bottom-nav [data-panel]').forEach(b=>b.addEventListe
 $('themeToggle').addEventListener('click',()=>{const dark=document.body.dataset.theme!=='dark';document.body.dataset.theme=dark?'dark':'light';$('themeToggle').innerHTML=dark?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';});
 $('menuToggle').addEventListener('click',()=>{const open=$('topLinks').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));});
 $('brandHome').addEventListener('click',e=>{e.preventDefault();setPanel('freePanel')});
-$('headerVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel'):openModal('vipModal'));
-$('heroVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel'):openModal('vipModal'));
-$('bottomVip').addEventListener('click',()=>currentUser?setPanel('premiumPanel'):openModal('vipModal'));
+function handleVipAccess(){
+  if(!currentUser){openModal('vipModal');return;}
+  const expired=currentUser.membershipStatus==='expired'||(currentUser.vipExpiresAt&&new Date(currentUser.vipExpiresAt)<=new Date());
+  if(expired){setPanel('subscriptionPanel');openModal('renewModal');return;}
+  if(currentUser.membershipStatus==='active'||currentUser.isActivated){setPanel('premiumPanel');return;}
+  setPanel('subscriptionPanel');openModal('renewModal');
+}
+$('headerVip').addEventListener('click',handleVipAccess);
+$('heroVip').addEventListener('click',handleVipAccess);
+$('bottomVip').addEventListener('click',handleVipAccess);
 $('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
 $('refreshTips').addEventListener('click',loadFreeTips);
 $('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
