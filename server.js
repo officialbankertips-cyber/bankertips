@@ -436,6 +436,24 @@ app.get("/api/auth/me", requireAuth, (req, res) => {
 });
 
 
+// Authenticated members may select a renewal package before starting checkout.
+app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, res) => {
+  try {
+    if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP subscription." });
+    const packageKey = String(req.body.selectedPackage || "").toLowerCase();
+    if (!Object.prototype.hasOwnProperty.call(PACKAGE_PRICES, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
+    req.user.selectedPackage = packageKey;
+    if (req.user.membershipStatus === "active" && req.user.vipExpiresAt && new Date(req.user.vipExpiresAt) <= new Date()) {
+      req.user.membershipStatus = "expired"; req.user.isActivated = false;
+    }
+    await req.user.save();
+    res.json({ success: true, user: safeUser(req.user), message: "Renewal package selected. Continue to payment." });
+  } catch (err) {
+    console.error("Renewal package selection error:", err.message);
+    res.status(500).json({ success: false, message: "Could not update your renewal package. Please try again." });
+  }
+});
+
 // OptimaPay STK Push. Provider credentials are read only from server environment variables.
 app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, res) => {
   let payment;
