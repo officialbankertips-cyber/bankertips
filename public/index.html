@@ -274,6 +274,8 @@ main.wrap{padding-top:25px}
 .history-separator span{height:1px;flex:1;background:linear-gradient(90deg,transparent,#b8d8ec)}
 .history-separator span:last-child{background:linear-gradient(90deg,#b8d8ec,transparent)}
 .history-separator i{width:30px;height:30px;display:grid;place-items:center;border:1px solid #cfe7f8;border-radius:50%;background:#eff8ff;color:#2586b8;font-size:.75rem}
+.vip-history-separator i{border-color:#f0d58a;background:#fff8e5;color:#b77908}.vip-history-separator span{background:linear-gradient(90deg,transparent,#e4c56e)}.vip-history-separator span:last-child{background:linear-gradient(90deg,#e4c56e,transparent)}[data-theme=dark] .vip-history-separator i{background:#352b14;border-color:#80652a;color:#f4d477}[data-theme=dark] .vip-history-separator span{background:linear-gradient(90deg,transparent,#80652a)}[data-theme=dark] .vip-history-separator span:last-child{background:linear-gradient(90deg,#80652a,transparent)}
+
 .history-overall-notice{margin-top:13px;border:1px solid #d9eaf6;border-radius:12px;background:#f8fcff}
 .history-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:32px 18px;background:var(--surface);border:1px dashed #b9d9ee;border-radius:16px;color:#66849b}
 .history-empty>i{font-size:1.6rem;color:#2788bb}.history-empty strong{font:800 1rem Outfit,sans-serif;color:#194866}.history-empty span{font-size:.84rem}.history-empty.error>i{color:#c24141}
@@ -768,7 +770,7 @@ async function loadVipHistory() {
           <tbody>${rows}</tbody>
         </table></div>
       </section>`;
-    }).join('<div class="history-separator" role="separator" aria-label="Separate daily history tables"><span></span><i class="fa-solid fa-calendar-days"></i><span></span></div>');
+    }).join('<div class="history-separator vip-history-separator" role="separator" aria-label="Separate VIP history tables"><span></span><i class="fa-solid fa-crown"></i><span></span></div>');
 
     $('vipHistoryNotice').textContent = `${tips.length} historical VIP tip(s) shown in ${dayKeys.length} separate daily table(s).`;
   } catch(e) {
