@@ -13,16 +13,3 @@ BANKER TIPS DEPLOYMENT CHECKLIST
 [ ] Premium API routes reject users without active VIP
 [ ] Test registration, login, logout, add/edit/delete tips, and VIP activation
 [ ] Never commit .env or put admin password in frontend HTML
-
-KENYA + TANZANIA OPTIMAPAY COLLECTO SETUP
-- Set OPTIMA_BASE_URL=https://global.optimapaybridge.co.ke/api/v2.
-- Kenya Render variables: KE_OPTIMAPAY_API_KEY, KE_OPTIMAPAY_API_SECRET, KE_OPTIMAPAY_ACCOUNT_ID.
-- Tanzania Render variables: TZ_OPTIMAPAY_API_KEY, TZ_OPTIMAPAY_API_SECRET, TZ_OPTIMAPAY_ACCOUNT_ID.
-- Initiation: POST https://global.optimapaybridge.co.ke/api/v2/collecto/initiate
-- Status: GET https://global.optimapaybridge.co.ke/api/v2/collecto/status/{identifier}
-- Set TZ_PRICE_DAILY, TZ_PRICE_WEEKLY, TZ_PRICE_MONTHLY to your confirmed commercial prices.
-- Ensure Render contains MONGODB_URI, JWT_SECRET, FRONTEND_ORIGIN, NODE_ENV=production and COOKIE_SECURE=true.
-- Confirm OptimaPay's required account-ID payload field and response fields for identifier, status, amount, phone and transaction receipt.
-- Test each country's credentials independently with provider-approved test numbers: successful, pending, failed, incorrect amount/phone and network timeout.
-- VIP membership must only activate when provider status is final-success and the returned amount and phone match the stored payment.
-- Never put API secrets in the browser, .env committed to Git, or public logs.
