@@ -134,11 +134,43 @@ The public performance endpoint summarizes recorded tips; keep all outcomes accu
 After deployment, verify with a test account: daily activation near midnight, access at 00:00 EAT, expired membership status, and renewal. Do not use a production customer to test expiry.
 
 
-## Kenya + Tanzania Collecto integration (current)
-- Base URL: `https://global.optimapaybridge.co.ke/api/v2`
-- Initiate: `POST /collecto/initiate`
-- Status: `GET /collecto/status/{identifier}`
-- Set the separate Kenya and Tanzania API key, secret, and account ID variables shown in `.env.example`.
-- The browser sends the selected country, package and mobile number to the backend. The backend determines price/currency and selects that country's credentials. Never trust a client-supplied amount.
-- The integration sends account routing fields plus phone, amount, currency, country, reference and description. Confirm the exact accepted account field and status response schema with OptimaPay before production.
-- Membership is activated only after provider status is successful and the returned phone and amount match the stored payment. Provider responses must include the paid amount and payer phone (or equivalent documented fields) for this verification to succeed.
+## Historical integration note
+The earlier Collecto endpoint description below has been superseded by the current Tanzania-specific Global API documentation and implementation described in the Tanzania section at the end of this file.
+
+
+## Tanzania OptimaPay Global API integration (feature-flagged)
+
+The Tanzania checkout is implemented as a separate adapter. Existing Kenya checkout continues to use the original `OPTIMAPAY_API_KEY`, `OPTIMAPAY_API_SECRET`, `OPTIMAPAY_PAYMENT_ACCOUNT_ID`, `stkpush.php`, and `status.php` routes. Tanzania uses only the separate `TZ_*` variables.
+
+### Tanzania provider endpoints
+- API host: `https://global.optimapaybridge.co.ke`
+- Initiate: `POST /api/v2/godigital/tz/collect`
+- Verify status: `GET /api/v2/godigital/tz/status/{identifier}`
+- Headers: `X-API-KEY`, `X-API-SECRET`, `Accept: application/json`, `Content-Type: application/json`
+- Initiation body uses documented `providerCode`, `phone`, `amount`, `reference`, and `description` fields. Operator codes: `VODACOM`, `YAS`, `AIRTEL`, `HALOTEL`. Phone format sent to provider is `255` plus the Tanzanian mobile number.
+- HTTP 202 / `PENDING` is not payment success. Membership activation is only attempted after server-to-server status polling reports `SUCCESSFUL`, and amount, phone, reference (when returned), and TZS currency are checked. No callback is trusted for activation; the provider documentation says callback delivery/signing must be confirmed, so the implementation relies on status polling.
+
+### Render environment variables
+Add these in Render → Environment. Keep the feature disabled until OptimaPay confirms merchant access and the final Tanzania prices are set:
+- `TZ_PAYMENTS_ENABLED=false` initially; set to `true` only after controlled testing.
+- `TZ_PAYMENT_API_BASE_URL=https://global.optimapaybridge.co.ke`
+- `TZ_PAYMENT_API_KEY` — Tanzania-enabled OptimaPay API key.
+- `TZ_PAYMENT_API_SECRET` — corresponding API secret.
+- `TZ_DAILY_PRICE_TZS`, `TZ_WEEKLY_PRICE_TZS`, `TZ_MONTHLY_PRICE_TZS` — final whole-number TZS prices supplied by the business. No KES conversion/default price is applied.
+
+All three TZS prices must be positive whole numbers and credentials must be present before the API reports Tanzania checkout as enabled. The four operator choices are shown only while this configuration is ready, but actual operator availability still depends on the merchant account; confirm all four channels with OptimaPay before enabling publicly.
+
+### Routes added
+- `GET /api/payments/tz/config` — reports whether Tanzania checkout is configured and exposes prices only when enabled.
+- `POST /api/payments/tz/initiate` — authenticated Tanzania payment initiation using server-side price and operator validation.
+- Existing `GET /api/payments/:paymentId/status` now dispatches Tanzania transactions to the Tanzania status endpoint while retaining the existing Kenya status call for Kenya records.
+
+### Important launch checklist
+1. Obtain final Daily/Weekly/Monthly TZS prices.
+2. Confirm KYC and each operator channel (VODACOM, YAS, AIRTEL, HALOTEL) with OptimaPay.
+3. Set Tanzania credentials and prices in Render while `TZ_PAYMENTS_ENABLED=false`.
+4. Deploy and verify the Tanzania config endpoint remains disabled until the flag is enabled.
+5. Run controlled sandbox/test payments for each enabled operator and verify status responses include the amount and payer phone. The implementation intentionally does not grant VIP when these checks mismatch or status is pending/unknown. The current build uses server-to-server status polling and does not register a callback URL because callback delivery and authenticity behavior are not confirmed in the provider documentation.
+6. Only after testing, set `TZ_PAYMENTS_ENABLED=true`.
+
+No live OptimaPay credentials were available during development, so live payment initiation, provider responses, and merchant-specific operator enablement have not been tested. Kenya credentials and prices are not changed by this integration.
