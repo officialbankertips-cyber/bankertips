@@ -597,7 +597,7 @@ function openModal(id) { $(id)?.classList.add('open'); const first=$(id)?.queryS
 function closeModal(id) { $(id)?.classList.remove('open'); }
 function setPanel(panelId) {
   renderUserProfile();
-  const permitted = ['freePanel','historyPanel','premiumPanel','paymentPanel','adminPanel','subscriptionPanel'];
+  const permitted = ['freePanel','historyPanel','premiumPanel','vipHistoryPanel','paymentPanel','adminPanel','subscriptionPanel'];
   if (!permitted.includes(panelId)) return;
   if (panelId === 'adminPanel' && String(currentUser?.role || '').toLowerCase() !== 'admin') {
     if (currentUser) alert('Your account does not have admin permissions.');
