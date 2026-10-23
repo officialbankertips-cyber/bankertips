@@ -90,8 +90,8 @@ Tip payload example:
 - The backend validates incoming tip data and never allows public registration to choose a role.
 - Before public production use, consider adding email verification, password reset, audit logs, backups, monitoring, and a dedicated CSRF-token implementation if the frontend and API are hosted on different sites.
 - This is a starter implementation; review and test in your environment before accepting real customer payments. OptimaPay M-Pesa STK Push and server-side status polling are integrated. PayPal, Skrill, Eversend, and Binance are display-only and are not integrated.
-- Configure `OPTIMA_BASE_URL=https://global.optimapaybridge.co.ke/api/v2` and country-specific credentials in Render: `KE_OPTIMAPAY_API_KEY`, `KE_OPTIMAPAY_API_SECRET`, `KE_OPTIMAPAY_ACCOUNT_ID`, `TZ_OPTIMAPAY_API_KEY`, `TZ_OPTIMAPAY_API_SECRET`, and `TZ_OPTIMAPAY_ACCOUNT_ID`. The server uses `POST /collecto/initiate` and `GET /collecto/status/{identifier}` for the selected country. Keep secrets out of frontend code and source control.
-- The current integration uses server-side status polling against the provided Collecto status endpoint; verify the exact Collecto request and response schema with OptimaPay before live transactions. Membership is activated only when OptimaPay reports `completed` and the reported amount and phone match the stored payment. Test with a low amount and a test account first; confirm current package prices and your payment account ID before production use.
+- Configure `OPTIMAPAY_API_KEY`, `OPTIMAPAY_API_SECRET`, and `OPTIMAPAY_PAYMENT_ACCOUNT_ID` in your hosting provider's environment settings. Do not place real credentials in frontend code, commit them to source control, or send them in chat. The API key and secret are sent only from the backend to `https://optimapaybridge.co.ke/api/v2/stkpush.php` and `status.php`.
+- The current OptimaPay documentation describes status polling but does not document a callback/webhook contract, so this implementation uses server-side status polling instead of assuming an undocumented callback format. Membership is activated only when OptimaPay reports `completed` and the reported amount and phone match the stored payment. Test with a low amount and a test account first; confirm current package prices and your payment account ID before production use.
 
 
 ## Fix for admin tip validation
@@ -132,13 +132,3 @@ The public performance endpoint summarizes recorded tips; keep all outcomes accu
 - The countdown is informational UI; server-side authorization and expiry timestamps are authoritative.
 
 After deployment, verify with a test account: daily activation near midnight, access at 00:00 EAT, expired membership status, and renewal. Do not use a production customer to test expiry.
-
-
-## Kenya + Tanzania Collecto integration (current)
-- Base URL: `https://global.optimapaybridge.co.ke/api/v2`
-- Initiate: `POST /collecto/initiate`
-- Status: `GET /collecto/status/{identifier}`
-- Set the separate Kenya and Tanzania API key, secret, and account ID variables shown in `.env.example`.
-- The browser sends the selected country, package and mobile number to the backend. The backend determines price/currency and selects that country's credentials. Never trust a client-supplied amount.
-- The integration sends account routing fields plus phone, amount, currency, country, reference and description. Confirm the exact accepted account field and status response schema with OptimaPay before production.
-- Membership is activated only after provider status is successful and the returned phone and amount match the stored payment. Provider responses must include the paid amount and payer phone (or equivalent documented fields) for this verification to succeed.
