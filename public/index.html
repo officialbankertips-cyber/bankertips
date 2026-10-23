@@ -15,7 +15,7 @@
 <style>
 :root{color-scheme:light;--bg:#f3f7fb;--surface:#fff;--ink:#102033;--muted:#617286;--line:#dce6ef;--blue:#0284c7;--blue2:#075985;--soft:#eaf6fd;--green:#15803d;--greenbg:#dcfce7;--red:#b91c1c;--redbg:#fee2e2;--amber:#a16207;--amberbg:#fef3c7;--radius:16px;--shadow:0 12px 35px rgba(15,53,82,.08)}
 [data-theme=dark]{color-scheme:dark;--bg:#08111e;--surface:#111e30;--ink:#f0f6fc;--muted:#a1b1c4;--line:#26384c;--soft:#172f43;--green:#86efac;--greenbg:#153c2b;--red:#fca5a5;--redbg:#481e27;--amber:#fcd34d;--amberbg:#493719;--shadow:0 12px 35px rgba(0,0,0,.22)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",Arial,sans-serif;line-height:1.5;padding-bottom:calc(88px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",Arial,sans-serif;line-height:1.5;padding-bottom:calc(88px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
 header{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .header-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none}.brand-mark{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);overflow:hidden}.brand-mark img{width:100%;height:100%;object-fit:contain;padding:2px}.brand-name{font:800 1.3rem Outfit,sans-serif;letter-spacing:-.5px}.brand-name span{color:var(--blue)}.head-actions{display:flex;align-items:center;gap:8px}.icon-btn,.menu-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}.menu-btn{display:none}
 .top-links{display:flex;gap:8px;align-items:center}.btn{border:0;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-weight:800;padding:11px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 5px 14px #0284c729}.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}.btn.secondary{background:var(--soft);color:var(--blue2);box-shadow:none;border:1px solid var(--line)}.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:1px solid var(--line)}.btn.danger{background:#b91c1c}.btn.small{padding:8px 11px;font-size:.85rem}
@@ -24,9 +24,9 @@ main{padding:26px 0}.hero{background:linear-gradient(125deg,#075985,#0284c7 70%,
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:570px}.tips-table{min-width:0;table-layout:fixed}.tips-table th,.tips-table td{overflow-wrap:anywhere}.tips-table th:first-child{width:92px}.tips-table th:nth-child(2){width:29%}.tips-table th:nth-child(3){width:16%}.tips-table th:nth-child(4){width:82px}.tips-table th:last-child{width:112px}th{background:var(--soft);color:var(--muted);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:13px 15px}td{padding:14px 15px;border-top:1px solid var(--line);font-size:.9rem;font-weight:600}tbody tr:hover{background:color-mix(in srgb,var(--soft) 45%,var(--surface))}.match{font-weight:800}.subtext{display:block;font-size:.75rem;color:var(--muted);font-weight:500}.odds{display:inline-block;border:1px solid var(--line);background:var(--soft);padding:4px 9px;border-radius:8px;font-weight:800;color:var(--blue2)}.status{display:inline-flex;padding:4px 9px;border-radius:99px;font-size:.76rem;font-weight:800}.pending{background:var(--amberbg);color:var(--amber)}.won{background:var(--greenbg);color:var(--green)}.lost{background:var(--redbg);color:var(--red)}.void{background:#e5e7eb;color:#374151}.notice{padding:13px 15px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.subscription-card{display:flex;flex-direction:column;align-items:flex-start}.subscription-card .btn{margin-top:auto}.package-price{font-size:1.45rem;font-weight:800;color:var(--blue);margin:4px 0}.package-price span{font-size:.9rem;color:var(--muted);font-weight:600}.featured-package{border:2px solid var(--blue)}.membership-status{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:.75rem;font-weight:800;background:var(--amberbg);color:var(--amber);white-space:nowrap}.membership-status.active{background:var(--greenbg);color:var(--green)}.membership-status.rejected,.membership-status.expired{background:var(--redbg);color:var(--red)}.admin-members{margin-top:18px}.admin-members .table-scroll{max-height:520px}.account-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.summary-tile{border:1px solid var(--line);border-radius:13px;padding:14px;background:var(--surface)}.summary-tile strong{display:block;font-size:1.25rem}.summary-tile span{font-size:.78rem;color:var(--muted)}@media(max-width:700px){.account-summary{grid-template-columns:1fr}}
 .info-card{padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}.info-card i{color:var(--blue);font-size:1.35rem}.info-card h3{margin:10px 0 4px;font:700 1.05rem Outfit,sans-serif}.info-card p{color:var(--muted);font-size:.88rem;margin:0}.banner{margin-top:24px;padding:24px;border-radius:18px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px}.banner h2{font:800 1.35rem Outfit,sans-serif;margin:0 0 4px}.banner p{margin:0;color:var(--muted);font-size:.9rem}.payment-methods{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pay-pill{padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-weight:700}
-.panel{display:none;margin-top:22px}.panel.active{display:block}.hidden{display:none!important}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0284c71f}.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.admin-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.pad{padding:20px}.msg{margin-top:12px;font-size:.88rem;padding:10px 12px;border-radius:10px;display:none}.msg.show{display:block}.msg.error{background:var(--redbg);color:var(--red)}.msg.ok{background:var(--greenbg);color:var(--green)}.msg.info{background:var(--soft);color:var(--blue2)}
+.panel{display:none;margin-top:22px}.panel.active{display:block;animation:panelEnter .22s ease both}@keyframes panelEnter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}.hidden{display:none!important}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0284c71f}.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.admin-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.pad{padding:20px}.msg{margin-top:12px;font-size:.88rem;padding:10px 12px;border-radius:10px;display:none}.msg.show{display:block}.msg.error{background:var(--redbg);color:var(--red)}.msg.ok{background:var(--greenbg);color:var(--green)}.msg.info{background:var(--soft);color:var(--blue2)}
 footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:25;display:flex;justify-content:center;gap:0;background:var(--surface);border-top:1px solid var(--line);padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0f172a0b}.bottom-nav button{border:0;background:transparent;color:var(--muted);font-size:.72rem;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;max-width:180px;padding:5px}.bottom-nav button i{font-size:1.15rem}.bottom-nav button.active{color:var(--blue)}
-.modal{display:none;position:fixed;inset:0;z-index:100;background:#071321b8;backdrop-filter:blur(5px);padding:18px;align-items:center;justify-content:center}.modal.open{display:flex}.modal-box{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 25px 80px #0003}.modal-box h2{font:800 1.45rem Outfit,sans-serif;margin:0 40px 6px 0}.modal-box>p{color:var(--muted);font-size:.88rem;margin:0 0 17px}.close{position:absolute;right:15px;top:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px}.modal-box .btn{width:100%;margin-top:14px}
+.modal{display:flex;visibility:hidden;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:100;background:#071321b8;backdrop-filter:blur(5px);padding:18px;align-items:center;justify-content:center;transition:opacity .22s ease,visibility .22s ease}.modal.open{visibility:visible;opacity:1;pointer-events:auto}.modal-box{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 25px 80px #0003;transform:translateY(12px) scale(.985);transition:transform .22s ease}.modal.open .modal-box{transform:translateY(0) scale(1)}.modal-box h2{font:800 1.45rem Outfit,sans-serif;margin:0 40px 6px 0}.modal-box>p{color:var(--muted);font-size:.88rem;margin:0 0 17px}.close{position:absolute;right:15px;top:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px}.modal-box .btn{width:100%;margin-top:14px}
 @media(max-width:700px){
 .tips-table{min-width:0;table-layout:auto}
 .tips-table thead{display:none}
@@ -355,14 +355,14 @@ main.wrap{padding-top:25px}
    <article class="info-card subscription-card featured-package"><i class="fa-solid fa-calendar-week"></i><h3>Weekly VIP</h3><p class="package-price">Ksh 1,500 <span>/ $15</span></p><p>5–10 odds · Two tickets daily · 7-day access</p><button class="btn choose-package" data-package="weekly">Choose Weekly</button></article>
    <article class="info-card subscription-card"><i class="fa-solid fa-crown"></i><h3>Monthly VIP</h3><p class="package-price">Ksh 3,500 <span>/ $35</span></p><p>10–15 odds · HT/FT and Correct Score · VIP support</p><button class="btn choose-package" data-package="monthly">Choose Monthly</button></article>
   </div>
-  <div class="notice" style="margin-top:16px"><i class="fa-solid fa-shield-halved"></i> Existing members can select a package to continue to secure payment. VIP access is restored only after payment is verified.</div>
+  <div class="notice" style="margin-top:16px"><i class="fa-solid fa-shield-halved"></i> Existing members can select a package to continue to secure payment. VIP access is restored only after payment is verified.</div><div class="form-actions"><button class="btn ghost" type="button" id="subscriptionHomeButton" data-panel="freePanel"><i class="fa-solid fa-house"></i> Go to Home / Free Tips</button></div>
  </section>
 
  <section class="panel active" id="freePanel">
   <div class="section">
    <div class="section-head"><div><h2>Today's Free Tips</h2><p>Best selection for today </p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
    <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Preparing today’s selections…</div></div>
-   <div class="form-actions"><button class="btn secondary" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button><button class="btn ghost" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> View history</button></div>
+   <div class="form-actions"><button class="btn secondary" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</button><button class="btn ghost" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button></div>
   </div>
   <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results do not guarantee future outcomes.</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="statsSettled">—</strong><span>Settled tips</span></div><div class="summary-tile"><strong id="statsWins">—</strong><span>Wins recorded</span></div><div class="summary-tile"><strong id="statsWinRate">—</strong><span>Win rate (void excluded)</span></div></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
   <div class="section grid-3">
@@ -393,7 +393,7 @@ main.wrap{padding-top:25px}
 
  <section class="panel" id="premiumPanel">
   <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
-  <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div>
+  <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions"><button class="btn secondary" type="button" id="premiumTipsHistoryButton" data-panel="premiumHistoryPanel"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
  </section>
 
  <section class="panel" id="paymentPanel">
@@ -788,7 +788,7 @@ async function handleMpesaPayment(event){
       if(payment.status==='completed'){
         currentUser=result.user||currentUser; updateAccountUI(); updatePaymentUI();
         notice.textContent=`Payment confirmed${payment.transactionCode?` (receipt ${payment.transactionCode})`:''}. Your ${packageLabel(payment.package)} membership is now active.`;
-        alert('M-Pesa payment confirmed. Your VIP membership is active.');
+        
         setPanel('premiumPanel'); await loadPremium(); return;
       }
       if(payment.status==='failed'||payment.status==='verification_error'){
@@ -803,7 +803,7 @@ async function handleMpesaPayment(event){
 
 async function handleAuthButton(){
   if(!currentUser){ openModal('loginModal'); return; }
-  try { await api('/api/auth/logout',{method:'POST'}); currentUser=null; updateAccountUI(); closeModal('loginModal'); setPanel('freePanel'); alert('You have been logged out.'); }
+  try { await api('/api/auth/logout',{method:'POST'}); currentUser=null; updateAccountUI(); closeModal('loginModal'); setPanel('freePanel'); const n=$('freeNotice'); if(n) n.textContent='You have been logged out successfully.'; }
   catch(e){ await checkSession(); alert('Could not log out: '+e.message); }
 }
 async function handleRegister(event) {
@@ -817,7 +817,7 @@ async function handleRegister(event) {
     currentUser=data.user||null; updateAccountUI();
     showMessage('registerMessage',(data.message||'Account created.')+' Selected package: '+packageLabel(selectedPackage)+'. Complete payment and wait for confirmation before VIP access is enabled.', 'ok');
     $('registerForm').reset(); $('selectedPackage').value='';
-    setTimeout(()=>{ closeModal('registerModal'); setPanel('paymentPanel'); }, 1200);
+    setTimeout(()=>{ closeModal('registerModal'); setPanel('subscriptionPanel'); const prompt=document.querySelector('#subscriptionPanel .section-head p'); if(prompt) prompt.textContent='Account created! Confirm your preferred VIP package below, or go to Home to access Free Tips.'; }, 700);
   } catch(e) { showMessage('registerMessage',e.message,'error'); }
 }
 async function handleLogin(event) {
@@ -830,7 +830,7 @@ async function handleLogin(event) {
     $('loginForm').reset(); closeModal('loginModal');
     if(currentUser?.role?.toLowerCase()==='admin') showMessage('loginMessage','Signed in successfully. Admin access is available.','ok');
     if(data.isActivated || currentUser?.isActivated) { setPanel('premiumPanel'); await loadPremium(); }
-    else { setPanel('freePanel'); alert('Login successful. Your VIP Tips remain locked until your payment is verified. Open Payment to complete or check your M-Pesa payment.'); }
+    else { setPanel('freePanel'); const n=$('freeNotice'); if(n) n.textContent='Login successful. VIP tips remain locked until payment is verified. Open Wallet to complete or check payment.'; }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
 function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; }
@@ -840,7 +840,7 @@ async function loadAdminTips() {
   if(!user || String(user.role||'').toLowerCase()!=='admin') {
     showEmpty('adminRows',4,'Admin permission required. Please sign in with an active account.');
     $('adminNotice').textContent='Administrator access is required for this section.';
-    if(user) alert('Your account does not have admin permissions.');
+    if(user) $('adminNotice').textContent='Your account does not have administrator permissions.';
     else openModal('loginModal');
     setPanel('freePanel'); return;
   }
@@ -952,6 +952,8 @@ $('bottomVip').addEventListener('click',handleVipAccess);
 $('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
 $('refreshTips').addEventListener('click',loadFreeTips);
 $('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
+$('premiumTipsHistoryButton')?.addEventListener('click',()=>setPanel('premiumHistoryPanel'));
+document.querySelectorAll('#subscriptionPanel [data-panel], #premiumPanel [data-panel]').forEach(b=>b.addEventListener('click',()=>setPanel(b.dataset.panel)));
 $('premiumHistoryRefresh').addEventListener('click',loadPremiumHistory);
 $('premiumHistoryBack').addEventListener('click',()=>setPanel('premiumPanel'));
 $('backToday').addEventListener('click',()=>setPanel('freePanel'));
