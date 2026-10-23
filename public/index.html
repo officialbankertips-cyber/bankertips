@@ -431,9 +431,7 @@ main.wrap{padding-top:25px}
 <nav class="bottom-nav" aria-label="Main navigation">
  <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Home</span></button>
  <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP</span></button>
- <button data-panel="paymentPanel"><i class="fa-solid fa-wallet"></i><span>Wallet</span></button>
- <button data-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i><span>Free History</span></button>
- <button data-panel="premiumHistoryPanel" id="bottomPremiumHistory"><i class="fa-solid fa-crown"></i><span>VIP History</span></button>
+ <button data-panel="paymentPanel" id="bottomAccount"><i class="fa-solid fa-user-circle"></i><span>My Account</span></button>
  <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
 </nav>
 
@@ -632,7 +630,7 @@ async function loadPremiumHistory() {
     }
     const active = currentUser.isActivated === true || String(currentUser.membershipStatus || '').toLowerCase() === 'active';
     if (!active) {
-      host.innerHTML = `<div class="history-empty"><i class="fa-solid fa-crown"></i><strong>Active VIP membership required</strong><span>Your account needs an approved, active membership to view premium history. Check your membership status in Wallet.</span><button class="btn secondary" type="button" id="premiumHistoryWallet"><i class="fa-solid fa-wallet"></i> View membership</button></div>`;
+      host.innerHTML = `<div class="history-empty"><i class="fa-solid fa-crown"></i><strong>Active VIP membership required</strong><span>Your account needs an approved, active membership to view premium history. Check your membership status in My Account.</span><button class="btn secondary" type="button" id="premiumHistoryWallet"><i class="fa-solid fa-wallet"></i> View membership</button></div>`;
       $('premiumHistoryWallet')?.addEventListener('click', () => setPanel('paymentPanel'));
       notice.textContent = 'Access was not granted. No premium history has been displayed.';
       return;
@@ -830,7 +828,7 @@ async function handleLogin(event) {
     $('loginForm').reset(); closeModal('loginModal');
     if(currentUser?.role?.toLowerCase()==='admin') showMessage('loginMessage','Signed in successfully. Admin access is available.','ok');
     if(data.isActivated || currentUser?.isActivated) { setPanel('premiumPanel'); await loadPremium(); }
-    else { setPanel('freePanel'); const n=$('freeNotice'); if(n) n.textContent='Login successful. VIP tips remain locked until payment is verified. Open Wallet to complete or check payment.'; }
+    else { setPanel('freePanel'); const n=$('freeNotice'); if(n) n.textContent='Login successful. VIP tips remain locked until payment is verified. Open My Account to complete or check payment.'; }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
 function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; }
