@@ -207,8 +207,19 @@ async function requireAuth(req, res, next) {
       clearSession(res);
       return res.status(401).json({ success: false, message: "Session is no longer valid." });
     }
-    // Persist expiry immediately on the first authenticated request at/after the deadline.
-    await expireUserIfNeeded(user);
+    // Admin accounts are permanent system accounts: never apply VIP expiry rules to them.
+    // Repair legacy/inconsistent admin flags whenever an admin authenticates.
+    if (user.role === "admin") {
+      let changed = false;
+      if (user.isActivated !== true) { user.isActivated = true; changed = true; }
+      if (user.membershipStatus !== "active") { user.membershipStatus = "active"; changed = true; }
+      if (user.vipExpiresAt != null) { user.vipExpiresAt = null; changed = true; }
+      if (user.selectedPackage != null) { user.selectedPackage = null; changed = true; }
+      if (changed) await user.save();
+    } else {
+      // Persist expiry immediately on the first authenticated request at/after the deadline.
+      await expireUserIfNeeded(user);
+    }
     req.user = user;
     next();
   } catch (err) {
@@ -448,6 +459,7 @@ app.post("/api/auth/logout", csrfCheck, (req, res) => {
 });
 
 app.get("/api/auth/me", requireAuth, (req, res) => {
+  res.set("Cache-Control", "private, no-store, max-age=0");
   res.json({ success: true, user: safeUser(req.user) });
 });
 
@@ -679,7 +691,14 @@ app.get("/api/stats/performance", async (req, res) => {
 app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
   try {
     const [users, payments, tips] = await Promise.all([
-      User.aggregate([{ $group: { _id: null, total: { $sum: 1 }, active: { $sum: { $cond: [{ $and: [{ $eq: ["$isActivated", true] }, { $gt: ["$vipExpiresAt", new Date()] }] }, 1, 0] } } } }]),
+      User.aggregate([{ $group: { _id: null, total: { $sum: 1 }, active: { $sum: { $cond: [{ $or: [
+        { $eq: ["$role", "admin"] },
+        { $and: [
+          { $eq: ["$isActivated", true] },
+          { $eq: ["$membershipStatus", "active"] },
+          { $gt: ["$vipExpiresAt", new Date()] }
+        ] }
+      ] }, 1, 0] } } } }]),
       Payment.aggregate([{ $group: { _id: "$status", count: { $sum: 1 }, amount: { $sum: "$amount" } } }]),
       Tip.aggregate([{ $group: { _id: "$result", count: { $sum: 1 } } }])
     ]);
@@ -736,7 +755,7 @@ app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (r
 });
 
 // Never allow a user to self-assign the admin role through public registration.
-app.get("*", (req, res, next) => {
+app.get(/.*/, (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
   res.sendFile(path.join(__dirname, "public", "index.html"), err => {
     if (err) res.status(404).send("Frontend not found. Add your Banker Tips HTML to the public folder.");
@@ -756,11 +775,17 @@ async function bootstrapAdmin() {
   let admin = await User.findOne({ email }).select("+passwordHash");
   const passwordHash = await bcrypt.hash(password, 12);
   if (!admin) {
-    admin = await User.create({ email, passwordHash, role: "admin", isActivated: true });
+    admin = await User.create({
+      email, passwordHash, role: "admin", isActivated: true,
+      membershipStatus: "active", selectedPackage: null, vipExpiresAt: null
+    });
     console.log(`Bootstrapped admin account: ${email}`);
   } else {
     admin.role = "admin";
     admin.isActivated = true;
+    admin.membershipStatus = "active";
+    admin.selectedPackage = null;
+    admin.vipExpiresAt = null;
     admin.passwordHash = passwordHash;
     await admin.save();
     console.log(`Admin account verified/updated from environment: ${email}`);
@@ -771,6 +796,14 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("MongoDB connected.");
     await bootstrapAdmin();
+    // Repair admin status on every startup, including older admin records not named by ADMIN_EMAIL.
+    const repairedAdmins = await User.updateMany(
+      { role: "admin" },
+      { $set: { isActivated: true, membershipStatus: "active", vipExpiresAt: null, selectedPackage: null } }
+    );
+    if (repairedAdmins.modifiedCount) {
+      console.log(`Restored permanent active status for ${repairedAdmins.modifiedCount} admin account(s).`);
+    }
     // Sweep immediately at startup and then every minute. Access checks also enforce expiry
     // synchronously, so an expired member cannot keep VIP access while waiting for this sweep.
     await expireMemberships().catch(err => console.error("Initial membership expiry sweep failed:", err.message));
