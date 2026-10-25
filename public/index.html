@@ -35,21 +35,9 @@ main{padding:26px 0}.hero{background:linear-gradient(125deg,#075985,#0284c7 70%,
 
 footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}
 /* Free visitor counter: compact, responsive footer widget */
-.visitor-counter-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:5px;width:min(100%,1080px);margin:0 auto 18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,var(--surface),var(--soft));text-align:right}
 .visitor-counter-title{display:flex;align-items:center;justify-content:flex-end;gap:8px;color:var(--ink);font-size:.8rem;font-weight:800;letter-spacing:.01em}
 .visitor-counter-title i{color:var(--blue);font-size:.95rem}
 .visitor-counter-description,.visitor-counter-help{margin:0;color:var(--muted);font-size:.76rem;line-height:1.5}
-.visitor-counter-widget{min-height:34px;padding:5px 0}
-.admin-visitor-counter{align-items:flex-start;text-align:left;margin:16px 0;padding:18px}
-.admin-visitor-counter .visitor-counter-title,.admin-visitor-counter .visitor-counter-widget{justify-content:flex-start}
-.admin-visitor-counter .visitor-counter-credit{margin-top:2px}
-.admin-visitor-counter .visitor-counter-help{max-width:720px}
-#adminPanel:not(.active) .admin-visitor-counter{display:none}
-.visitor-counter-widget{display:flex;align-items:center;justify-content:flex-end;max-width:100%;min-height:24px;overflow-wrap:anywhere}
-.visitor-counter-credit{font-size:.65rem;color:var(--muted);text-decoration:none;opacity:.8}
-.visitor-counter-credit:hover{text-decoration:underline;opacity:1}
-[data-theme=dark] .visitor-counter-wrap{border-color:var(--line);background:linear-gradient(135deg,var(--surface),var(--soft))}
-@media(max-width:600px){.visitor-counter-wrap{align-items:center;text-align:center;padding:13px 10px;margin-bottom:15px}.visitor-counter-title,.visitor-counter-widget{justify-content:center}.visitor-counter-widget{max-width:100%;transform-origin:center;overflow-x:auto}}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:25;display:flex;justify-content:center;gap:0;background:var(--surface);border-top:1px solid var(--line);padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0f172a0b}.bottom-nav button{border:0;background:transparent;color:var(--muted);font-size:.72rem;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;max-width:180px;padding:5px}.bottom-nav button i{font-size:1.15rem}.bottom-nav button.active{color:var(--blue)}
 .modal{display:flex;visibility:hidden;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:100;background:#071321b8;backdrop-filter:blur(5px);padding:18px;align-items:center;justify-content:center;transition:opacity .22s ease,visibility .22s ease}.modal.open{visibility:visible;opacity:1;pointer-events:auto}.modal-box{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 25px 80px #0003;transform:translateY(12px) scale(.985);transition:transform .22s ease}.modal.open .modal-box{transform:translateY(0) scale(1)}.modal-box h2{font:800 1.45rem Outfit,sans-serif;margin:0 40px 6px 0}.modal-box>p{color:var(--muted);font-size:.88rem;margin:0 0 17px}.close{position:absolute;right:15px;top:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px}.modal-box .btn{width:100%;margin-top:14px}
 @media(max-width:700px){
@@ -551,16 +539,6 @@ img, video, canvas { max-width: 100%; height: auto; }
 
  <section class="panel" id="adminPanel">
   <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div>
-  <div class="visitor-counter-wrap admin-visitor-counter" aria-label="Website visitor counter">
-   <div class="visitor-counter-title"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Website Visitor Counter</span></div>
-   <p class="visitor-counter-description">Visitor statistics from FreeVisitorCounters.com. This panel is visible only inside the Admin Panel.</p>
-   <div class="visitor-counter-widget" id="visitorCounterWidget">
-    <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=70263faa320975a0dbd78817986496d1f293f464"></script>
-    <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1685009/t/1"></script>
-   </div>
-   <a class="visitor-counter-credit" href="https://www.versicherungen.at/tier-krankenversicherung/" target="_blank" rel="noopener noreferrer">Tier-Krankenversicherung</a>
-   <p class="visitor-counter-help">If no number appears, check whether your browser blocks third-party scripts or verify the counter code in your FreeVisitorCounters account.</p>
-  </div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
