@@ -15,7 +15,7 @@
 <style>
 :root{color-scheme:light;--bg:#f3f7fb;--surface:#fff;--ink:#102033;--muted:#617286;--line:#dce6ef;--blue:#0284c7;--blue2:#075985;--soft:#eaf6fd;--green:#15803d;--greenbg:#dcfce7;--red:#b91c1c;--redbg:#fee2e2;--amber:#a16207;--amberbg:#fef3c7;--radius:16px;--shadow:0 12px 35px rgba(15,53,82,.08)}
 [data-theme=dark]{color-scheme:dark;--bg:#08111e;--surface:#111e30;--ink:#f0f6fc;--muted:#a1b1c4;--line:#26384c;--soft:#172f43;--green:#86efac;--greenbg:#153c2b;--red:#fca5a5;--redbg:#481e27;--amber:#fcd34d;--amberbg:#493719;--shadow:0 12px 35px rgba(0,0,0,.22)}
-*{box-sizing:border-box}html{scroll-behavior:smooth;font-size:clamp(15px,calc(14px + .25vw),18px);text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",Arial,sans-serif;line-height:1.5;padding-bottom:calc(88px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",Arial,sans-serif;line-height:1.5;padding-bottom:calc(88px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
 header{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .header-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none}.brand-mark{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);overflow:hidden}.brand-mark img{width:100%;height:100%;object-fit:contain;padding:2px}.brand-name{font:800 1.3rem Outfit,sans-serif;letter-spacing:-.5px}.brand-name span{color:var(--blue)}.head-actions{display:flex;align-items:center;gap:8px}.icon-btn,.menu-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}.menu-btn{display:none}
 .top-links{display:flex;gap:8px;align-items:center}.btn{border:0;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-weight:800;padding:11px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 5px 14px #0284c729}.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}.btn.secondary{background:var(--soft);color:var(--blue2);box-shadow:none;border:1px solid var(--line)}.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:1px solid var(--line)}.btn.danger{background:#b91c1c}.btn.small{padding:8px 11px;font-size:.85rem}
@@ -436,30 +436,6 @@ main.wrap{padding-top:25px}
 [data-theme=dark] .tips-table .total-odds-value{background:#102b3d;color:#bceaff}
 @media(max-width:700px){.history-day-card .tips-table .total-odds-row{display:block!important}.history-day-card .tips-table .total-odds-row td{display:flex!important;align-items:center;justify-content:space-between;gap:8px}.history-day-card .tips-table .total-odds-label{margin-right:auto}}
 
-
-/* Responsive typography and touch-friendly mobile layout */
-body{font-size:1rem}
-h1,h2,h3,h4,p,button,input,select,textarea,td,th,label{overflow-wrap:anywhere}
-button,input,select,textarea{max-width:100%}
-@media(max-width:700px){
-  body{font-size:clamp(.94rem,3.8vw,1.05rem)}
-  .wrap{width:min(100% - 24px,1040px)}
-  .section-head{flex-wrap:wrap;align-items:flex-start}
-  .section-head h2{font-size:clamp(1.15rem,5vw,1.4rem)}
-  .section-head p{font-size:clamp(.8rem,3.5vw,.92rem)}
-  .btn{white-space:normal;line-height:1.35}
-  input,select,textarea{font-size:16px!important}
-  .table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .table-scroll table{min-width:600px}
-  .bottom-nav button{font-size:clamp(.65rem,2.8vw,.78rem)}
-}
-@media(max-width:360px){
-  .wrap{width:calc(100% - 18px)}
-  .hero h1{font-size:clamp(1.65rem,8vw,2rem)}
-  .bottom-nav{gap:1px}
-  .bottom-nav button{padding-left:2px;padding-right:2px}
-}
-
 </style>
 </head>
 <body data-theme="light">
@@ -561,6 +537,7 @@ button,input,select,textarea{max-width:100%}
   <div class="section"><div class="section-head"><div><h2>Business overview</h2><p>Live totals from the application database.</p></div><button class="btn secondary small" id="adminOverviewReload"><i class="fa-solid fa-rotate"></i> Refresh overview</button></div><div class="account-summary"><div class="summary-tile"><strong id="overviewUsers">—</strong><span>Total accounts</span></div><div class="summary-tile"><strong id="overviewVip">—</strong><span>Active VIP</span></div><div class="summary-tile"><strong id="overviewPaid">—</strong><span>Verified payments (KES)</span></div></div><div class="notice" id="overviewNotice">Revenue includes completed payment records only.</div></div>
   <div class="card admin-members"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Payment ledger</h3><p>Provider references and statuses for support and reconciliation.</p></div><button class="btn secondary small" id="paymentsReload"><i class="fa-solid fa-rotate"></i> Refresh payments</button></div><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Package</th><th>Amount</th><th>Status</th><th>Reference / Receipt</th></tr></thead><tbody id="adminPaymentsRows"><tr><td colspan="5">Load payment ledger from admin session.</td></tr></tbody></table></div><div class="notice" id="paymentsNotice">Only verified completed transactions should be treated as paid.</div></div>
   <div class="card admin-members"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Membership approvals</h3><p>Verify the customer's payment in your payment provider or transaction records before approving.</p></div><button class="btn secondary small" id="usersReload"><i class="fa-solid fa-rotate"></i> Reload members</button></div><div class="account-summary" style="padding:0 16px 16px"><div class="summary-tile"><strong id="membersPendingCount">—</strong><span>Pending review</span></div><div class="summary-tile"><strong id="membersActiveCount">—</strong><span>Active VIP members</span></div><div class="summary-tile"><strong id="membersExpiredCount">—</strong><span>Rejected / expired</span></div></div><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Selected package</th><th>Status</th><th>Expiry</th><th>Admin action</th></tr></thead><tbody id="adminUsersRows"><tr><td colspan="5">Load members after admin authentication.</td></tr></tbody></table></div><div class="notice" id="membersNotice">Approval activates access for the selected package duration. Payments are not automatically verified by this interface.</div></div>
+  <div class="card admin-members"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Administrator activity log</h3><p>Recent tip and membership changes for accountability.</p></div><button class="btn secondary small" id="auditReload"><i class="fa-solid fa-rotate"></i> Refresh activity</button></div><div class="table-scroll"><table><thead><tr><th>Time</th><th>Administrator</th><th>Action</th><th>Details</th></tr></thead><tbody id="adminAuditRows"><tr><td colspan="4">Load activity after admin authentication.</td></tr></tbody></table></div><div class="notice" id="auditNotice">Recent administrator changes are recorded here.</div></div>
  </section>
 </main>
 <footer>© Copyright <span id="year"></span> | Banker Tips - Rights reserved.</footer>
@@ -659,7 +636,7 @@ function setPanel(panelId) {
   if(panelId==='subscriptionPanel') window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='paymentPanel' && typeof loadCustomerPayments==='function') loadCustomerPayments();
   if(panelId==='premiumPanel') loadPremium();
-  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
+  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
 }
 function showEmpty(tbodyId, columns, message) {
   $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
@@ -1033,6 +1010,11 @@ async function loadAdminTips() {
     $('adminNotice').textContent=`${adminTipsCache.length} tip(s) loaded. Drafts and scheduled items are visible only to administrators until publication.`;
   } catch(e) { showEmpty('adminRows',4,'Could not load admin tips.'); $('adminNotice').textContent=`Admin API error: ${e.message}`; }
 }
+async function loadAdminAudit(){
+  const body=$('adminAuditRows'); if(!body)return;
+  body.innerHTML='<tr><td colspan="4">Loading administrator activity…</td></tr>';
+  try{const d=await api('/api/admin/audit-logs');const logs=d.logs||[];body.innerHTML=logs.length?logs.map(x=>`<tr><td>${escapeHTML(x.createdAt?new Date(x.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(x.actorEmail||'system')}</td><td><strong>${escapeHTML(x.action||'')}</strong></td><td>${escapeHTML(x.summary||'')}</td></tr>`).join(''):'<tr><td colspan="4">No administrator activity recorded yet.</td></tr>';$('auditNotice').textContent=`Showing ${logs.length} recent administrator action(s).`;}catch(e){body.innerHTML=`<tr><td colspan="4">${escapeHTML(e.message||'Activity unavailable.')}</td></tr>`;$('auditNotice').textContent='Could not load activity log.';}
+}
 async function copyVipTicket(){
   try{
     const rows=[...$('premiumRows').querySelectorAll('tr')].filter(r=>!r.classList.contains('total-odds-row'));
@@ -1160,7 +1142,7 @@ $('tipForm').addEventListener('submit',saveTip);
 $('tipPublication')?.addEventListener('change',()=>{$('tipPublishAtWrap').hidden=$('tipPublication').value!=='scheduled';});
 $('adminTipSearch')?.addEventListener('input',renderAdminTipRows);
 $('copyVipTicket')?.addEventListener('click',copyVipTicket);
-
+$('auditReload')?.addEventListener('click',loadAdminAudit);
 $('clearTip').addEventListener('click',clearTipForm);
 $('adminReload').addEventListener('click',loadAdminTips);
 $('adminRows').addEventListener('click',adminRowAction);
@@ -1181,7 +1163,7 @@ let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preve
 $('notifyButton').addEventListener('click',async()=>{if(!('Notification'in window)){alert('Notifications are not supported by this browser.');return;}const permission=await Notification.requestPermission();if(permission==='granted'){new Notification('Banker Tips notifications enabled',{body:'You can receive reminders while using this device.'});$('notifyButton').innerHTML='<i class="fa-solid fa-bell"></i>';}else alert('Notifications were not enabled. You can change this in browser settings.');});
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(e=>console.warn('PWA service worker registration failed',e)));}
 const originalAdminPanelObserver=setInterval(()=>{if($('adminPanel')&&$('adminPanel').classList.contains('active')){loadAdminOverview();loadAdminPayments();}},60000);window.addEventListener('beforeunload',()=>clearInterval(originalAdminPanelObserver));
-$('adminOverviewReload')?.addEventListener('click',loadAdminOverview);$('paymentsReload')?.addEventListener('click',loadAdminPayments);$('paymentHistoryReload')?.addEventListener('click',loadCustomerPayments);
+$('adminOverviewReload')?.addEventListener('click',loadAdminOverview);$('paymentsReload')?.addEventListener('click',loadAdminPayments);$('auditReload')?.addEventListener('click',loadAdminAudit);$('paymentHistoryReload')?.addEventListener('click',loadCustomerPayments);
 checkSession().then(()=>{renderUserProfile();loadFreeTips();checkExpiryReminder();});
 loadPerformanceStats();
 </script>
