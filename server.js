@@ -101,6 +101,8 @@ const tipSchema = new mongoose.Schema({
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
+  publicationStatus: { type: String, enum: ["draft", "scheduled", "published"], default: "published", index: true },
+  publishAt: { type: Date, default: null },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -129,6 +131,21 @@ const paymentSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const Tip = mongoose.model("Tip", tipSchema);
 const Payment = mongoose.model("Payment", paymentSchema);
+
+const auditLogSchema = new mongoose.Schema({
+  actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+  actorEmail: { type: String, default: "system", maxlength: 254 },
+  action: { type: String, required: true, maxlength: 80, index: true },
+  entityType: { type: String, required: true, maxlength: 40 },
+  entityId: { type: String, default: "", maxlength: 100 },
+  summary: { type: String, required: true, maxlength: 500 },
+  createdAt: { type: Date, default: Date.now, index: true }
+}, { versionKey: false });
+const AuditLog = mongoose.model("AuditLog", auditLogSchema);
+async function recordAudit(req, action, entityType, entityId, summary) {
+  try { await AuditLog.create({ actor: req.user?._id || null, actorEmail: req.user?.email || "system", action, entityType, entityId: String(entityId || ""), summary }); }
+  catch (err) { console.error("Audit log write failed:", err.message); }
+}
 
 function safeUser(user) {
   return {
@@ -291,10 +308,16 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
+  const publicationStatus = String(body.publicationStatus || "published").toLowerCase();
+  if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Choose Draft, Scheduled, or Published.");
+  const publishAt = body.publishAt ? new Date(body.publishAt) : null;
+  if (body.publishAt && Number.isNaN(publishAt.getTime())) throw new Error("Invalid scheduled publication date/time.");
+  if (publicationStatus === "scheduled" && !publishAt) throw new Error("Choose a publication date and time for scheduled tips.");
+  if (publicationStatus === "scheduled" && publishAt <= new Date()) throw new Error("Scheduled publication time must be in the future.");
   return {
     type, date, homeTeam, awayTeam, match, time, tip, odds, result,
-    league: String(body.league || "").trim(),
-    notes: String(body.notes || "").trim()
+    league: String(body.league || "").trim(), notes: String(body.notes || "").trim(),
+    publicationStatus, publishAt: publicationStatus === "scheduled" ? publishAt : null
   };
 }
 
@@ -372,7 +395,9 @@ function publicTip(tip) {
   return {
     ...obj,
     id: String(obj._id || obj.id || ""),
-    status: resultToStatus[obj.result] || obj.status || "Pending"
+    status: resultToStatus[obj.result] || obj.status || "Pending",
+    publicationStatus: obj.publicationStatus || "published",
+    publishAt: obj.publishAt || null
   };
 }
 
@@ -548,7 +573,13 @@ app.get("/api/tips", async (req, res) => {
       const user = await User.findById(decoded.sub);
       if (!user || !hasActiveVip(user)) return res.status(403).json({ success: false, message: "VIP access is not active. Contact the administrator after payment." });
     }
-    const tips = await Tip.find({ type, date }).sort({ createdAt: 1 }).lean();
+    const now = new Date();
+    const visiblePublication = { $or: [
+      { publicationStatus: { $exists: false } },
+      { publicationStatus: "published" },
+      { publicationStatus: "scheduled", publishAt: { $lte: now } }
+    ] };
+    const tips = await Tip.find({ type, date, $and: [visiblePublication, { publicationStatus: { $ne: "draft" } }] }).sort({ createdAt: 1 }).lean();
     res.json({ success: true, authorized: true, tips: tips.map(publicTip) });
   } catch (err) {
     console.error("Tips error:", err.message);
@@ -587,7 +618,11 @@ app.get("/api/tips/history", async (req, res) => {
     }
 
     // Keep a bounded history response; sort newest dates first and preserve entry order within a date.
-    const tips = await Tip.find({ type })
+    const now = new Date();
+    const tips = await Tip.find({ type, $and: [{ $or: [
+      { publicationStatus: { $exists: false } }, { publicationStatus: "published" },
+      { publicationStatus: "scheduled", publishAt: { $lte: now } }
+    ] }, { publicationStatus: { $ne: "draft" } }] })
       .sort({ date: -1, createdAt: 1, _id: 1 })
       .limit(500)
       .lean();
@@ -633,6 +668,7 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
       return res.status(400).json({ success: false, message: "Choose approve, reject, or revoke." });
     }
     await user.save();
+    await recordAudit(req, `membership.${action}`, "user", user._id, `${action} membership for ${user.email}`);
     res.json({ success: true, message: action === "approve" ? "Membership approved and activated." : action === "reject" ? "Membership request rejected." : "VIP access revoked.", user: safeUser(user) });
   } catch (err) {
     console.error("VIP membership update error:", err.message);
@@ -676,6 +712,13 @@ app.get("/api/admin/payments", requireAuth, requireAdmin, async (req, res) => {
   } catch (err) { res.status(500).json({ success: false, message: "Could not load payment ledger." }); }
 });
 
+app.get("/api/admin/audit-logs", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const logs = await AuditLog.find({}).sort({ createdAt: -1 }).limit(200).lean();
+    res.json({ success: true, logs: logs.map(x => ({ id: String(x._id), actorEmail: x.actorEmail, action: x.action, entityType: x.entityType, entityId: x.entityId, summary: x.summary, createdAt: x.createdAt })) });
+  } catch (err) { res.status(500).json({ success: false, message: "Could not load administrator activity." }); }
+});
+
 app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   const tips = await Tip.find({}).sort({ date: -1, createdAt: 1 }).limit(2000).lean();
   res.json({ success: true, tips: tips.map(publicTip) });
@@ -685,6 +728,7 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
   try {
     const data = cleanTipInput(req.body);
     const tip = await Tip.create({ ...data, createdBy: req.user._id });
+    await recordAudit(req, "tip.created", "tip", tip._id, `${tip.publicationStatus}: ${tip.type} tip for ${tip.match}`);
     res.status(201).json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Could not create tip." });
@@ -696,6 +740,7 @@ app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req,
     const data = cleanTipInput(req.body);
     const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true });
     if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
+    await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.publicationStatus}: ${tip.type} tip for ${tip.match}`);
     res.json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Could not update tip." });
@@ -705,6 +750,7 @@ app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req,
 app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   const tip = await Tip.findByIdAndDelete(req.params.id);
   if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
+  await recordAudit(req, "tip.deleted", "tip", tip._id, `Deleted ${tip.type} tip: ${tip.match}`);
   res.json({ success: true, message: "Tip deleted." });
 });
 
