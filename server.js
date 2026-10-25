@@ -39,7 +39,6 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "data:"],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -102,6 +101,8 @@ const tipSchema = new mongoose.Schema({
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
+  publicationStatus: { type: String, enum: ["draft", "scheduled", "published"], default: "published", index: true },
+  publishAt: { type: Date, default: null },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -307,9 +308,16 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
+  const publicationStatus = String(body.publicationStatus || "published").toLowerCase();
+  if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Choose Draft, Scheduled, or Published.");
+  const publishAt = body.publishAt ? new Date(body.publishAt) : null;
+  if (body.publishAt && Number.isNaN(publishAt.getTime())) throw new Error("Invalid scheduled publication date/time.");
+  if (publicationStatus === "scheduled" && !publishAt) throw new Error("Choose a publication date and time for scheduled tips.");
+  if (publicationStatus === "scheduled" && publishAt <= new Date()) throw new Error("Scheduled publication time must be in the future.");
   return {
     type, date, homeTeam, awayTeam, match, time, tip, odds, result,
-    league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
+    league: String(body.league || "").trim(), notes: String(body.notes || "").trim(),
+    publicationStatus, publishAt: publicationStatus === "scheduled" ? publishAt : null
   };
 }
 
@@ -384,11 +392,12 @@ async function activatePaidMembership(payment, providerStatus) {
 function publicTip(tip) {
   const obj = typeof tip.toObject === "function" ? tip.toObject() : { ...tip };
   const resultToStatus = { Pending: "Pending", Win: "Won", Lose: "Lost", Void: "Void" };
-  const { publicationStatus, publishAt, ...tipFields } = obj;
   return {
-    ...tipFields,
+    ...obj,
     id: String(obj._id || obj.id || ""),
     status: resultToStatus[obj.result] || obj.status || "Pending",
+    publicationStatus: obj.publicationStatus || "published",
+    publishAt: obj.publishAt || null
   };
 }
 
@@ -564,7 +573,13 @@ app.get("/api/tips", async (req, res) => {
       const user = await User.findById(decoded.sub);
       if (!user || !hasActiveVip(user)) return res.status(403).json({ success: false, message: "VIP access is not active. Contact the administrator after payment." });
     }
-    const tips = await Tip.find({ type, date, publicationStatus: { $ne: "draft" } }).sort({ createdAt: 1 }).lean();
+    const now = new Date();
+    const visiblePublication = { $or: [
+      { publicationStatus: { $exists: false } },
+      { publicationStatus: "published" },
+      { publicationStatus: "scheduled", publishAt: { $lte: now } }
+    ] };
+    const tips = await Tip.find({ type, date, $and: [visiblePublication, { publicationStatus: { $ne: "draft" } }] }).sort({ createdAt: 1 }).lean();
     res.json({ success: true, authorized: true, tips: tips.map(publicTip) });
   } catch (err) {
     console.error("Tips error:", err.message);
@@ -603,7 +618,11 @@ app.get("/api/tips/history", async (req, res) => {
     }
 
     // Keep a bounded history response; sort newest dates first and preserve entry order within a date.
-    const tips = await Tip.find({ type, publicationStatus: { $ne: "draft" } })
+    const now = new Date();
+    const tips = await Tip.find({ type, $and: [{ $or: [
+      { publicationStatus: { $exists: false } }, { publicationStatus: "published" },
+      { publicationStatus: "scheduled", publishAt: { $lte: now } }
+    ] }, { publicationStatus: { $ne: "draft" } }] })
       .sort({ date: -1, createdAt: 1, _id: 1 })
       .limit(500)
       .lean();
@@ -709,7 +728,7 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
   try {
     const data = cleanTipInput(req.body);
     const tip = await Tip.create({ ...data, createdBy: req.user._id });
-    await recordAudit(req, "tip.created", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
+    await recordAudit(req, "tip.created", "tip", tip._id, `${tip.publicationStatus}: ${tip.type} tip for ${tip.match}`);
     res.status(201).json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Could not create tip." });
@@ -721,7 +740,7 @@ app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req,
     const data = cleanTipInput(req.body);
     const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true });
     if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
-    await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
+    await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.publicationStatus}: ${tip.type} tip for ${tip.match}`);
     res.json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Could not update tip." });
