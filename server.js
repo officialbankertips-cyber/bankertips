@@ -16,7 +16,7 @@ const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "banker_tips_session";
 const TOKEN_TTL = "12h";
-const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2"; // Correct OptimaPay v2 API Base URL
+const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2";
 const PACKAGE_PRICES = Object.freeze({ daily: 250, weekly: 1500, monthly: 3500 });
 const PACKAGE_DAYS = Object.freeze({ daily: 1, weekly: 7, monthly: 30 });
 const MEMBERSHIP_TIME_ZONE = "Africa/Nairobi";
@@ -39,6 +39,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "data:"],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -101,8 +102,6 @@ const tipSchema = new mongoose.Schema({
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
-  publicationStatus: { type: String, enum: ["draft", "scheduled", "published"], default: "published", index: true },
-  publishAt: { type: Date, default: null },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -186,6 +185,7 @@ function validEmail(email) {
   return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
 }
 function csrfCheck(req, res, next) {
+  // SameSite=Lax plus Origin/Referer checks help protect cookie-authenticated writes.
   const origin = req.get("origin");
   const referer = req.get("referer");
   const expected = (process.env.FRONTEND_ORIGIN || "").split(",").map(v => v.trim()).filter(Boolean);
@@ -207,6 +207,7 @@ async function requireAuth(req, res, next) {
       clearSession(res);
       return res.status(401).json({ success: false, message: "Session is no longer valid." });
     }
+    // Persist expiry immediately on the first authenticated request at/after the deadline.
     await expireUserIfNeeded(user);
     req.user = user;
     next();
@@ -229,6 +230,7 @@ function nairobiDateParts(date = new Date()) {
   return { year: Number(values.year), month: Number(values.month), day: Number(values.day) };
 }
 
+// Kenya has no daylight-saving changes. 00:00 Africa/Nairobi is 21:00 UTC on the prior date.
 function nextNairobiMidnight(from = new Date()) {
   const { year, month, day } = nairobiDateParts(from);
   return new Date(Date.UTC(year, month - 1, day + 1, -3, 0, 0, 0));
@@ -238,6 +240,8 @@ function calculatePackageExpiry(packageKey, existingExpiry = null, currentlyActi
   const validExistingExpiry = currentlyActive && existingExpiry && new Date(existingExpiry).getTime() > now.getTime();
   const base = validExistingExpiry ? new Date(existingExpiry) : now;
   if (packageKey === "daily") {
+    // A fresh daily plan ends at the next midnight in Kenya. Renewals add one calendar day
+    // to the still-active expiry so paying early does not discard remaining subscription time.
     return validExistingExpiry
       ? new Date(base.getTime() + 24 * 60 * 60 * 1000)
       : nextNairobiMidnight(now);
@@ -276,6 +280,7 @@ function hasActiveVip(user) {
 function cleanTipInput(body) {
   const type = body.type;
   const date = String(body.date || "");
+  // Accept separate team fields or a combined match such as "Lyon - Nice".
   let homeTeam = String(body.homeTeam || "").trim();
   let awayTeam = String(body.awayTeam || "").trim();
   const suppliedMatch = String(body.match || "").trim();
@@ -302,18 +307,12 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
-  const publicationStatus = String(body.publicationStatus || "published").toLowerCase();
-  if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Choose Draft, Scheduled, or Published.");
-  const publishAt = body.publishAt ? new Date(body.publishAt) : null;
-  if (body.publishAt && Number.isNaN(publishAt.getTime())) throw new Error("Invalid scheduled publication date/time.");
-  if (publicationStatus === "scheduled" && !publishAt) throw new Error("Choose a publication date and time for scheduled tips.");
-  if (publicationStatus === "scheduled" && publishAt <= new Date()) throw new Error("Scheduled publication time must be in the future.");
   return {
     type, date, homeTeam, awayTeam, match, time, tip, odds, result,
-    league: String(body.league || "").trim(), notes: String(body.notes || "").trim(),
-    publicationStatus, publishAt: publicationStatus === "scheduled" ? publishAt : null
+    league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
   };
 }
+
 
 function normalizeKenyanPhone(value) {
   let phone = String(value || "").replace(/[\s()-]/g, "");
@@ -326,8 +325,6 @@ function paymentConfigReady() {
   const accountId = Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID);
   return Boolean(process.env.OPTIMAPAY_API_KEY && process.env.OPTIMAPAY_API_SECRET && Number.isInteger(accountId) && accountId > 0);
 }
-
-// OptimaPay API helper with correct headers and error checking
 async function optimapayPost(endpoint, payload) {
   const response = await fetch(`${OPTIMAPAY_BASE_URL}/${endpoint}`, {
     method: "POST",
@@ -350,13 +347,10 @@ async function optimapayPost(endpoint, payload) {
   }
   return data;
 }
-
 async function activatePaidMembership(payment, providerStatus) {
   const reportedAmount = Number(providerStatus.amount);
   const reportedPhone = normalizeKenyanPhone(providerStatus.phone);
-  const statusStr = String(providerStatus.status || "").toLowerCase();
-  
-  if (statusStr !== "completed" && statusStr !== "success") return false;
+  if (String(providerStatus.status || "").toLowerCase() !== "completed") return false;
   if (!Number.isFinite(reportedAmount) || reportedAmount !== payment.amount || !reportedPhone || reportedPhone !== payment.phone) {
     payment.status = "verification_error";
     payment.providerMessage = "Provider status did not match the expected amount and phone; membership was not activated.";
@@ -371,6 +365,7 @@ async function activatePaidMembership(payment, providerStatus) {
       await payment.save();
       return false;
     }
+    // Activate only the package actually paid for; do not trust browser-supplied amounts or package names.
     const wasActive = user.isActivated && user.membershipStatus === "active";
     user.vipExpiresAt = calculatePackageExpiry(payment.package, user.vipExpiresAt, wasActive);
     user.selectedPackage = payment.package;
@@ -378,7 +373,7 @@ async function activatePaidMembership(payment, providerStatus) {
     user.membershipStatus = "active";
     await user.save();
     payment.status = "completed";
-    payment.transactionCode = String(providerStatus.transaction_code || providerStatus.mpesa_receipt || providerStatus.transaction_id || "").slice(0, 100) || null;
+    payment.transactionCode = String(providerStatus.transaction_code || "").slice(0, 100) || null;
     payment.providerMessage = "Payment verified with OptimaPay.";
     payment.completedAt = new Date();
     await payment.save();
@@ -389,12 +384,11 @@ async function activatePaidMembership(payment, providerStatus) {
 function publicTip(tip) {
   const obj = typeof tip.toObject === "function" ? tip.toObject() : { ...tip };
   const resultToStatus = { Pending: "Pending", Win: "Won", Lose: "Lost", Void: "Void" };
+  const { publicationStatus, publishAt, ...tipFields } = obj;
   return {
-    ...obj,
+    ...tipFields,
     id: String(obj._id || obj.id || ""),
     status: resultToStatus[obj.result] || obj.status || "Pending",
-    publicationStatus: obj.publicationStatus || "published",
-    publishAt: obj.publishAt || null
   };
 }
 
@@ -457,6 +451,8 @@ app.get("/api/auth/me", requireAuth, (req, res) => {
   res.json({ success: true, user: safeUser(req.user) });
 });
 
+
+// Authenticated members may select a renewal package before starting checkout.
 app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, res) => {
   try {
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP subscription." });
@@ -474,7 +470,7 @@ app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, re
   }
 });
 
-// Correct OptimaPay STK Push Gateway Integration -> stkpush.php
+// OptimaPay STK Push. Provider credentials are read only from server environment variables.
 app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, res) => {
   let payment;
   try {
@@ -486,7 +482,6 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
     if (!phone) return res.status(400).json({ success: false, message: "Enter a valid Kenyan M-Pesa number, e.g. 0712345678 or 254712345678." });
     const reference = `BT${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString("hex").toUpperCase()}`.slice(0, 30);
     payment = await Payment.create({ user: req.user._id, package: packageKey, amount: PACKAGE_PRICES[packageKey], phone, reference, status: "initiating" });
-    
     const provider = await optimapayPost("stkpush.php", {
       payment_account_id: Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID),
       phone,
@@ -494,7 +489,6 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
       reference,
       description: `Banker Tips ${packageKey} VIP membership`
     });
-
     if (!provider.checkout_request_id) throw new Error("OptimaPay response did not include checkout_request_id.");
     payment.checkoutRequestId = String(provider.checkout_request_id).slice(0, 200);
     payment.merchantRequestId = String(provider.merchant_request_id || "").slice(0, 200) || null;
@@ -513,20 +507,21 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
   }
 });
 
-// Correct OptimaPay Status Polling Gateway Integration -> status.php
+// Polling endpoint checks OptimaPay's server-side status API; browser data never activates membership.
 app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
   try {
     let payment = await Payment.findOne({ _id: req.params.paymentId, user: req.user._id });
     if (!payment) return res.status(404).json({ success: false, message: "Payment not found." });
     if (payment.status === "pending" && payment.checkoutRequestId) {
       if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
+      // Claim the pending record atomically so concurrent polls cannot activate the same purchase twice.
       const claimed = await Payment.findOneAndUpdate({ _id: payment._id, status: "pending" }, { $set: { status: "verifying" } }, { new: true });
       if (claimed) {
         payment = await Payment.findById(payment._id);
         try {
           const provider = await optimapayPost("status.php", { checkout_request_id: payment.checkoutRequestId });
           const status = String(provider.status || "").toLowerCase();
-          if (status === "completed" || status === "success") {
+          if (status === "completed") {
             await activatePaidMembership(payment, provider);
           } else if (status === "failed") {
             payment.status = "failed";
@@ -538,6 +533,7 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
             await payment.save();
           }
         } catch (providerError) {
+          // Keep the payment pending on transient provider/network errors; do not grant access.
           payment.status = "pending";
           await payment.save().catch(() => {});
           console.error("OptimaPay status check error:", providerError.message);
@@ -560,6 +556,7 @@ app.get("/api/tips", async (req, res) => {
     const date = String(req.query.date || new Date().toISOString().slice(0, 10));
     if (!["free", "premium"].includes(type)) return res.status(400).json({ success: false, message: "Invalid tips type." });
     if (type === "premium") {
+      // Every premium request is authorized on the server; hiding a menu item is not security.
       const token = req.cookies[COOKIE_NAME];
       if (!token) return res.status(401).json({ success: false, message: "Log in to access premium tips." });
       let decoded;
@@ -567,13 +564,7 @@ app.get("/api/tips", async (req, res) => {
       const user = await User.findById(decoded.sub);
       if (!user || !hasActiveVip(user)) return res.status(403).json({ success: false, message: "VIP access is not active. Contact the administrator after payment." });
     }
-    const now = new Date();
-    const visiblePublication = { $or: [
-      { publicationStatus: { $exists: false } },
-      { publicationStatus: "published" },
-      { publicationStatus: "scheduled", publishAt: { $lte: now } }
-    ] };
-    const tips = await Tip.find({ type, date, $and: [visiblePublication, { publicationStatus: { $ne: "draft" } }] }).sort({ createdAt: 1 }).lean();
+    const tips = await Tip.find({ type, date, publicationStatus: { $ne: "draft" } }).sort({ createdAt: 1 }).lean();
     res.json({ success: true, authorized: true, tips: tips.map(publicTip) });
   } catch (err) {
     console.error("Tips error:", err.message);
@@ -582,6 +573,7 @@ app.get("/api/tips", async (req, res) => {
 });
 
 app.get("/api/tips/history", async (req, res) => {
+  // History may contain member-only premium selections: never let a browser or proxy cache it.
   res.set("Cache-Control", "private, no-store, max-age=0");
   res.set("Pragma", "no-cache");
   try {
@@ -610,11 +602,8 @@ app.get("/api/tips/history", async (req, res) => {
       authorized = true;
     }
 
-    const now = new Date();
-    const tips = await Tip.find({ type, $and: [{ $or: [
-      { publicationStatus: { $exists: false } }, { publicationStatus: "published" },
-      { publicationStatus: "scheduled", publishAt: { $lte: now } }
-    ] }, { publicationStatus: { $ne: "draft" } }] })
+    // Keep a bounded history response; sort newest dates first and preserve entry order within a date.
+    const tips = await Tip.find({ type, publicationStatus: { $ne: "draft" } })
       .sort({ date: -1, createdAt: 1, _id: 1 })
       .limit(500)
       .lean();
@@ -625,6 +614,7 @@ app.get("/api/tips/history", async (req, res) => {
   }
 });
 
+// Admin-only user activation and VIP expiry controls.
 app.get("/api/admin/users", requireAuth, requireAdmin, async (req, res) => {
   const users = await User.find({}).sort({ createdAt: -1 }).limit(1000).lean();
   res.json({ success: true, users: users.map(u => ({
@@ -641,6 +631,7 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
     if (!user) return res.status(404).json({ success: false, message: "User not found." });
     if (user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts cannot be changed from membership review." });
     if (action === "approve") {
+      // Admin should verify payment against the real transaction record before activating.
       if (!PACKAGE_DAYS[user.selectedPackage]) return res.status(400).json({ success: false, message: "This user has no valid selected package." });
       const wasActive = user.isActivated && user.membershipStatus === "active";
       user.vipExpiresAt = calculatePackageExpiry(user.selectedPackage, user.vipExpiresAt, wasActive);
@@ -666,6 +657,7 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
   }
 });
 
+// Customer payment history. Sensitive provider payloads and credentials are never exposed.
 app.get("/api/payments/history", requireAuth, async (req, res) => {
   try {
     const payments = await Payment.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100).lean();
@@ -673,6 +665,7 @@ app.get("/api/payments/history", requireAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ success: false, message: "Could not load payment history." }); }
 });
 
+// Public historical performance summary. Only settled tips count in the win-rate denominator.
 app.get("/api/stats/performance", async (req, res) => {
   try {
     const rows = await Tip.aggregate([{ $match: { result: { $in: ["Win", "Lose", "Void"] } } }, { $group: { _id: "$type", total: { $sum: 1 }, wins: { $sum: { $cond: [{ $eq: ["$result", "Win"] }, 1, 0] } }, losses: { $sum: { $cond: [{ $eq: ["$result", "Lose"] }, 1, 0] } }, voids: { $sum: { $cond: [{ $eq: ["$result", "Void"] }, 1, 0] } } } }]);
@@ -682,6 +675,7 @@ app.get("/api/stats/performance", async (req, res) => {
   } catch (err) { res.status(500).json({ success: false, message: "Performance statistics unavailable." }); }
 });
 
+// Admin business overview and payment ledger.
 app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
   try {
     const [users, payments, tips] = await Promise.all([
@@ -715,7 +709,7 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
   try {
     const data = cleanTipInput(req.body);
     const tip = await Tip.create({ ...data, createdBy: req.user._id });
-    await recordAudit(req, "tip.created", "tip", tip._id, `${tip.publicationStatus}: ${tip.type} tip for ${tip.match}`);
+    await recordAudit(req, "tip.created", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
     res.status(201).json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Could not create tip." });
@@ -727,7 +721,7 @@ app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req,
     const data = cleanTipInput(req.body);
     const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true });
     if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
-    await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.publicationStatus}: ${tip.type} tip for ${tip.match}`);
+    await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
     res.json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message || "Could not update tip." });
@@ -741,6 +735,7 @@ app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (r
   res.json({ success: true, message: "Tip deleted." });
 });
 
+// Never allow a user to self-assign the admin role through public registration.
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
   res.sendFile(path.join(__dirname, "public", "index.html"), err => {
@@ -776,6 +771,8 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("MongoDB connected.");
     await bootstrapAdmin();
+    // Sweep immediately at startup and then every minute. Access checks also enforce expiry
+    // synchronously, so an expired member cannot keep VIP access while waiting for this sweep.
     await expireMemberships().catch(err => console.error("Initial membership expiry sweep failed:", err.message));
     const expirySweep = setInterval(() => {
       expireMemberships().catch(err => console.error("Membership expiry sweep failed:", err.message));
