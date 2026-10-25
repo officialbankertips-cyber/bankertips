@@ -417,6 +417,32 @@ main.wrap{padding-top:25px}
 #vipHistoryPanel .history-table th{white-space:nowrap}
 #vipHistoryPanel .vip-history-actions{display:flex;flex-wrap:wrap;gap:10px}
 @media(max-width:600px){#vipHistoryPanel .section-head{align-items:flex-start;gap:12px;flex-wrap:wrap}#vipHistoryPanel .history-day-heading{gap:10px}#vipHistoryPanel .history-table th,#vipHistoryPanel .history-table td{padding:10px 9px}}
+
+
+/* Auto-calculated Total Odds summary — isolated to tips tables */
+.tips-table .total-odds-row,
+.tips-table .total-odds-row:hover{background:transparent!important}
+.tips-table tbody td.total-odds-cell,
+.tips-table tbody .total-odds-row td{
+  border:1px solid #000!important;
+  border-radius:10px!important;
+  background:#e5f5ff!important;
+  color:#123e60!important;
+  padding:14px 16px!important;
+  text-align:right;
+  font-weight:800;
+}
+.tips-table .total-odds-label{display:inline-block;margin-right:12px;color:#315d7c;font-size:.78rem;letter-spacing:.08em}
+.tips-table .total-odds-value{display:inline-flex;align-items:center;justify-content:center;min-width:76px;padding:7px 12px;border:1px solid #000;border-radius:10px;background:#fff;color:#075985;font-size:1rem;font-variant-numeric:tabular-nums}
+@media(max-width:700px){
+ .tips-table tbody .total-odds-row{display:block!important;margin:8px!important;padding:0!important;border:0!important;background:transparent!important}
+ .tips-table tbody .total-odds-row td{display:flex!important;grid-column:auto!important;grid-row:auto!important;align-items:center;justify-content:space-between;gap:8px;border:1px solid #000!important;border-radius:10px!important;padding:12px!important;background:#e5f5ff!important}
+ .tips-table .total-odds-label{margin-right:auto}
+}
+[data-theme=dark] .tips-table tbody .total-odds-row td{background:#17364c!important;color:#d6efff!important}
+[data-theme=dark] .tips-table .total-odds-label{color:#bceaff}
+[data-theme=dark] .tips-table .total-odds-value{background:#102b3d;color:#bceaff}
+
 </style>
 </head>
 <body data-theme="light">
@@ -625,7 +651,13 @@ function renderTipRows(tips, target, withDate=false) {
     showEmpty(target,withDate?6:5,'No tips are available for this date.');
     return;
   }
-  $(target).innerHTML = tips.map(t => `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
+  const rows = tips.map(t => `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
+  const totalOdds = tips.reduce((total, tip) => {
+    const value = Number.parseFloat(String(tip.odds ?? '').replace(/[^0-9.]/g, ''));
+    return total + (Number.isFinite(value) ? value : 0);
+  }, 0);
+  const totalRow = `<tr class="total-odds-row"><td colspan="${withDate?6:5}"><span class="total-odds-label">TOTAL ODDS</span><strong class="total-odds-value">${totalOdds.toFixed(2)}</strong></td></tr>`;
+  $(target).innerHTML = rows + totalRow;
 }
 async function loadFreeTips() {
   const date=todayISO(); $('todayDate').textContent=prettyDate(date);
