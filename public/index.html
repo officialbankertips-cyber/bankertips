@@ -497,64 +497,6 @@ img, video, canvas { max-width: 100%; height: auto; }
 .auth-modal .msg{font-size:.82rem}
 @media(max-width:650px){.auth-modal{padding:10px}.auth-modal .auth-modal-box{width:min(500px,100%);max-height:94vh;border-radius:22px}.auth-layout{display:flex;flex-direction:column;max-height:94vh;min-height:0;overflow:auto}.auth-content{order:1;padding:25px 20px 24px;overflow:visible}.auth-side{display:none}.auth-mobile-brand{display:flex}.auth-switch-mobile{display:block}.auth-content h2{font-size:1.75rem}.auth-content .reg-plan-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.auth-content .reg-plan{padding:10px 5px}.auth-content .reg-plan strong{font-size:.75rem}.auth-content .reg-plan small{font-size:.68rem}.auth-content .reg-price-note{font-size:.72rem}.auth-content .flow-footnote{font-size:.7rem}.auth-content .auth-submit{font-size:.84rem;padding:12px 10px}.auth-modal .close{right:10px;top:10px}}
 @media(prefers-reduced-motion:reduce){.auth-modal .auth-modal-box{transition:none}}
-
-
-/* Banker Tips unified match-card table redesign — Free, Premium and both history views */
-.tips-table{border-spacing:0 0!important;border-collapse:separate!important;background:transparent}
-.card:has(>.table-scroll:has(.tips-table)){overflow:hidden;border-radius:20px;border:1px solid #e1edf8;background:linear-gradient(180deg,#fff,#fafdff);box-shadow:0 10px 28px rgba(12,73,124,.065)}
-.tips-table thead th{background:#edf6ff!important;color:#52718b!important;border-bottom:1px solid #dcecf8!important;font-size:.7rem;letter-spacing:.075em;padding:14px 13px}
-.tips-table tbody tr{background:#f8fcff!important;transition:background .18s ease,transform .18s ease}
-.tips-table tbody tr:nth-child(even){background:#eff8ff!important}
-.tips-table tbody td{border-top:1px solid #e0edf8!important;border-bottom:1px solid #e0edf8!important;padding:15px 13px!important;color:#243c55}
-.tips-table tbody td:first-child{border-left:5px solid #086bff!important;border-radius:11px 0 0 11px;color:#637b94;font-variant-numeric:tabular-nums}
-.tips-table tbody td:last-child{border-right:1px solid #e0edf8!important;border-radius:0 11px 11px 0}
-.tips-table .match{color:#102448;font-weight:800;letter-spacing:-.025em}
-.tips-table .odds{display:inline-flex;align-items:center;justify-content:center;min-width:68px;padding:8px 11px!important;border:1px solid #c5e5ff!important;border-radius:12px!important;background:#dff1ff!important;color:#0757a6!important;font-size:.95rem;font-weight:900;font-variant-numeric:tabular-nums}
-.tips-table .status{display:inline-flex;align-items:center;justify-content:center;min-width:84px;padding:7px 10px!important;border-radius:11px!important;font-size:.76rem;font-weight:900;white-space:nowrap}
-.tips-table .won{background:#c9f7d2!important;color:#087b32!important}
-.tips-table .pending{background:#ffeba8!important;color:#9a5b00!important}
-.tips-table .lost{background:#ffe0e0!important;color:#b42323!important}
-.tips-table .void{background:#e9eef5!important;color:#536579!important}
-.tips-table tbody tr:hover{background:#e8f5ff!important}
-.tips-table .total-odds-row td{border:1px solid #0a4f91!important;border-radius:0!important;background:linear-gradient(110deg,#063d7c,#087cc5)!important;color:#fff!important;padding:12px 14px!important}
-.tips-table .total-odds-label{color:#e4f3ff!important;font-size:.78rem;font-weight:900;letter-spacing:.06em}
-.tips-table .total-odds-value{min-width:78px;padding:7px 12px;border:1px solid #d8ebfb;border-radius:12px;background:#fff;color:#0759a4;font-weight:900}
-.history-day-card .tips-table tbody tr{margin:0 0 8px}
-[data-theme=dark] .card:has(.tips-table){background:var(--surface);border-color:var(--line)}
-[data-theme=dark] .tips-table thead th{background:#17334d!important;color:#b8d9f1!important;border-color:var(--line)!important}
-[data-theme=dark] .tips-table tbody tr,[data-theme=dark] .tips-table tbody tr:nth-child(even){background:#13283d!important}
-[data-theme=dark] .tips-table tbody td{color:#d8e8f7;border-color:#29445c!important}
-[data-theme=dark] .tips-table .match{color:#f0f7ff}
-[data-theme=dark] .tips-table .odds{background:#183d5a!important;color:#a9ddff!important;border-color:#2b648a!important}
-[data-theme=dark] .tips-table tbody td:first-child{border-left-color:#1682ff!important}
-@media(max-width:700px){
- .card:has(.tips-table){border-radius:19px}
- .tips-table tbody tr{position:relative;display:grid!important;grid-template-columns:minmax(0,1fr) 108px!important;grid-template-rows:auto auto auto;align-items:center;gap:5px 10px;padding:13px 13px 13px 15px!important;margin:9px 9px 0!important;width:calc(100% - 18px)!important;border:1px solid #dcecf8!important;border-radius:15px!important;overflow:hidden;box-shadow:0 4px 12px rgba(24,91,145,.045)}
- .tips-table tbody tr:last-child{margin-bottom:9px!important}
- .tips-table tbody td{display:block!important;min-width:0;padding:2px 0!important;border:0!important;border-radius:0!important;background:transparent!important;overflow-wrap:anywhere}
- .tips-table tbody td:first-child{grid-column:1;grid-row:1;border-left:0!important;color:#607a94;font-size:.76rem;font-weight:800}
- .tips-table tbody td:nth-child(2){grid-column:1;grid-row:2;color:#102448;font-size:.98rem;line-height:1.32;font-weight:900;padding:2px 0!important}
- .tips-table tbody td:nth-child(3){grid-column:1;grid-row:3;color:#6b7f96;font-size:.85rem;font-weight:600}
- .tips-table tbody td:nth-child(4){grid-column:2;grid-row:1;justify-self:stretch;align-self:center;text-align:center}
- .tips-table tbody td:nth-child(5){grid-column:2;grid-row:2 / span 2;justify-self:stretch;align-self:center;text-align:center}
- .tips-table .odds{width:100%;min-width:0;font-size:.9rem;padding:8px 6px!important}
- .tips-table .status{width:100%;min-width:0;font-size:.73rem;padding:8px 5px!important;white-space:normal}
- .tips-table.history-table tbody tr{grid-template-columns:minmax(0,1fr) 108px!important}
- .tips-table.history-table tbody td:nth-child(1){grid-column:1;grid-row:1}
- .tips-table.history-table tbody td:nth-child(2){grid-column:1;grid-row:2;color:#102448;font-size:.98rem;font-weight:900}
- .tips-table.history-table tbody td:nth-child(3){grid-column:1;grid-row:3;color:#6b7f96;font-size:.84rem}
- .tips-table.history-table tbody td:nth-child(4){grid-column:1;grid-row:4;color:#6b7f96;font-size:.8rem}
- .tips-table.history-table tbody td:nth-child(5){grid-column:2;grid-row:1 / span 2;align-self:center;justify-self:stretch}
- .tips-table.history-table tbody td:nth-child(6){grid-column:2;grid-row:3 / span 2;align-self:center;justify-self:stretch}
- .tips-table .total-odds-row{display:block!important;margin:0 9px 9px!important}
- .tips-table .total-odds-row td{display:flex!important;align-items:center;justify-content:space-between;gap:10px;padding:12px!important;border-radius:12px!important}
- .history-day-card .tips-table tbody tr{margin:8px!important;width:calc(100% - 16px)!important}
-}
-@media(max-width:370px){
- .tips-table tbody tr{grid-template-columns:minmax(0,1fr) 88px!important;gap:5px 7px;padding:12px 10px 12px 13px!important}
- .tips-table .status{font-size:.68rem;padding:7px 4px!important}
-}
-
 </style>
 </head>
 <body data-theme="light">
