@@ -452,6 +452,40 @@ img, video, canvas { max-width: 100%; height: auto; }
   .card { padding-left: 12px; padding-right: 12px; }
   button, .btn { max-width: 100%; white-space: normal; }
 }
+
+
+/* Unified rounded table redesign: Free Tips, Premium Tips, History and admin tables */
+table{border-collapse:separate!important;border-spacing:5px!important;width:100%;}
+th,td{border:1px solid #111!important;border-radius:10px!important;overflow-wrap:anywhere;}
+th{padding:clamp(8px,1.8vw,14px)!important;font-size:clamp(.68rem,1.6vw,.8rem)!important;}
+td{padding:clamp(8px,1.8vw,14px)!important;font-size:clamp(.78rem,1.8vw,.94rem)!important;}
+.tips-table{border-spacing:5px!important;}
+.tips-table thead th{border:1px solid #111!important;border-radius:10px!important;}
+.tips-table tbody td{border:1px solid #111!important;border-radius:10px!important;}
+/* Fluid typography adapts continuously to viewport width */
+html{font-size:clamp(14px, calc(13px + .25vw), 17px);}
+body{font-size:clamp(.9rem, .82rem + .25vw, 1rem);}
+h1{font-size:clamp(1.65rem, 1.2rem + 2.2vw, 2.7rem)!important;}
+h2{font-size:clamp(1.15rem, 1rem + .9vw, 1.65rem);}
+h3{font-size:clamp(1rem, .92rem + .45vw, 1.25rem);}
+p,li,label,.notice,.subtext{font-size:clamp(.82rem, .78rem + .18vw, .95rem);}
+button,.btn,input,select,textarea{font-size:clamp(.9rem, .84rem + .2vw, 1rem);}
+input,select,textarea{font-size:16px!important;}
+img,video,iframe{max-width:100%;}
+@media(max-width:700px){
+  .table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  /* Preserve the existing mobile card layout while giving every cell its own rounded border. */
+  .tips-table tbody tr{border:0!important;border-radius:12px;}
+  .tips-table tbody td{padding:6px 8px!important;min-width:0;}
+  .tips-table thead th{font-size:clamp(.68rem,2.5vw,.78rem)!important;}
+  .wrap{width:calc(100% - 20px);}
+}
+@media(max-width:360px){
+  .tips-table tbody tr{padding:10px 8px;gap:2px 8px;}
+  .tips-table tbody td{font-size:clamp(.75rem,3.2vw,.86rem)!important;}
+  .brand-name{font-size:1rem;}
+}
+
 </style>
 </head>
 <body data-theme="light">
