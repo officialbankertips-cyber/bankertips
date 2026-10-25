@@ -38,6 +38,13 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}
 .visitor-counter-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:5px;width:min(100%,1080px);margin:0 auto 18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,var(--surface),var(--soft));text-align:right}
 .visitor-counter-title{display:flex;align-items:center;justify-content:flex-end;gap:8px;color:var(--ink);font-size:.8rem;font-weight:800;letter-spacing:.01em}
 .visitor-counter-title i{color:var(--blue);font-size:.95rem}
+.visitor-counter-description,.visitor-counter-help{margin:0;color:var(--muted);font-size:.76rem;line-height:1.5}
+.visitor-counter-widget{min-height:34px;padding:5px 0}
+.admin-visitor-counter{align-items:flex-start;text-align:left;margin:16px 0;padding:18px}
+.admin-visitor-counter .visitor-counter-title,.admin-visitor-counter .visitor-counter-widget{justify-content:flex-start}
+.admin-visitor-counter .visitor-counter-credit{margin-top:2px}
+.admin-visitor-counter .visitor-counter-help{max-width:720px}
+#adminPanel:not(.active) .admin-visitor-counter{display:none}
 .visitor-counter-widget{display:flex;align-items:center;justify-content:flex-end;max-width:100%;min-height:24px;overflow-wrap:anywhere}
 .visitor-counter-credit{font-size:.65rem;color:var(--muted);text-decoration:none;opacity:.8}
 .visitor-counter-credit:hover{text-decoration:underline;opacity:1}
@@ -544,6 +551,16 @@ img, video, canvas { max-width: 100%; height: auto; }
 
  <section class="panel" id="adminPanel">
   <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div>
+  <div class="visitor-counter-wrap admin-visitor-counter" aria-label="Website visitor counter">
+   <div class="visitor-counter-title"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Website Visitor Counter</span></div>
+   <p class="visitor-counter-description">Visitor statistics from FreeVisitorCounters.com. This panel is visible only inside the Admin Panel.</p>
+   <div class="visitor-counter-widget" id="visitorCounterWidget">
+    <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=2e5d2ff2b1910be4040d2babe883efdbdfcdf108"></script>
+    <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1685006/t/1"></script>
+   </div>
+   <a class="visitor-counter-credit" href="https://www.versicherungen.at/tier-krankenversicherung/" target="_blank" rel="noopener noreferrer">Tier-Krankenversicherung</a>
+   <p class="visitor-counter-help">If no number appears, check whether your browser blocks third-party scripts or verify the counter code in your FreeVisitorCounters account.</p>
+  </div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
@@ -566,14 +583,6 @@ img, video, canvas { max-width: 100%; height: auto; }
  </section>
 </main>
 <footer>
-  <div class="visitor-counter-wrap" aria-label="Website visitor counter">
-    <div class="visitor-counter-title"><i class="fa-solid fa-chart-line" aria-hidden="true"></i><span>Banker Tips Visitors</span></div>
-    <div class="visitor-counter-widget" id="visitorCounterWidget">
-      <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=2e5d2ff2b1910be4040d2babe883efdbdfcdf108"></script>
-      <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1685006/t/1"></script>
-    </div>
-    <a class="visitor-counter-credit" href="https://www.versicherungen.at/tier-krankenversicherung/" target="_blank" rel="noopener noreferrer">Tier-Krankenversicherung</a>
-  </div>
   © Copyright <span id="year"></span> | Banker Tips - Rights reserved.
 </footer>
 <a class="whatsapp-float" href="https://wa.me/254101047400?text=Hello%20Banker%20Tips%20Support%2C%20I%20need%20assistance." target="_blank" rel="noopener noreferrer" aria-label="Chat with Banker Tips support on WhatsApp" title="WhatsApp Support"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i><span class="whatsapp-label">WhatsApp Support</span></a>
