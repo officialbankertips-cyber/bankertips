@@ -754,12 +754,23 @@ app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (r
   res.json({ success: true, message: "Tip deleted." });
 });
 
-// Never allow a user to self-assign the admin role through public registration.
-app.get(/.*/, (req, res, next) => {
-  if (req.path.startsWith("/api/")) return next();
+// Independent frontend URLs. Keep API endpoints outside this fallback so API misses remain JSON/404 responses.
+const FRONTEND_ROUTES = new Set([
+  "/", "/register", "/login", "/free-tips", "/free-tips-history",
+  "/vip-packages", "/subscription", "/my-account", "/payment-history", "/checkout",
+  "/contact", "/premium-tips", "/vip-tips-history", "/admin"
+]);
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api/") || req.path.includes(".")) return next();
+  if (!FRONTEND_ROUTES.has(req.path)) return res.status(404).type("text").send("404 — Page not found");
+  res.set("Cache-Control", "no-cache");
   res.sendFile(path.join(__dirname, "public", "index.html"), err => {
-    if (err) res.status(404).send("Frontend not found. Add your Banker Tips HTML to the public folder.");
+    if (err && !res.headersSent) res.status(404).type("text").send("Frontend not found. Add Banker Tips HTML to the public folder.");
   });
+});
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/")) return res.status(404).json({ success: false, message: "API endpoint not found." });
+  next();
 });
 
 async function bootstrapAdmin() {
