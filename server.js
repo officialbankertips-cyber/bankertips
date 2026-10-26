@@ -495,7 +495,7 @@ app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, re
   try {
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP subscription." });
     const packageKey = String(req.body.selectedPackage || "").toLowerCase();
-    if (!Object.prototype.hasOwnProperty.call(PACKAGE_PRICES, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
+    if (!Object.prototype.hasOwnProperty.call(PACKAGE_DAYS, packageKey) || !Number.isFinite(packagePriceFor(req.user.country === "TZ" ? "TZ" : "KE", packageKey))) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
     req.user.selectedPackage = packageKey;
     if (req.user.membershipStatus === "active" && req.user.vipExpiresAt && new Date(req.user.vipExpiresAt) <= new Date()) {
       req.user.membershipStatus = "expired"; req.user.isActivated = false;
@@ -517,7 +517,7 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
     const config = countryPaymentConfig(country);
     if (!config.ready) return res.status(503).json({ success: false, message: `${country === "TZ" ? "Tanzania" : "Kenya"} payment gateway is not configured yet. Please contact support.` });
     const packageKey = req.user.selectedPackage;
-    if (!PACKAGE_PRICES[packageKey]) return res.status(400).json({ success: false, message: "Choose a VIP package before paying." });
+    if (!Object.prototype.hasOwnProperty.call(PACKAGE_DAYS, packageKey) || !Number.isFinite(packagePriceFor(country, packageKey)) || packagePriceFor(country, packageKey) <= 0) return res.status(400).json({ success: false, message: "Choose a VIP package before paying." });
     const phone = country === "TZ" ? normalizeTanzanianPhone(req.body.phone || req.user.phoneNumber) : normalizeKenyanPhone(req.body.phone || req.user.phoneNumber);
     if (!phone) return res.status(400).json({ success: false, message: country === "TZ" ? "Enter a valid Tanzanian mobile number, e.g. 0712345678 or 255712345678." : "Enter a valid Kenyan M-Pesa number, e.g. 0712345678 or 254712345678." });
     const reference = `BT${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString("hex").toUpperCase()}`.slice(0, 30);
