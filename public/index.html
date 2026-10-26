@@ -539,6 +539,41 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
 @media(min-width:701px){
   html{font-size:16px}
 }
+
+/* Professional registration, login and checkout refinement */
+.auth-modal{padding:clamp(10px,3vw,24px);overscroll-behavior:contain}
+.auth-modal .auth-modal-box{width:min(900px,100%);max-height:min(92dvh,900px);padding:0;overflow:auto;border:1px solid #dbe5f0;border-radius:24px;background:#fff;color:#17263b;box-shadow:0 28px 90px rgba(4,24,48,.28);overscroll-behavior:contain}
+.auth-layout{min-height:520px}
+.auth-content{padding:clamp(24px,4vw,42px)}
+.auth-content form{display:flex;flex-direction:column;gap:0}
+.auth-content .field{margin-top:13px!important;gap:7px}
+.auth-content .field label{font-size:.72rem;letter-spacing:.07em;color:#52657d}
+.auth-content .field input,.auth-content .field select{min-height:48px;background:#f8fafc;border:1px solid #d8e2ee;border-radius:12px;padding:12px 14px;color:#17263b;transition:border-color .18s,box-shadow .18s}
+.auth-content .field input:focus,.auth-content .field select:focus{border-color:#1686cf;box-shadow:0 0 0 4px rgba(22,134,207,.13);outline:0}
+.auth-content .reg-price-note{border-radius:12px;background:#f0f7ff;border-color:#d7e9fb;color:#3e5a78;line-height:1.55}
+.auth-content .reg-plan-grid{margin:9px 0 4px}
+.auth-content .reg-plan{position:relative;min-height:100px;padding:13px 10px;border:1.5px solid #dbe4ee;border-radius:14px;background:#fff;transition:transform .16s,border-color .16s,background .16s,box-shadow .16s}
+.auth-content .reg-plan:hover{transform:translateY(-1px);border-color:#78b9e5}
+.auth-content .reg-plan.selected{border:2px solid #0879c9;background:#edf7ff;box-shadow:0 0 0 3px rgba(8,121,201,.10)}
+.auth-content .reg-plan.selected:after{content:"✓";position:absolute;right:8px;top:7px;width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:#0879c9;color:#fff;font-size:.72rem;font-weight:900}
+.auth-content .reg-plan strong{font-size:.84rem;color:#182d46;padding-right:12px}
+.auth-content .reg-plan small{font-size:.72rem}
+.auth-content .reg-plan small:first-of-type{font-size:.88rem;color:#0879c9;font-weight:900}
+.auth-content .auth-submit{min-height:49px;margin-top:17px;border-radius:13px}
+.auth-content .auth-submit:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.15);transform:none}
+.auth-content .msg{margin-top:12px;line-height:1.5}
+.auth-content .flow-footnote{margin-top:12px;line-height:1.55}
+.auth-modal .close{position:sticky;float:right;z-index:5;top:12px;right:12px;margin:12px -4px -48px 0;width:38px;height:38px;background:#f4f7fb;border-radius:12px;box-shadow:0 2px 8px rgba(20,40,70,.08)}
+.modal.open .modal-box{transform:none}
+.modal{overscroll-behavior:contain}
+@media(max-width:650px){
+ .auth-modal{align-items:flex-start;padding:8px}
+ .auth-modal .auth-modal-box{width:100%;max-height:calc(100dvh - 16px);border-radius:20px}
+ .auth-layout{min-height:0}
+ .auth-content{padding:24px 18px 22px}
+ .auth-content .reg-plan{min-height:92px}
+}
+
 </style>
 </head>
 <body data-theme="light">
@@ -662,6 +697,7 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
 'use strict';
 const API_BASE = ''; // Set to your backend origin only if API is hosted separately; configure CORS + cookies there.
 const $ = (id) => document.getElementById(id);
+let registrationPackage = '';
 // Fail-safe registration modal opener: this is registered before the rest of the
 // page initialisation so an unrelated widget error cannot disable the Register button.
 document.addEventListener('click', function(event) {
@@ -1036,7 +1072,7 @@ async function handleAuthButton(){
 async function handleRegister(event) {
   event.preventDefault(); hideMessage('registerMessage');
   const email=$('regEmail').value.trim(), rawPhone=$('regPhone').value.trim(), password=$('regPassword').value;
-  const selectedPackage=$('selectedPackage').value;
+  const selectedPackage=String($('selectedPackage')?.value || registrationPackage || '').toLowerCase();
   if(!['daily','weekly','monthly'].includes(selectedPackage)) return showMessage('registerMessage','Please select a VIP subscription package.','error');
   if(password.length<10) return showMessage('registerMessage','Use a password with at least 10 characters.','error');
   const digits=rawPhone.replace(/[\s()+-]/g,'');
@@ -1067,10 +1103,25 @@ async function handleRegister(event) {
 }
 function updateRegistrationFlow(){
   const phone=$('regPhone');
-  phone.placeholder='0712345678 or 254712345678';
-  $('regPhoneHelp').textContent='Enter a Kenyan mobile number, e.g. 0712345678.';
-  document.querySelectorAll('[data-reg-package]').forEach(b=>b.classList.toggle('selected',b.dataset.regPackage===registrationPackage));
-  $('selectedPackage').value=registrationPackage;
+  if(phone) phone.placeholder='0712345678 or 254712345678';
+  const phoneHelp=$('regPhoneHelp');
+  if(phoneHelp) phoneHelp.textContent='Enter a Kenyan mobile number, e.g. 0712345678.';
+  const selectedField=$('selectedPackage');
+  if(selectedField) selectedField.value=registrationPackage;
+  document.querySelectorAll('[data-reg-package]').forEach(button=>{
+    const selected=button.dataset.regPackage===registrationPackage;
+    button.classList.toggle('selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+  });
+  const note=$('regPriceNote');
+  const amount=packagePrices[registrationPackage];
+  if(note){
+    note.innerHTML=amount
+      ? '<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Selected: <strong>'+packageLabel(registrationPackage)+'</strong> — KSh '+amount.toLocaleString('en-KE')+'. You can change your plan before creating your account.'
+      : '<i class="fa-solid fa-circle-info" aria-hidden="true"></i> Select a VIP package. The selected plan and exact amount will be confirmed before payment.';
+  }
+  const submit=$('registerSubmit');
+  if(submit) submit.disabled=!['daily','weekly','monthly'].includes(registrationPackage);
 }
 
 async function handleLogin(event) {
@@ -1195,15 +1246,25 @@ async function adminRowAction(event) {
 }
 
 document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openModal(b.dataset.open)));
-$('registerNavButton').addEventListener('click',()=>{registrationPackage='';updateRegistrationFlow();setPanel('freePanel');openModal('registerModal')});
+$('registerNavButton')?.addEventListener('click',()=>{
+  registrationPackage='';
+  updateRegistrationFlow();
+  setPanel('freePanel');
+  openModal('registerModal');
+});
 document.querySelectorAll('[data-switch-auth]').forEach(button=>button.addEventListener('click',()=>{const target=button.dataset.switchAuth;closeModal(target==='login'?'registerModal':'loginModal');if(target==='register'){registrationPackage='';updateRegistrationFlow();}openModal(target==='login'?'loginModal':'registerModal');}));
 
-document.querySelectorAll('[data-reg-package]').forEach(b=>b.addEventListener('click',()=>{registrationPackage=b.dataset.regPackage;updateRegistrationFlow()}));
+document.querySelectorAll('[data-reg-package]').forEach(button=>button.addEventListener('click',()=>{
+  const key=String(button.dataset.regPackage||'').toLowerCase();
+  if(!['daily','weekly','monthly'].includes(key)) return;
+  registrationPackage=key;
+  updateRegistrationFlow();
+}));
 
 $('authNavButton').addEventListener('click',handleAuthButton);
 document.querySelectorAll('.choose-package').forEach(b=>b.addEventListener('click',()=>beginRegistration(b.dataset.package)));
 $('mpesaPaymentForm').addEventListener('submit',handleMpesaPayment);
-document.querySelectorAll('[data-open="registerModal"]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();setPanel('subscriptionPanel')}));
+
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>closeModal(m.id))});
