@@ -16,8 +16,11 @@ const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "banker_tips_session";
 const TOKEN_TTL = "12h";
-const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2";
+const KE_OPTIMAPAY_BASE_URL = process.env.OPTIMAPAY_BASE_URL || "https://optimapaybridge.co.ke/api/v2";
+const TZ_OPTIMAPAY_BASE_URL = process.env.TZ_OPTIMAPAY_BASE_URL || "https://global.optimapaybridge.co.ke/api/v2";
 const PACKAGE_PRICES = Object.freeze({ daily: 150, weekly: 1500, monthly: 3500 });
+const TZ_PACKAGE_PRICES = Object.freeze({ daily: Number(process.env.TZ_DAILY_PRICE || 150), weekly: Number(process.env.TZ_WEEKLY_PRICE || 1500), monthly: Number(process.env.TZ_MONTHLY_PRICE || 3500) });
+function packagePriceFor(country, packageKey) { return country === "TZ" ? TZ_PACKAGE_PRICES[packageKey] : PACKAGE_PRICES[packageKey]; }
 const PACKAGE_DAYS = Object.freeze({ daily: 1, weekly: 7, monthly: 30 });
 const MEMBERSHIP_TIME_ZONE = "Africa/Nairobi";
 const MEMBERSHIP_SWEEP_INTERVAL_MS = 60 * 1000;
@@ -81,6 +84,8 @@ const apiLimiter = rateLimit({
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
   phoneNumber: { type: String, trim: true, maxlength: 30, default: "" },
+  country: { type: String, enum: ["KE", "TZ"], default: "KE", index: true },
+  mobileOperator: { type: String, enum: ["vodacom", "halotel", "airtel", "mixx", "safaricom", "other", ""], default: "" },
   passwordHash: { type: String, required: true, select: false },
   role: { type: String, enum: ["user", "admin"], default: "user", index: true },
   isActivated: { type: Boolean, default: false, index: true },
@@ -117,6 +122,7 @@ const paymentSchema = new mongoose.Schema({
   package: { type: String, enum: ["daily", "weekly", "monthly"], required: true },
   amount: { type: Number, required: true, min: 1 },
   phone: { type: String, required: true },
+  country: { type: String, enum: ["KE", "TZ"], default: "KE", index: true },
   reference: { type: String, required: true, unique: true },
   checkoutRequestId: { type: String, unique: true, sparse: true },
   merchantRequestId: { type: String, default: null },
@@ -151,6 +157,8 @@ function safeUser(user) {
     id: String(user._id),
     email: user.email,
     phoneNumber: user.phoneNumber || "",
+    country: user.country || "KE",
+    mobileOperator: user.mobileOperator || "",
     role: user.role,
     isActivated: Boolean(user.isActivated),
     membershipStatus: user.membershipStatus || (user.isActivated ? "active" : "pending_approval"),
@@ -332,16 +340,30 @@ function normalizeKenyanPhone(value) {
   if (!/^254[17]\d{8}$/.test(phone)) return null;
   return phone;
 }
-function paymentConfigReady() {
-  const accountId = Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID);
-  return Boolean(process.env.OPTIMAPAY_API_KEY && process.env.OPTIMAPAY_API_SECRET && Number.isInteger(accountId) && accountId > 0);
+function normalizeTanzanianPhone(value) {
+  let phone = String(value || "").replace(/[\s()-]/g, "");
+  if (phone.startsWith("+")) phone = phone.slice(1);
+  if (/^0[67]\d{8}$/.test(phone)) phone = "255" + phone.slice(1);
+  if (!/^255[67]\d{8}$/.test(phone)) return null;
+  return phone;
 }
-async function optimapayPost(endpoint, payload) {
-  const response = await fetch(`${OPTIMAPAY_BASE_URL}/${endpoint}`, {
+function countryPaymentConfig(country) {
+  const tz = country === "TZ";
+  const prefix = tz ? "TZ_OPTIMAPAY" : "OPTIMAPAY";
+  const key = process.env[`${prefix}_API_KEY`];
+  const secret = process.env[`${prefix}_API_SECRET`];
+  const accountId = Number(process.env[`${prefix}_PAYMENT_ACCOUNT_ID`]);
+  const baseUrl = (tz ? TZ_OPTIMAPAY_BASE_URL : KE_OPTIMAPAY_BASE_URL).replace(/\/+$/, "");
+  return { key, secret, accountId, baseUrl, ready: Boolean(key && secret && Number.isInteger(accountId) && accountId > 0) };
+}
+async function optimapayPost(country, endpoint, payload) {
+  const config = countryPaymentConfig(country);
+  if (!config.ready) throw new Error(`${country === "TZ" ? "Tanzania" : "Kenya"} payments are not configured yet. Please contact support.`);
+  const response = await fetch(`${config.baseUrl}/${endpoint}`, {
     method: "POST",
     headers: {
-      "X-API-Key": process.env.OPTIMAPAY_API_KEY,
-      "X-API-Secret": process.env.OPTIMAPAY_API_SECRET,
+      "X-API-KEY": config.key,
+      "X-API-SECRET": config.secret,
       "Content-Type": "application/json",
       "Accept": "application/json"
     },
@@ -352,15 +374,13 @@ async function optimapayPost(endpoint, payload) {
   try { data = await response.json(); } catch { data = null; }
   if (!response.ok || !data || data.success === false) {
     const message = data && typeof data.message === "string" ? data.message : `OptimaPay request failed (HTTP ${response.status}).`;
-    const error = new Error(message);
-    error.status = response.status;
-    throw error;
+    const error = new Error(message); error.status = response.status; throw error;
   }
   return data;
 }
 async function activatePaidMembership(payment, providerStatus) {
   const reportedAmount = Number(providerStatus.amount);
-  const reportedPhone = normalizeKenyanPhone(providerStatus.phone);
+  const reportedPhone = payment.country === "TZ" ? normalizeTanzanianPhone(providerStatus.phone) : normalizeKenyanPhone(providerStatus.phone);
   if (String(providerStatus.status || "").toLowerCase() !== "completed") return false;
   if (!Number.isFinite(reportedAmount) || reportedAmount !== payment.amount || !reportedPhone || reportedPhone !== payment.phone) {
     payment.status = "verification_error";
@@ -413,8 +433,14 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
   try {
     const email = String(req.body.email || "").trim().toLowerCase();
     const phoneNumber = String(req.body.phoneNumber || "").trim();
+    const country = String(req.body.country || "KE").toUpperCase();
+    const mobileOperator = String(req.body.mobileOperator || "").toLowerCase();
+    const normalizedPhone = country === "TZ" ? normalizeTanzanianPhone(phoneNumber) : country === "KE" ? normalizeKenyanPhone(phoneNumber) : null;
     const password = req.body.password;
     const selectedPackage = String(req.body.selectedPackage || "").toLowerCase();
+    if (!["KE", "TZ"].includes(country)) return res.status(400).json({ success: false, message: "Choose Kenya or Tanzania." });
+    if (!normalizedPhone) return res.status(400).json({ success: false, message: country === "TZ" ? "Enter a valid Tanzanian mobile number, e.g. 0712345678 or 255712345678." : "Enter a valid Kenyan mobile number, e.g. 0712345678 or 254712345678." });
+    if (country === "TZ" && !["vodacom", "halotel", "airtel", "mixx"].includes(mobileOperator)) return res.status(400).json({ success: false, message: "Choose Vodacom, Halotel, Airtel or Mixx for Tanzania." });
     if (!["daily", "weekly", "monthly"].includes(selectedPackage)) return res.status(400).json({ success: false, message: "Choose a valid subscription package before registering." });
     if (!validEmail(email)) return res.status(400).json({ success: false, message: "Enter a valid email address." });
     if (typeof password !== "string" || password.length < 10 || password.length > 128) {
@@ -424,7 +450,7 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ success: false, message: "An account with that email already exists." });
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await User.create({ email, phoneNumber, passwordHash, role: "user", selectedPackage, isActivated: false, membershipStatus: "pending_approval", vipExpiresAt: null });
+    const user = await User.create({ email, phoneNumber: normalizedPhone, country, mobileOperator: country === "TZ" ? mobileOperator : "safaricom", passwordHash, role: "user", selectedPackage, isActivated: false, membershipStatus: "pending_approval", vipExpiresAt: null });
     setSession(res, user);
     res.status(201).json({ success: true, message: "Account created. VIP access remains locked until an administrator activates it.", user: safeUser(user) });
   } catch (err) {
@@ -487,15 +513,17 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
   let payment;
   try {
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP payment." });
-    if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "M-Pesa payments are not configured yet. Please contact support." });
+    const country = req.user.country === "TZ" ? "TZ" : "KE";
+    const config = countryPaymentConfig(country);
+    if (!config.ready) return res.status(503).json({ success: false, message: `${country === "TZ" ? "Tanzania" : "Kenya"} payment gateway is not configured yet. Please contact support.` });
     const packageKey = req.user.selectedPackage;
     if (!PACKAGE_PRICES[packageKey]) return res.status(400).json({ success: false, message: "Choose a VIP package before paying." });
-    const phone = normalizeKenyanPhone(req.body.phone || req.user.phoneNumber);
-    if (!phone) return res.status(400).json({ success: false, message: "Enter a valid Kenyan M-Pesa number, e.g. 0712345678 or 254712345678." });
+    const phone = country === "TZ" ? normalizeTanzanianPhone(req.body.phone || req.user.phoneNumber) : normalizeKenyanPhone(req.body.phone || req.user.phoneNumber);
+    if (!phone) return res.status(400).json({ success: false, message: country === "TZ" ? "Enter a valid Tanzanian mobile number, e.g. 0712345678 or 255712345678." : "Enter a valid Kenyan M-Pesa number, e.g. 0712345678 or 254712345678." });
     const reference = `BT${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString("hex").toUpperCase()}`.slice(0, 30);
-    payment = await Payment.create({ user: req.user._id, package: packageKey, amount: PACKAGE_PRICES[packageKey], phone, reference, status: "initiating" });
-    const provider = await optimapayPost("stkpush.php", {
-      payment_account_id: Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID),
+    payment = await Payment.create({ user: req.user._id, package: packageKey, amount: packagePriceFor(country, packageKey), phone, country, reference, status: "initiating" });
+    const provider = await optimapayPost(country, "stkpush.php", {
+      payment_account_id: config.accountId,
       phone,
       amount: payment.amount,
       reference,
@@ -507,7 +535,7 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
     payment.status = "pending";
     payment.providerMessage = String(provider.message || "STK push sent. Complete the prompt on your phone.").slice(0, 300);
     await payment.save();
-    res.status(202).json({ success: true, message: "STK Push sent. Enter your M-Pesa PIN on your phone, then wait while we verify the payment.", paymentId: String(payment._id), amount: payment.amount, package: payment.package, status: payment.status });
+    res.status(202).json({ success: true, message: country === "TZ" ? "Mobile-money payment prompt sent. Complete it on your phone, then wait while we verify the payment." : "STK Push sent. Enter your M-Pesa PIN on your phone, then wait while we verify the payment.", paymentId: String(payment._id), amount: payment.amount, package: payment.package, status: payment.status });
   } catch (err) {
     if (payment) {
       payment.status = "failed";
@@ -525,13 +553,13 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
     let payment = await Payment.findOne({ _id: req.params.paymentId, user: req.user._id });
     if (!payment) return res.status(404).json({ success: false, message: "Payment not found." });
     if (payment.status === "pending" && payment.checkoutRequestId) {
-      if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
+      if (!countryPaymentConfig(payment.country || "KE").ready) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
       // Claim the pending record atomically so concurrent polls cannot activate the same purchase twice.
       const claimed = await Payment.findOneAndUpdate({ _id: payment._id, status: "pending" }, { $set: { status: "verifying" } }, { new: true });
       if (claimed) {
         payment = await Payment.findById(payment._id);
         try {
-          const provider = await optimapayPost("status.php", { checkout_request_id: payment.checkoutRequestId });
+          const provider = await optimapayPost(payment.country || "KE", "status.php", { checkout_request_id: payment.checkoutRequestId });
           const status = String(provider.status || "").toLowerCase();
           if (status === "completed") {
             await activatePaidMembership(payment, provider);
