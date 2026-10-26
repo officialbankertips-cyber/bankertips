@@ -19,7 +19,7 @@ const TOKEN_TTL = "12h";
 const KE_OPTIMAPAY_BASE_URL = process.env.OPTIMAPAY_BASE_URL || "https://optimapaybridge.co.ke/api/v2";
 const TZ_OPTIMAPAY_BASE_URL = process.env.TZ_OPTIMAPAY_BASE_URL || "https://global.optimapaybridge.co.ke/api/v2";
 const PACKAGE_PRICES = Object.freeze({ daily: 150, weekly: 1500, monthly: 3500 });
-const TZ_PACKAGE_PRICES = Object.freeze({ daily: Number(process.env.TZ_DAILY_PRICE || 150), weekly: Number(process.env.TZ_WEEKLY_PRICE || 1500), monthly: Number(process.env.TZ_MONTHLY_PRICE || 3500) });
+const TZ_PACKAGE_PRICES = Object.freeze({ daily: Number(process.env.TZ_DAILY_PRICE || 7000), weekly: Number(process.env.TZ_WEEKLY_PRICE || 35000), monthly: Number(process.env.TZ_MONTHLY_PRICE || 80000) });
 function packagePriceFor(country, packageKey) { return country === "TZ" ? TZ_PACKAGE_PRICES[packageKey] : PACKAGE_PRICES[packageKey]; }
 const PACKAGE_DAYS = Object.freeze({ daily: 1, weekly: 7, monthly: 30 });
 const MEMBERSHIP_TIME_ZONE = "Africa/Nairobi";
