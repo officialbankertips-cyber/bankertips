@@ -1050,9 +1050,10 @@ async function handleAuthButton(){
 async function handleRegister(event) {
   event.preventDefault(); hideMessage('registerMessage');
   const email=$('regEmail').value.trim(), rawPhone=$('regPhone').value.trim(), password=$('regPassword').value;
-  const selectedPackage=$('selectedPackage').value, country=$('regCountry').value || 'KE';
+  const selectedPackage=$('selectedPackage').value || registrationPackage || (document.querySelector('[data-reg-package].selected')?.dataset.regPackage || ''), country=$('regCountry').value || 'KE';
   const mobileOperator=$('regOperator').value;
   if(!['daily','weekly','monthly'].includes(selectedPackage)) return showMessage('registerMessage','Please select a VIP subscription package.','error');
+  registrationPackage = selectedPackage; $('selectedPackage').value = selectedPackage;
   if(password.length<10) return showMessage('registerMessage','Use a password with at least 10 characters.','error');
   const digits=rawPhone.replace(/[\s()+-]/g,'');
   const validPhone=country==='TZ'?/^(?:0[67]\d{8}|255[67]\d{8})$/.test(digits):/^(?:0[17]\d{8}|254[17]\d{8})$/.test(digits);
@@ -1209,8 +1210,30 @@ document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',(
 $('registerNavButton').addEventListener('click',()=>{registrationPackage='';updateRegistrationFlow();setPanel('freePanel');openModal('registerModal')});
 document.querySelectorAll('[data-switch-auth]').forEach(button=>button.addEventListener('click',()=>{const target=button.dataset.switchAuth;closeModal(target==='login'?'registerModal':'loginModal');if(target==='register'){registrationPackage='';updateRegistrationFlow();}openModal(target==='login'?'loginModal':'registerModal');}));
 
-document.querySelectorAll('[data-reg-package]').forEach(b=>b.addEventListener('click',()=>{registrationPackage=b.dataset.regPackage;updateRegistrationFlow()}));
-document.querySelectorAll('[data-reg-country]').forEach(b=>b.addEventListener('click',()=>{$('regCountry').value=b.dataset.regCountry;updateRegistrationFlow()}));
+// Delegated registration controls: reliably capture taps on mobile, including taps on nested labels/icons.
+document.addEventListener('click', event => {
+  const packageButton = event.target && event.target.closest ? event.target.closest('[data-reg-package]') : null;
+  if (packageButton) {
+    event.preventDefault();
+    const key = packageButton.dataset.regPackage;
+    if (['daily', 'weekly', 'monthly'].includes(key)) {
+      registrationPackage = key;
+      const selected = $('selectedPackage');
+      if (selected) selected.value = key;
+      updateRegistrationFlow();
+    }
+    return;
+  }
+  const countryButton = event.target && event.target.closest ? event.target.closest('[data-reg-country]') : null;
+  if (countryButton) {
+    event.preventDefault();
+    const country = countryButton.dataset.regCountry;
+    if (['KE', 'TZ'].includes(country)) {
+      $('regCountry').value = country;
+      updateRegistrationFlow();
+    }
+  }
+});
 
 $('authNavButton').addEventListener('click',handleAuthButton);
 document.querySelectorAll('.choose-package').forEach(b=>b.addEventListener('click',()=>beginRegistration(b.dataset.package)));
