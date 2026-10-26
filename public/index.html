@@ -593,6 +593,11 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
   </div>
  </div>
 </header>
+<div class="route-page-loading" id="routeLoadingBar" hidden aria-hidden="true"></div>
+<nav class="route-nav" id="routeNav" aria-label="Main pages">
+ <a href="/" data-route="/">Home</a><a href="/free-tips" data-route="/free-tips">Free Tips</a><a href="/free-tips-history" data-route="/free-tips-history">Tips History</a><a href="/vip-packages" data-route="/vip-packages">VIP Packages</a><a href="/subscription" data-route="/subscription">Subscription</a><a href="/my-account" data-route="/my-account">My Account</a><a href="/payment-history" data-route="/payment-history">Payments</a><a href="/contact" data-route="/contact">Contact</a>
+</nav>
+
 <main class="wrap">
  <section class="hero">
   <div><div class="eyebrow"><i class="fa-solid fa-chart-line"></i> DAILY MATCH INTELLIGENCE</div><h1>Best!<br>Soccer Predictions</h1><p>Your daily destination for football selections, match analysis and transparent results. Review every pick and make your own informed decisions.</p><button class="btn" id="heroVip"><i class="fa-solid fa-crown"></i> Access VIP Tips</button></div>
@@ -1088,7 +1093,7 @@ async function handleRegister(event) {
   try {
     const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email,phoneNumber,password,selectedPackage,country:'KE'})});
     currentUser=data.user||null; updateAccountUI(); $('registerForm').reset();
-    closeModal('registerModal'); setPanel('paymentPanel'); updatePaymentUI();
+    closeModal('registerModal'); if(window.navigateBankerTips) window.navigateBankerTips('/checkout'); else setPanel('paymentPanel'); updatePaymentUI();
     const phone=$('mpesaPhone'); if(phone) phone.value=phoneNumber;
     const note=$('mpesaPaymentNotice'); if(note) note.textContent='Account created. Your '+packageLabel(selectedPackage)+' is selected. Confirm the KSh amount and complete the M-Pesa prompt; VIP access activates only after verified payment.';
 
@@ -1132,9 +1137,15 @@ async function handleLogin(event) {
     currentUser=data.user||null;
     if(!currentUser) await checkSession(); else updateAccountUI();
     $('loginForm').reset(); closeModal('loginModal');
-    if(currentUser?.role?.toLowerCase()==='admin') showMessage('loginMessage','Signed in successfully. Admin access is available.','ok');
-    if(data.isActivated || currentUser?.isActivated) { setPanel('premiumPanel'); await loadPremium(); }
-    else { setPanel('freePanel'); const n=$('freeNotice'); if(n) n.textContent='Login successful. VIP tips remain locked until payment is verified. Open My Account to complete or check payment.'; }
+    if(String(currentUser?.role||'').toLowerCase()==='admin') {
+      if(window.navigateBankerTips) window.navigateBankerTips('/admin'); else setPanel('adminPanel');
+    } else if(data.isActivated || currentUser?.isActivated) {
+      if(window.navigateBankerTips) window.navigateBankerTips('/premium-tips'); else setPanel('premiumPanel');
+      await loadPremium();
+    } else {
+      if(window.navigateBankerTips) window.navigateBankerTips('/my-account'); else setPanel('paymentPanel');
+      const n=$('memberStatusNotice'); if(n) n.textContent='Login successful. VIP tips remain locked until payment is verified. Review your subscription or continue to checkout.';
+    }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
 function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; }
@@ -1321,5 +1332,41 @@ $('adminOverviewReload')?.addEventListener('click',loadAdminOverview);$('payment
 checkSession().then(()=>{renderUserProfile();loadFreeTips();checkExpiryReminder();});
 loadPerformanceStats();
 </script>
+
+<style id="independent-route-styles">
+:root{--route-gold:#d4a72c}.route-nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 auto 12px;max-width:1200px;padding:0 18px}.route-nav a{color:inherit;text-decoration:none;font-size:.82rem;font-weight:700;padding:8px 10px;border-radius:9px;white-space:nowrap}.route-nav a[aria-current="page"]{background:rgba(212,167,44,.16);color:var(--route-gold)}.panel.route-enter{animation:routeEnter .2s ease both}.route-page-title{max-width:1200px;margin:0 auto 14px;padding:0 18px;font-size:clamp(1.25rem,3vw,1.8rem);font-weight:800}.route-page-title:empty{display:none}.route-page-loading{height:3px;position:fixed;top:0;left:0;right:0;z-index:9999;overflow:hidden;pointer-events:none}.route-page-loading:after{content:"";display:block;width:32%;height:100%;background:var(--route-gold);animation:routeLoad .6s ease-in-out infinite alternate}.route-standalone-auth{position:fixed!important;inset:0!important;z-index:1000;overflow:auto;background:var(--bg,#f7f8fa);padding:24px 12px!important;display:none}.route-standalone-auth.open{display:block!important;animation:routeEnter .2s ease both}.route-standalone-auth .modal-box{margin:0 auto;max-height:none;min-height:min-content}.route-standalone-auth .close{display:none}.route-standalone-auth .auth-switch-mobile{display:block}.route-subsection-hidden{display:none!important}.route-standalone-auth .auth-layout{min-height:0}@keyframes routeEnter{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@keyframes routeLoad{from{transform:translateX(-100%)}to{transform:translateX(300%)}}@media(max-width:760px){.route-nav{overflow-x:auto;flex-wrap:nowrap;padding:0 12px 6px;scrollbar-width:thin}.route-nav a{font-size:.75rem}.route-standalone-auth{padding:12px!important}}@media(prefers-reduced-motion:reduce){.panel.route-enter,.route-standalone-auth.open,.route-page-loading:after{animation:none!important;transition:none!important}}
+</style>
+<script>
+(function(){
+ 'use strict';
+ const routes={
+  '/':{panel:'freePanel',title:'Banker Tips — Home'},'/free-tips':{panel:'freePanel',title:'Free Tips — Banker Tips'},'/free-tips-history':{panel:'historyPanel',title:'Free Tips History — Banker Tips'},'/vip-packages':{panel:'subscriptionPanel',title:'VIP Packages — Banker Tips'},'/subscription':{panel:'paymentPanel',section:'membership',title:'Subscription — Banker Tips'},'/my-account':{panel:'paymentPanel',section:'account',title:'My Account — Banker Tips'},'/payment-history':{panel:'paymentPanel',section:'payments',title:'Payment History — Banker Tips'},'/checkout':{panel:'paymentPanel',section:'checkout',title:'Secure Checkout — Banker Tips'},'/contact':{panel:'contact',title:'Contact — Banker Tips'},'/register':{auth:'registerModal',title:'Register — Banker Tips'},'/login':{auth:'loginModal',title:'Login — Banker Tips'},'/premium-tips':{panel:'premiumPanel',title:'VIP Tips — Banker Tips'},'/vip-tips-history':{panel:'vipHistoryPanel',title:'VIP Tips History — Banker Tips'},'/admin':{panel:'adminPanel',title:'Admin — Banker Tips'}
+ };
+ let navigating=false;
+ const norm=p=>{p=(p||'/').replace(/\/+$/,'')||'/';return p};
+ function closeRouteModals(){document.querySelectorAll('.modal.open').forEach(m=>{m.classList.remove('open');m.setAttribute('aria-hidden','true')})}
+ function sectionFilter(section){const panel=document.getElementById('paymentPanel');if(!panel)return;const hero=panel.querySelector('.payment-hero');const steps=panel.querySelector('.payment-steps');const profile=panel.querySelector('.profile-card');const membership=panel.querySelector('.membership-card');const payments=panel.querySelector('.payment-history-card');const method=panel.querySelector('.payment-method-card');[hero,steps,profile,membership,payments,method].forEach(el=>{if(el)el.classList.remove('route-subsection-hidden')});if(section==='membership'){[hero,steps,profile,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='payments'){[hero,steps,profile,membership,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='checkout'){[hero,steps,profile,membership,payments].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='account'){[steps,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}}
+ function ensureContact(){let el=document.getElementById('routeContactPage');if(!el){el=document.createElement('section');el.id='routeContactPage';el.className='panel';el.innerHTML='<div class="card pad" style="max-width:760px;margin:0 auto"><span class="eyebrow">BANKER TIPS SUPPORT</span><h1>Contact us</h1><p>For account, subscription or payment assistance, contact the support channel published by Banker Tips. Never share your M-Pesa PIN or password.</p><p>If you have paid, keep your transaction receipt and account email ready when contacting support.</p><p><a class="btn" href="/my-account" data-route="/my-account">Open My Account</a></p></div>';document.querySelector('main')?.appendChild(el)}return el}
+ function routeTo(path,opts={}){path=norm(path);const url=new URL(path,location.origin);const route=routes[url.pathname];if(!route){location.assign('/404');return}if(navigating)return;navigating=true;const loading=document.getElementById('routeLoadingBar');if(loading)loading.hidden=false;
+  closeRouteModals();document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active','route-enter')});const oldContact=document.getElementById('routeContactPage');if(oldContact)oldContact.classList.remove('active');
+  if(route.auth){const modal=document.getElementById(route.auth);if(modal){modal.classList.add('route-standalone-auth');modal.classList.add('open');modal.setAttribute('aria-hidden','false');if(route.auth==='registerModal'){const pkg=url.searchParams.get('package')||url.searchParams.get('plan')||'';if(['daily','weekly','monthly'].includes(pkg)){registrationPackage=pkg;const f=document.getElementById('selectedPackage');if(f)f.value=pkg;updateRegistrationFlow()}else if(!['daily','weekly','monthly'].includes(registrationPackage)){registrationPackage='';updateRegistrationFlow()}}}}
+  else if(route.panel==='contact'){const c=ensureContact();c.classList.add('active','route-enter')}
+  else {if(route.panel==='adminPanel'&&String(currentUser?.role||'').toLowerCase()!=='admin'){routeTo('/login',{replace:true});navigating=false;return}if(typeof setPanel==='function')setPanel(route.panel);const panel=document.getElementById(route.panel);if(panel){panel.classList.add('route-enter');setTimeout(()=>panel.classList.remove('route-enter'),240)}if(route.panel==='paymentPanel')sectionFilter(route.section||'account');else sectionFilter('all')}
+  document.querySelectorAll('[data-route]').forEach(a=>{const active=norm(a.getAttribute('href'))===path;a.toggleAttribute('aria-current',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});document.title=route.title;const nav=document.getElementById('topLinks');if(nav)nav.classList.remove('open');const menu=document.getElementById('menuToggle');if(menu)menu.setAttribute('aria-expanded','false');
+  if(!opts.noHistory){if(opts.replace)history.replaceState({route:path},'',url.pathname+url.search);else history.pushState({route:path},'',url.pathname+url.search)}window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});setTimeout(()=>{if(loading)loading.hidden=true;navigating=false},220);
+ }
+ window.navigateBankerTips=routeTo;
+ document.addEventListener('click',function(e){const link=e.target.closest('a[data-route]');if(link){if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();e.stopImmediatePropagation();routeTo(link.getAttribute('href'));return}const reg=e.target.closest('#registerNavButton');if(reg){e.preventDefault();e.stopImmediatePropagation();routeTo('/register');return}const auth=e.target.closest('#authNavButton');if(auth&&(!auth.dataset.action||auth.dataset.action==='login')){e.preventDefault();e.stopImmediatePropagation();routeTo('/login');return}const brand=e.target.closest('#brandHome');if(brand){e.preventDefault();e.stopImmediatePropagation();routeTo('/');return}const pkg=e.target.closest('.choose-package');if(pkg){const key=pkg.dataset.package;if(['daily','weekly','monthly'].includes(key)){e.preventDefault();if(currentUser){routeTo('/checkout');return}e.stopImmediatePropagation();routeTo('/register?package='+encodeURIComponent(key));return}}const sw=e.target.closest('[data-switch-auth]');if(sw){e.preventDefault();e.stopImmediatePropagation();routeTo(sw.dataset.switchAuth==='login'?'/login':'/register');return}},true);
+ window.addEventListener('popstate',()=>routeTo(location.pathname+location.search,{noHistory:true}));
+ // Password visibility controls are added without changing submitted values.
+ [['regPassword','registerForm'],['loginPassword','loginForm']].forEach(([id,formId])=>{const input=document.getElementById(id);if(!input||input.dataset.visibilityAdded)return;input.dataset.visibilityAdded='1';const btn=document.createElement('button');btn.type='button';btn.className='btn secondary small';btn.textContent='Show password';btn.style.marginTop='8px';btn.setAttribute('aria-controls',id);btn.addEventListener('click',()=>{const show=input.type==='password';input.type=show?'text':'password';btn.textContent=show?'Hide password':'Show password';btn.setAttribute('aria-pressed',String(show))});input.insertAdjacentElement('afterend',btn)});
+ // Successful auth flows now land on meaningful independent URLs.
+ const originalRegister=window.handleRegister; // Existing handlers remain authoritative; URL state is reconciled on navigation.
+ window.addEventListener('load',()=>{document.getElementById('registerModal')?.classList.add('route-auth-ready');document.getElementById('loginModal')?.classList.add('route-auth-ready');routeTo(location.pathname+location.search,{noHistory:true});});
+ // Package selection on the registration form stays in sync with canonical backend keys.
+ document.querySelectorAll('[data-reg-package]').forEach(btn=>btn.addEventListener('click',()=>{registrationPackage=btn.dataset.regPackage;const field=document.getElementById('selectedPackage');if(field)field.value=registrationPackage;updateRegistrationFlow()}));
+})();
+</script>
+
 </body>
 </html>
