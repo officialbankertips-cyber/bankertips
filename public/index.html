@@ -574,6 +574,40 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
  .auth-content .reg-plan{min-height:92px}
 }
 
+
+
+/* Final layout pass: remove the legacy page-link strip and keep VIP tips aligned with Free Tips. */
+#routeNav,.route-nav{display:none!important}
+#premiumPanel .table-scroll{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border-radius:inherit}
+#premiumPanel .tips-table{width:100%;min-width:0!important;max-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:3px 3px;background:var(--surface)}
+#premiumPanel .tips-table thead th{position:static;text-align:center;white-space:normal;overflow-wrap:anywhere;padding:14px 10px}
+#premiumPanel .tips-table th:nth-child(1),#premiumPanel .tips-table td:nth-child(1){width:15%}
+#premiumPanel .tips-table th:nth-child(2),#premiumPanel .tips-table td:nth-child(2){width:31%}
+#premiumPanel .tips-table th:nth-child(3),#premiumPanel .tips-table td:nth-child(3){width:22%}
+#premiumPanel .tips-table th:nth-child(4),#premiumPanel .tips-table td:nth-child(4){width:12%}
+#premiumPanel .tips-table th:nth-child(5),#premiumPanel .tips-table td:nth-child(5){width:20%}
+#premiumPanel .tips-table tbody td{padding:13px 10px;line-height:1.4;vertical-align:middle;overflow-wrap:anywhere}
+#premiumPanel .tips-table .odds,#premiumPanel .tips-table .status{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;justify-content:center;text-align:center}
+#premiumPanel .tips-table .match{line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:700px){
+ #premiumPanel .table-scroll{overflow:visible}
+ #premiumPanel .tips-table{display:block;width:100%;min-width:0!important;border-spacing:0;table-layout:auto}
+ #premiumPanel .tips-table thead{display:none!important}
+ #premiumPanel .tips-table tbody{display:block;width:100%;min-width:0}
+ #premiumPanel .tips-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(76px,auto);grid-template-rows:auto auto auto;align-items:center;gap:5px 10px;width:auto;min-width:0;margin:0;padding:14px 15px;border:0;border-bottom:1px solid var(--table-blue-border,#b8dff1);background:var(--table-blue-pale,#e5f5ff);box-sizing:border-box;overflow:hidden}
+ #premiumPanel .tips-table tbody tr:nth-child(even){background:var(--table-blue-cell,#d8efff)}
+ #premiumPanel .tips-table tbody tr:last-child{border-bottom:0}
+ #premiumPanel .tips-table tbody td{display:block;width:auto;min-width:0;max-width:100%;padding:2px 0!important;margin:0!important;border:0!important;background:transparent!important;line-height:1.4;font-size:.86rem;overflow-wrap:anywhere;box-sizing:border-box}
+ #premiumPanel .tips-table tbody td:nth-child(1){grid-column:1;grid-row:1;color:var(--muted);font-size:.76rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+ #premiumPanel .tips-table tbody td:nth-child(2){grid-column:1;grid-row:2;font-size:.98rem;font-weight:800;color:var(--ink);padding:4px 0!important}
+ #premiumPanel .tips-table tbody td:nth-child(3){grid-column:1;grid-row:3;color:var(--muted);font-size:.82rem;font-weight:700}
+ #premiumPanel .tips-table tbody td:nth-child(4){grid-column:2;grid-row:1;justify-self:end;align-self:center;text-align:center}
+ #premiumPanel .tips-table tbody td:nth-child(5){grid-column:2;grid-row:2 / span 2;justify-self:end;align-self:center;text-align:center}
+ #premiumPanel .tips-table .odds,#premiumPanel .tips-table .status{display:inline-flex;align-items:center;justify-content:center;min-width:0;max-width:100%;padding:7px 9px;font-size:.78rem;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
+ #premiumPanel .tips-table .total-odds-row{display:block;padding:0 14px;background:var(--surface)}
+ #premiumPanel .tips-table .total-odds-row td{display:block;text-align:right;padding:10px 0!important;font-weight:800}
+}
+
 </style>
 </head>
 <body data-theme="light">
@@ -594,9 +628,6 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
  </div>
 </header>
 <div class="route-page-loading" id="routeLoadingBar" hidden aria-hidden="true"></div>
-<nav class="route-nav" id="routeNav" aria-label="Main pages">
- <a href="/" data-route="/">Home</a><a href="/free-tips" data-route="/free-tips">Free Tips</a><a href="/free-tips-history" data-route="/free-tips-history">Tips History</a><a href="/vip-packages" data-route="/vip-packages">VIP Packages</a><a href="/subscription" data-route="/subscription">Subscription</a><a href="/my-account" data-route="/my-account">My Account</a><a href="/payment-history" data-route="/payment-history">Payments</a><a href="/contact" data-route="/contact">Contact</a>
-</nav>
 
 <main class="wrap">
  <section class="hero">
