@@ -608,6 +608,41 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
  #premiumPanel .tips-table .total-odds-row td{display:block;text-align:right;padding:10px 0!important;font-weight:800}
 }
 
+
+/* Final alignment fix: VIP uses the same table/card rules as the Free Tips reference. */
+#premiumPanel .tips-table{width:100%;min-width:0!important;max-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:3px 3px}
+#premiumPanel .tips-table th:first-child,#premiumPanel .tips-table td:first-child{width:17%}
+#premiumPanel .tips-table th:nth-child(2),#premiumPanel .tips-table td:nth-child(2){width:31%}
+#premiumPanel .tips-table th:nth-child(3),#premiumPanel .tips-table td:nth-child(3){width:20%}
+#premiumPanel .tips-table th:nth-child(4),#premiumPanel .tips-table td:nth-child(4){width:12%}
+#premiumPanel .tips-table th:nth-child(5),#premiumPanel .tips-table td:nth-child(5){width:20%}
+#premiumPanel .tips-table tbody td{vertical-align:middle;overflow-wrap:anywhere}
+#premiumPanel .tips-table .match{line-height:1.35;overflow-wrap:anywhere}
+#premiumPanel .tips-table .odds,#premiumPanel .tips-table .status{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#premiumPanel .tips-table .total-odds-row td{padding:12px 14px!important;text-align:right}
+@media(max-width:700px){
+ #premiumPanel .table-scroll{overflow:visible}
+ #premiumPanel .tips-table{display:block;width:100%;min-width:0!important;table-layout:auto;border-spacing:0}
+ #premiumPanel .tips-table thead{display:none!important}
+ #premiumPanel .tips-table,#premiumPanel .tips-table tbody{display:block;width:100%;min-width:0}
+ #premiumPanel .tips-table tbody tr:not(.total-odds-row){display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto auto;align-items:start;gap:0 12px;width:100%;margin:0;padding:15px 16px;border:0;border-bottom:1px solid var(--table-blue-border,#a8d7f0);box-sizing:border-box;overflow:hidden}
+ #premiumPanel .tips-table tbody tr:nth-child(even):not(.total-odds-row){background:var(--table-blue-cell,#d8efff)}
+ #premiumPanel .tips-table tbody td{display:block;min-width:0;max-width:100%;padding:2px 0!important;margin:0!important;border:0!important;background:transparent!important;font-size:.86rem;line-height:1.4;overflow-wrap:anywhere;box-sizing:border-box}
+ #premiumPanel .tips-table tbody td:nth-child(1){grid-column:1;grid-row:1;color:var(--muted);font-size:.76rem;font-weight:800;white-space:normal}
+ #premiumPanel .tips-table tbody td:nth-child(2){grid-column:1;grid-row:2;font-size:.98rem;font-weight:800;line-height:1.35;padding:4px 0 7px!important;color:var(--ink)}
+ #premiumPanel .tips-table tbody td:nth-child(3){grid-column:1;grid-row:3;color:var(--muted);font-size:.82rem;font-weight:700}
+ #premiumPanel .tips-table tbody td:nth-child(4){grid-column:2;grid-row:1 / span 2;justify-self:end;align-self:start;padding-left:4px!important}
+ #premiumPanel .tips-table tbody td:nth-child(5){grid-column:2;grid-row:3;justify-self:end;align-self:center;margin-top:4px!important}
+ #premiumPanel .tips-table .odds{min-width:0;padding:7px 9px;font-size:.84rem}
+ #premiumPanel .tips-table .status{min-width:0;padding:7px 9px;font-size:.76rem}
+ #premiumPanel .tips-table .total-odds-row{display:block!important;padding:0 14px;background:var(--surface)}
+ #premiumPanel .tips-table .total-odds-row td{display:flex!important;align-items:center;justify-content:space-between;gap:8px;padding:12px 0!important;text-align:left}
+ #premiumPanel .tips-table .total-odds-label{margin-right:auto}
+}
+@media(max-width:360px){
+ #premiumPanel .tips-table tbody tr:not(.total-odds-row){padding:13px 11px;gap:0 8px}
+ #premiumPanel .tips-table .status,#premiumPanel .tips-table .odds{padding:6px 7px}
+}
 </style>
 </head>
 <body data-theme="light">
@@ -820,7 +855,15 @@ function setPanel(panelId) {
 function showEmpty(tbodyId, columns, message) {
   $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
 }
-function calculateTotalOdds(tips){return (Array.isArray(tips)?tips:[]).reduce((sum,t)=>{const n=Number.parseFloat(String(t.odds??'').replace(/[^0-9.]/g,''));return sum+(Number.isFinite(n)?n:0);},0);}
+function calculateTotalOdds(tips){
+  const validOdds=(Array.isArray(tips)?tips:[]).map(t=>{
+    const raw=String(t?.odds??'').trim().replace(/,/g,'');
+    if(!raw || raw==='—' || raw==='-' ) return NaN;
+    const n=Number(raw.replace(/[^0-9.]/g,''));
+    return Number.isFinite(n) && n>0 ? n : NaN;
+  }).filter(Number.isFinite);
+  return validOdds.reduce((product,odds)=>product*odds,1);
+}
 function totalOddsRow(tips, columns=5){return `<tr class="total-odds-row"><td colspan="${columns}"><span class="total-odds-label">TOTAL ODDS</span><strong class="total-odds-value">${calculateTotalOdds(tips).toFixed(2)}</strong></td></tr>`;}
 function renderTipRows(tips, target, withDate=false) {
   if (!Array.isArray(tips) || tips.length===0) {
