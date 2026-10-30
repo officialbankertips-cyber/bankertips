@@ -17,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "banker_tips_session";
 const TOKEN_TTL = "12h";
 const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2";
-const PACKAGE_PRICES = Object.freeze({ daily: 150, weekly: 1500, monthly: 3500 });
+let PACKAGE_PRICES = Object.freeze({ daily: 150, weekly: 1500, monthly: 3500 });
 const PACKAGE_DAYS = Object.freeze({ daily: 1, weekly: 7, monthly: 30 });
 const MEMBERSHIP_TIME_ZONE = "Africa/Nairobi";
 const MEMBERSHIP_SWEEP_INTERVAL_MS = 60 * 1000;
@@ -102,6 +102,8 @@ const tipSchema = new mongoose.Schema({
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
+  finalScore: { type: String, trim: true, maxlength: 20, default: "" },
+  isFeatured: { type: Boolean, default: false, index: true },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -127,9 +129,48 @@ const paymentSchema = new mongoose.Schema({
   completedAt: { type: Date, default: null }
 }, { versionKey: false });
 
+
+const fixtureSchema = new mongoose.Schema({
+  date: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/, index: true },
+  homeTeam: { type: String, required: true, trim: true, maxlength: 120 },
+  awayTeam: { type: String, required: true, trim: true, maxlength: 120 },
+  match: { type: String, required: true, trim: true, maxlength: 250 },
+  league: { type: String, trim: true, maxlength: 120, default: "" },
+  kickoffTime: { type: String, trim: true, maxlength: 20, default: "" },
+  status: { type: String, enum: ["Scheduled", "Live", "Finished", "Postponed", "Cancelled"], default: "Scheduled", index: true },
+  homeScore: { type: Number, min: 0, default: null },
+  awayScore: { type: Number, min: 0, default: null },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { versionKey: false });
+
+const packageConfigSchema = new mongoose.Schema({
+  key: { type: String, default: "vip-packages", unique: true },
+  daily: { type: Number, required: true, min: 1, max: 1000000 },
+  weekly: { type: Number, required: true, min: 1, max: 1000000 },
+  monthly: { type: Number, required: true, min: 1, max: 1000000 },
+  updatedAt: { type: Date, default: Date.now }
+}, { versionKey: false });
+
+const announcementSchema = new mongoose.Schema({
+  title: { type: String, required: true, trim: true, maxlength: 120 },
+  body: { type: String, required: true, trim: true, maxlength: 1200 },
+  active: { type: Boolean, default: true, index: true },
+  priority: { type: Number, min: 0, max: 100, default: 0 },
+  startsAt: { type: Date, default: null },
+  endsAt: { type: Date, default: null },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { versionKey: false });
+
 const User = mongoose.model("User", userSchema);
 const Tip = mongoose.model("Tip", tipSchema);
 const Payment = mongoose.model("Payment", paymentSchema);
+const Fixture = mongoose.model("Fixture", fixtureSchema);
+const Announcement = mongoose.model("Announcement", announcementSchema);
+const PackageConfig = mongoose.model("PackageConfig", packageConfigSchema);
 
 const auditLogSchema = new mongoose.Schema({
   actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
@@ -312,7 +353,8 @@ function cleanTipInput(body) {
   if (time && time.length > 20) throw new Error("Invalid match time.");
   return {
     type, date, homeTeam, awayTeam, match, time, tip, odds, result,
-    league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
+    league: String(body.league || "").trim().slice(0,120), notes: String(body.notes || "").trim().slice(0,500),
+    finalScore: String(body.finalScore || "").trim().slice(0,20)
   };
 }
 
@@ -394,6 +436,62 @@ function publicTip(tip) {
   };
 }
 
+
+async function refreshPackagePrices() {
+  const config = await PackageConfig.findOne({ key: "vip-packages" }).lean();
+  if (config) PACKAGE_PRICES = Object.freeze({ daily: config.daily, weekly: config.weekly, monthly: config.monthly });
+  return PACKAGE_PRICES;
+}
+function nairobiTodayISO(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: MEMBERSHIP_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(date);
+  const v = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return `${v.year}-${v.month}-${v.day}`;
+}
+function cleanFixtureInput(body) {
+  const date = String(body.date || "");
+  let homeTeam = String(body.homeTeam || "").trim();
+  let awayTeam = String(body.awayTeam || "").trim();
+  const suppliedMatch = String(body.match || "").trim();
+  if ((!homeTeam || !awayTeam) && suppliedMatch) {
+    const parts = suppliedMatch.split(/\s+(?:vs?\.?)\s+|\s*[-–—]\s*/i);
+    if (parts.length >= 2) { homeTeam ||= parts[0].trim(); awayTeam ||= parts.slice(1).join(" - ").trim(); }
+  }
+  const match = suppliedMatch || `${homeTeam} vs ${awayTeam}`;
+  const status = String(body.status || "Scheduled");
+  const kickoffTime = String(body.kickoffTime || body.time || "").trim();
+  const homeScore = body.homeScore === "" || body.homeScore == null ? null : Number(body.homeScore);
+  const awayScore = body.awayScore === "" || body.awayScore == null ? null : Number(body.awayScore);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) throw new Error("Fixture date must be YYYY-MM-DD.");
+  if (!homeTeam || !awayTeam || homeTeam.length > 120 || awayTeam.length > 120) throw new Error("Enter both home and away teams.");
+  if (!["Scheduled", "Live", "Finished", "Postponed", "Cancelled"].includes(status)) throw new Error("Invalid fixture status.");
+  if (kickoffTime && !/^\d{2}:\d{2}$/.test(kickoffTime)) throw new Error("Kickoff time must use HH:MM.");
+  if (status === "Finished" && (homeScore === null || awayScore === null || !Number.isInteger(homeScore) || !Number.isInteger(awayScore) || homeScore < 0 || awayScore < 0)) {
+    throw new Error("Enter valid final scores for a finished fixture.");
+  }
+  return { date, homeTeam, awayTeam, match, league: String(body.league || "").trim().slice(0,120), kickoffTime, status,
+    homeScore: status === "Finished" ? homeScore : null, awayScore: status === "Finished" ? awayScore : null, updatedAt: new Date() };
+}
+function cleanAnnouncementInput(body) {
+  const title = String(body.title || "").trim();
+  const text = String(body.body || "").trim();
+  const priority = Number(body.priority || 0);
+  if (!title || title.length > 120 || !text || text.length > 1200) throw new Error("Announcement title and message are required (maximum 120 and 1,200 characters).");
+  if (!Number.isInteger(priority) || priority < 0 || priority > 100) throw new Error("Priority must be a whole number from 0 to 100.");
+  const startsAt = body.startsAt ? new Date(body.startsAt) : null;
+  const endsAt = body.endsAt ? new Date(body.endsAt) : null;
+  if (startsAt && Number.isNaN(startsAt.getTime())) throw new Error("Invalid announcement start date.");
+  if (endsAt && Number.isNaN(endsAt.getTime())) throw new Error("Invalid announcement end date.");
+  if (startsAt && endsAt && endsAt <= startsAt) throw new Error("Announcement end must be after its start.");
+  return { title, body: text, active: body.active !== false, priority, startsAt, endsAt, updatedAt: new Date() };
+}
+function performanceSummary(rows) {
+  const total = rows.reduce((a, r) => ({ settled: a.settled + r.total, wins: a.wins + r.wins, losses: a.losses + r.losses, voids: a.voids + r.voids }), { settled: 0, wins: 0, losses: 0, voids: 0 });
+  return { ...total, totalPredictions: total.settled, winRate: total.wins + total.losses ? Math.round(total.wins / (total.wins + total.losses) * 1000) / 10 : null,
+    methodology: "Settled recorded tips only; void tips excluded from win-rate denominator. Pending tips are not included. Historical results do not guarantee future outcomes." };
+}
+
 app.use("/api", apiLimiter);
 
 app.get("/api/health", (req, res) => {
@@ -473,6 +571,7 @@ app.get("/api/auth/me", requireAuth, (req, res) => {
 
 app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, res) => {
   try {
+    await refreshPackagePrices();
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP subscription." });
     const packageKey = String(req.body.selectedPackage || "").toLowerCase();
     if (!Object.prototype.hasOwnProperty.call(PACKAGE_PRICES, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
@@ -491,6 +590,7 @@ app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, re
 app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, res) => {
   let payment;
   try {
+    await refreshPackagePrices();
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP payment." });
     if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "M-Pesa payments are not configured yet. Please contact support." });
     const packageKey = req.user.selectedPackage;
@@ -561,6 +661,45 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
     res.json({ success: true, payment: { id: String(payment._id), package: payment.package, amount: payment.amount, status: payment.status, message: payment.providerMessage, transactionCode: payment.transactionCode }, user: user ? safeUser(user) : undefined });
   } catch (err) {
     res.status(400).json({ success: false, message: "Could not check payment status." });
+  }
+});
+
+
+app.get("/api/public/config", async (req, res) => {
+  try { await refreshPackagePrices(); } catch (err) { console.error("Package config read failed:", err.message); }
+  res.set("Cache-Control", "public, max-age=60");
+  res.json({ success: true, currency: "KES", packages: {
+    daily: { price: PACKAGE_PRICES.daily, days: PACKAGE_DAYS.daily, label: "Daily VIP" },
+    weekly: { price: PACKAGE_PRICES.weekly, days: PACKAGE_DAYS.weekly, label: "Weekly VIP" },
+    monthly: { price: PACKAGE_PRICES.monthly, days: PACKAGE_DAYS.monthly, label: "Monthly VIP" }
+  }, support: { whatsapp: process.env.SUPPORT_WHATSAPP || "", email: process.env.SUPPORT_EMAIL || "", facebook: process.env.SUPPORT_FACEBOOK || "", telegram: process.env.SUPPORT_TELEGRAM || "" } });
+});
+
+app.get("/api/homepage", async (req, res) => {
+  try {
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.date || "")) ? String(req.query.date) : nairobiTodayISO();
+    const now = new Date();
+    const [freeTips, fixtures, featuredTip, latestResults, announcements, rows] = await Promise.all([
+      Tip.find({ type: "free", date, publicationStatus: { $ne: "draft" } }).sort({ time: 1, createdAt: 1 }).limit(100).lean(),
+      Fixture.find({ date }).sort({ kickoffTime: 1, league: 1 }).limit(100).lean(),
+      Tip.findOne({ type: "free", isFeatured: true, publicationStatus: { $ne: "draft" } }).sort({ updatedAt: -1 }).lean(),
+      Tip.find({ type: "free", result: { $in: ["Win", "Lose", "Void"] }, publicationStatus: { $ne: "draft" } }).sort({ date: -1, updatedAt: -1 }).limit(8).lean(),
+      Announcement.find({ active: true, $and: [
+        { $or: [{ startsAt: null }, { startsAt: { $lte: now } }] },
+        { $or: [{ endsAt: null }, { endsAt: { $gte: now } }] }
+      ] }).sort({ priority: -1, createdAt: -1 }).limit(5).lean(),
+      Tip.aggregate([{ $match: { result: { $in: ["Win", "Lose", "Void"] } } }, { $group: { _id: "$type", total: { $sum: 1 }, wins: { $sum: { $cond: [{ $eq: ["$result", "Win"] }, 1, 0] } }, losses: { $sum: { $cond: [{ $eq: ["$result", "Lose"] }, 1, 0] } }, voids: { $sum: { $cond: [{ $eq: ["$result", "Void"] }, 1, 0] } } } }])
+    ]);
+    res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=30");
+    res.json({ success: true, date, freeTips: freeTips.map(publicTip),
+      fixtures: fixtures.map(f => ({ id: String(f._id), date: f.date, homeTeam: f.homeTeam, awayTeam: f.awayTeam, match: f.match, league: f.league, kickoffTime: f.kickoffTime, status: f.status, homeScore: f.homeScore, awayScore: f.awayScore })),
+      featuredTip: featuredTip ? publicTip(featuredTip) : null,
+      latestResults: latestResults.map(publicTip),
+      announcements: announcements.map(a => ({ id: String(a._id), title: a.title, body: a.body, createdAt: a.createdAt })),
+      performance: performanceSummary(rows) });
+  } catch (err) {
+    console.error("Homepage data error:", err.message);
+    res.status(500).json({ success: false, message: "Homepage data is temporarily unavailable." });
   }
 });
 
@@ -676,9 +815,8 @@ app.get("/api/payments/history", requireAuth, async (req, res) => {
 app.get("/api/stats/performance", async (req, res) => {
   try {
     const rows = await Tip.aggregate([{ $match: { result: { $in: ["Win", "Lose", "Void"] } } }, { $group: { _id: "$type", total: { $sum: 1 }, wins: { $sum: { $cond: [{ $eq: ["$result", "Win"] }, 1, 0] } }, losses: { $sum: { $cond: [{ $eq: ["$result", "Lose"] }, 1, 0] } }, voids: { $sum: { $cond: [{ $eq: ["$result", "Void"] }, 1, 0] } } } }]);
-    const total = rows.reduce((a, r) => ({ settled: a.settled + r.total, wins: a.wins + r.wins, losses: a.losses + r.losses, voids: a.voids + r.voids }), { settled: 0, wins: 0, losses: 0, voids: 0 });
     res.set("Cache-Control", "public, max-age=60");
-    res.json({ success: true, ...total, winRate: total.wins + total.losses ? Math.round(total.wins / (total.wins + total.losses) * 1000) / 10 : null, methodology: "Settled recorded tips only; void tips excluded from win-rate denominator. Historical results do not guarantee future outcomes." });
+    res.json({ success: true, ...performanceSummary(rows) });
   } catch (err) { res.status(500).json({ success: false, message: "Performance statistics unavailable." }); }
 });
 
@@ -732,6 +870,7 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
 app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
     const data = cleanTipInput(req.body);
+    if (data.type === "premium") data.isFeatured = false;
     const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true });
     if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
     await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
@@ -748,10 +887,101 @@ app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (r
   res.json({ success: true, message: "Tip deleted." });
 });
 
+
+app.patch("/api/admin/tips/:id/featured", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const tip = await Tip.findById(req.params.id);
+    if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
+    if (tip.type !== "free") return res.status(400).json({ success: false, message: "Only a free prediction can be featured publicly." });
+    const featured = req.body.featured === true;
+    if (featured) await Tip.updateMany({ isFeatured: true }, { $set: { isFeatured: false } });
+    tip.isFeatured = featured;
+    tip.updatedAt = new Date();
+    await tip.save();
+    await recordAudit(req, featured ? "tip.featured" : "tip.unfeatured", "tip", tip._id, `${featured ? "Featured" : "Unfeatured"} ${tip.match}`);
+    res.json({ success: true, tip: publicTip(tip), message: featured ? "Prediction of the Day updated." : "Featured prediction cleared." });
+  } catch (err) { res.status(400).json({ success: false, message: "Could not update featured prediction." }); }
+});
+
+app.get("/api/admin/packages", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const config = await PackageConfig.findOne({ key: "vip-packages" }).lean();
+    res.json({ success: true, packages: config ? { daily: config.daily, weekly: config.weekly, monthly: config.monthly } : { ...PACKAGE_PRICES } });
+  } catch (err) { res.status(500).json({ success: false, message: "Could not load VIP packages." }); }
+});
+app.put("/api/admin/packages", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const prices = {};
+    for (const key of ["daily", "weekly", "monthly"]) {
+      const value = Number(req.body[key]);
+      if (!Number.isInteger(value) || value < 1 || value > 1000000) throw new Error(`${key} price must be a whole KES amount between 1 and 1,000,000.`);
+      prices[key] = value;
+    }
+    await PackageConfig.findOneAndUpdate({ key: "vip-packages" }, { $set: { ...prices, updatedAt: new Date() }, $setOnInsert: { key: "vip-packages" } }, { upsert: true, new: true, runValidators: true });
+    PACKAGE_PRICES = Object.freeze({ ...prices });
+    await recordAudit(req, "packages.updated", "package_config", "vip-packages", "Updated VIP subscription prices.");
+    res.json({ success: true, packages: prices, message: "VIP package prices updated." });
+  } catch (err) { res.status(400).json({ success: false, message: err.message || "Could not update VIP packages." }); }
+});
+
+app.get("/api/admin/fixtures", requireAuth, requireAdmin, async (req, res) => {
+  const fixtures = await Fixture.find({}).sort({ date: -1, kickoffTime: 1 }).limit(1000).lean();
+  res.json({ success: true, fixtures: fixtures.map(f => ({ ...f, id: String(f._id) })) });
+});
+app.post("/api/admin/fixtures", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const fixture = await Fixture.create({ ...cleanFixtureInput(req.body), createdBy: req.user._id });
+    await recordAudit(req, "fixture.created", "fixture", fixture._id, `Created fixture ${fixture.match}`);
+    res.status(201).json({ success: true, fixture: { ...fixture.toObject(), id: String(fixture._id) } });
+  } catch (err) { res.status(400).json({ success: false, message: err.message || "Could not create fixture." }); }
+});
+app.put("/api/admin/fixtures/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const fixture = await Fixture.findByIdAndUpdate(req.params.id, cleanFixtureInput(req.body), { new: true, runValidators: true });
+    if (!fixture) return res.status(404).json({ success: false, message: "Fixture not found." });
+    await recordAudit(req, "fixture.updated", "fixture", fixture._id, `Updated fixture ${fixture.match}`);
+    res.json({ success: true, fixture: { ...fixture.toObject(), id: String(fixture._id) } });
+  } catch (err) { res.status(400).json({ success: false, message: err.message || "Could not update fixture." }); }
+});
+app.delete("/api/admin/fixtures/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  const fixture = await Fixture.findByIdAndDelete(req.params.id);
+  if (!fixture) return res.status(404).json({ success: false, message: "Fixture not found." });
+  await recordAudit(req, "fixture.deleted", "fixture", fixture._id, `Deleted fixture ${fixture.match}`);
+  res.json({ success: true, message: "Fixture deleted." });
+});
+
+app.get("/api/admin/announcements", requireAuth, requireAdmin, async (req, res) => {
+  const announcements = await Announcement.find({}).sort({ priority: -1, createdAt: -1 }).limit(500).lean();
+  res.json({ success: true, announcements: announcements.map(a => ({ ...a, id: String(a._id) })) });
+});
+app.post("/api/admin/announcements", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const announcement = await Announcement.create({ ...cleanAnnouncementInput(req.body), createdBy: req.user._id });
+    await recordAudit(req, "announcement.created", "announcement", announcement._id, `Published announcement: ${announcement.title}`);
+    res.status(201).json({ success: true, announcement: { ...announcement.toObject(), id: String(announcement._id) } });
+  } catch (err) { res.status(400).json({ success: false, message: err.message || "Could not publish announcement." }); }
+});
+app.put("/api/admin/announcements/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const announcement = await Announcement.findByIdAndUpdate(req.params.id, cleanAnnouncementInput(req.body), { new: true, runValidators: true });
+    if (!announcement) return res.status(404).json({ success: false, message: "Announcement not found." });
+    await recordAudit(req, "announcement.updated", "announcement", announcement._id, `Updated announcement: ${announcement.title}`);
+    res.json({ success: true, announcement: { ...announcement.toObject(), id: String(announcement._id) } });
+  } catch (err) { res.status(400).json({ success: false, message: err.message || "Could not update announcement." }); }
+});
+app.delete("/api/admin/announcements/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  const announcement = await Announcement.findByIdAndDelete(req.params.id);
+  if (!announcement) return res.status(404).json({ success: false, message: "Announcement not found." });
+  await recordAudit(req, "announcement.deleted", "announcement", announcement._id, `Deleted announcement: ${announcement.title}`);
+  res.json({ success: true, message: "Announcement deleted." });
+});
+
+
 const FRONTEND_ROUTES = new Set([
   "/", "/register", "/login", "/free-tips", "/free-tips-history",
   "/vip-packages", "/subscription", "/my-account", "/payment-history", "/checkout",
-  "/contact", "/premium-tips", "/vip-tips-history", "/admin"
+  "/contact", "/premium-tips", "/vip-tips-history", "/admin",
+  "/performance", "/about", "/terms", "/privacy"
 ]);
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/") || req.path.includes(".")) return next();
@@ -799,6 +1029,9 @@ async function bootstrapAdmin() {
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("MongoDB connected.");
+    let packageConfig = await PackageConfig.findOne({ key: "vip-packages" });
+    if (!packageConfig) packageConfig = await PackageConfig.create({ key: "vip-packages", ...PACKAGE_PRICES });
+    PACKAGE_PRICES = Object.freeze({ daily: packageConfig.daily, weekly: packageConfig.weekly, monthly: packageConfig.monthly });
     await bootstrapAdmin();
     const repairedAdmins = await User.updateMany(
       { role: "admin" },
