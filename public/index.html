@@ -700,6 +700,40 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 }
 </style>
 
+
+<style id="vip-premium-tips-final-alignment">
+/* Keep the VIP current-tips table visually consistent with the Free Tips cards. */
+#premiumPanel .table-scroll{width:100%;max-width:100%;overflow-x:hidden;border-radius:inherit}
+#premiumPanel .tips-table{width:100%;max-width:100%;min-width:0!important;table-layout:fixed;border-collapse:separate;border-spacing:3px 3px}
+#premiumPanel .tips-table tbody td{vertical-align:middle;overflow-wrap:anywhere}
+#premiumPanel .tips-table .total-odds-row td{border:1px solid #000!important;border-radius:10px!important;background:#e5f5ff!important;color:#123e60!important;padding:12px 14px!important;text-align:right;font-weight:800}
+#premiumPanel .tips-table .total-odds-label{font-size:.76rem;letter-spacing:.08em;color:#315d7c;margin-right:10px}
+#premiumPanel .tips-table .total-odds-value{display:inline-flex;justify-content:center;min-width:72px;padding:6px 11px;border:1px solid #000;border-radius:9px;background:#fff;color:#075985;font-variant-numeric:tabular-nums}
+#premiumPanel .premium-bottom-crown{margin:0 14px;padding:13px 8px 12px}
+#premiumPanel .premium-bottom-crown i{width:32px;height:32px;font-size:.82rem}
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-row td{background:#17364c!important;color:#d6efff!important}
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-label{color:#bceaff}
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-value{background:#102b3d;color:#bceaff}
+@media(max-width:700px){
+  #premiumPanel .table-scroll{overflow:visible}
+  #premiumPanel .tips-table{display:block;width:100%;min-width:0!important;max-width:100%;border-spacing:0;table-layout:auto}
+  #premiumPanel .tips-table thead{display:none!important}
+  #premiumPanel .tips-table tbody{display:block;width:100%;min-width:0}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row){display:grid;grid-template-columns:minmax(0,1fr) minmax(76px,auto);grid-template-rows:auto auto auto;align-items:center;gap:5px 10px;width:calc(100% - 14px);min-width:0;margin:7px;border:1px solid var(--table-blue-border,#a8d7f0);border-radius:8px;padding:13px 14px;background:var(--table-blue-pale,#e5f5ff);box-sizing:border-box;overflow:hidden}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row):nth-child(even){background:var(--table-blue-cell,#d8efff)}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td{display:block;min-width:0;width:auto;max-width:100%;padding:2px 0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;line-height:1.35;font-size:.86rem;overflow-wrap:anywhere;box-sizing:border-box}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(1){grid-column:1;grid-row:1;color:#52758e;font-size:.76rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(2){grid-column:1;grid-row:2;color:#244f70;font-size:.98rem;font-weight:800;line-height:1.35;padding:4px 0!important}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(3){grid-column:1;grid-row:3;color:#52758e;font-size:.82rem;font-weight:600}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(4){grid-column:2;grid-row:1;justify-self:end;align-self:center;text-align:center}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(5){grid-column:2;grid-row:2 / span 2;justify-self:end;align-self:center;text-align:center}
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) .odds,#premiumPanel .tips-table tbody tr:not(.total-odds-row) .status{display:inline-flex;align-items:center;justify-content:center;min-width:70px;max-width:100%;padding:7px 9px;font-size:.8rem;line-height:1.25;white-space:nowrap}
+  #premiumPanel .tips-table tbody tr.total-odds-row{display:block;width:calc(100% - 14px);margin:9px 7px 7px;padding:0;border:1px solid var(--table-blue-border,#a8d7f0);border-radius:8px;background:var(--table-blue-cell,#d8efff);box-sizing:border-box}
+  #premiumPanel .tips-table .total-odds-row td{display:flex!important;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:13px 14px!important;border:0!important;border-radius:8px!important;background:transparent!important;text-align:left!important}
+  #premiumPanel .tips-table .total-odds-label{margin-right:auto}
+  #premiumPanel .premium-bottom-crown{margin:0 14px;padding:13px 8px 12px}
+}
+</style>
 </head>
 <body data-theme="light">
 <header>
@@ -763,7 +797,7 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 
  <section class="panel" id="premiumPanel">
   <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
-  <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
+  <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="history-separator vip-history-separator premium-bottom-crown" role="separator" aria-label="End of VIP Premium tips"><span></span><i class="fa-solid fa-crown" aria-hidden="true"></i><span></span></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
  </section>
 
  <section class="panel" id="vipHistoryPanel">
