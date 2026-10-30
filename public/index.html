@@ -700,49 +700,16 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 }
 </style>
 
-<style>
-
-/* Banker Tips navigation and administrator workspace upgrade */
-.top-links{gap:7px;align-items:center}
-.top-links .nav-link{display:inline-flex;align-items:center;gap:7px;padding:9px 10px;border-radius:10px;color:var(--muted);font-size:.76rem;font-weight:800;text-decoration:none;white-space:nowrap;transition:background .18s,color .18s}
-.top-links .nav-link:hover,.top-links .nav-link[aria-current="page"]{background:#eaf5ff;color:#0879c9}
-.top-links .nav-link i{font-size:.85rem}
-.bottom-nav a{position:relative;display:flex;flex:1;max-width:180px;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:7px 4px;border-radius:13px;color:#8492a5;text-decoration:none;font-size:.69rem;font-weight:800;line-height:1.25;transition:background .18s,color .18s}
-.bottom-nav a i{font-size:1.12rem}.bottom-nav a.active{color:#0879c9;background:#eaf5ff}.bottom-nav a.active:before{content:"";position:absolute;top:-8px;left:35%;right:35%;height:3px;background:#0879c9;border-radius:0 0 4px 4px}
-.admin-welcome{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px;margin-bottom:14px;background:linear-gradient(120deg,#f4faff,#fff 62%,#eaf6ff);border:1px solid #dcecf8}
-.admin-welcome h1{font:800 clamp(1.35rem,3vw,1.9rem) Comfortaa,sans-serif;color:#153653;margin:8px 0}
-.admin-welcome p{max-width:680px;margin:0;color:#647b91;font-size:.88rem;line-height:1.6}
-.admin-session-label{display:inline-flex;align-items:center;gap:7px;margin-top:13px;color:#0879c9;font-size:.74rem;font-weight:800}
-.admin-quick-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 24px}
-.admin-quick-nav button{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:56px;padding:12px 14px;border:1px solid #dce8f2;border-radius:13px;background:var(--surface);color:var(--ink);font:700 .82rem Comfortaa,sans-serif;cursor:pointer;transition:transform .18s,border-color .18s,background .18s}
-.admin-quick-nav button:hover{transform:translateY(-2px);border-color:#78bde6;background:#f3faff}
-.admin-quick-nav i{color:#0879c9;font-size:1.05rem}
-.admin-main-heading{margin-bottom:14px}
-#adminOverviewSection,#adminPaymentsSection,#adminMembershipSection,#adminPredictionSection{scroll-margin-top:88px}
-@media(max-width:900px){.top-links{gap:3px}.top-links .nav-link{font-size:.7rem;padding:8px 7px}}
-@media(max-width:700px){.top-links{display:none;position:absolute;top:66px;left:11px;right:11px;max-height:calc(100vh - 90px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:12px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch}.top-links.open{display:flex}.top-links .nav-link{padding:12px;font-size:.82rem}.admin-welcome{align-items:flex-start;flex-direction:column;padding:18px}.admin-welcome>.btn{width:100%}.admin-quick-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-quick-nav button{font-size:.73rem;padding:10px}.bottom-nav{justify-content:stretch}.bottom-nav a{max-width:none;font-size:clamp(.61rem,2.7vw,.7rem);padding:7px 2px}.bottom-nav a i{font-size:1.05rem}}
-@media(prefers-reduced-motion:reduce){.admin-quick-nav button,.top-links .nav-link,.bottom-nav a{transition:none}}
-
-</style>
 </head>
 <body data-theme="light">
 <header>
  <div class="wrap header-inner">
   <a class="brand" href="#" id="brandHome" aria-label="Banker Tips home"><span class="brand-mark"><img src="images/bankertipslogo.png" alt="Banker Tips logo"></span><span class="brand-copy"><span class="brand-name">BANKER <span>TIPS</span></span><span class="brand-tagline">FOOTBALL INTELLIGENCE</span></span></a>
   <div class="head-actions">
-   <nav class="top-links" id="topLinks" aria-label="Main navigation">
-    <a class="nav-link" href="/" data-route="/" data-nav-panel="freePanel"><i class="fa-solid fa-house"></i> Home</a>
-    <a class="nav-link" href="/free-tips-history" data-route="/free-tips-history" data-nav-panel="historyPanel"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</a>
-    <a class="nav-link" href="/premium-tips" data-route="/premium-tips" data-nav-panel="premiumPanel"><i class="fa-solid fa-crown"></i> VIP Tips</a>
-    <button class="btn secondary" id="headerVip"><i class="fa-solid fa-crown"></i> VIP Access</button>
-    <a class="nav-link" href="/vip-tips-history" data-route="/vip-tips-history" data-nav-panel="vipHistoryPanel"><i class="fa-solid fa-list-check"></i> VIP History</a>
-    <a class="nav-link" href="/vip-packages" data-route="/vip-packages" data-nav-panel="subscriptionPanel"><i class="fa-solid fa-gem"></i> VIP Packages</a>
-    <a class="nav-link" href="/my-account" data-route="/my-account" data-nav-panel="paymentPanel"><i class="fa-solid fa-user-circle"></i> My Account</a>
-    <a class="nav-link" href="/payment-history" data-route="/payment-history" data-nav-panel="paymentPanel"><i class="fa-solid fa-receipt"></i> Payment History</a>
-    <a class="nav-link" href="/contact" data-route="/contact"><i class="fa-solid fa-headset"></i> Contact</a>
-    <a class="nav-link admin-route-link hidden" href="/admin" data-route="/admin" data-nav-panel="adminPanel"><i class="fa-solid fa-shield-halved"></i> Admin Dashboard</a>
+   <nav class="top-links" id="topLinks" aria-label="Account navigation">
     <button class="btn secondary" id="registerNavButton"><i class="fa-solid fa-user-plus"></i> Register</button>
     <button class="btn" id="authNavButton" data-open="loginModal"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+    <button class="btn secondary" id="headerVip"><i class="fa-solid fa-crown"></i> VIP Access</button>
    </nav>
    <button class="icon-btn" id="installAppButton" aria-label="Install Banker Tips" title="Install app" style="display:none"><i class="fa-solid fa-download"></i></button>
    <button class="icon-btn" id="notifyButton" aria-label="Enable notifications" title="Enable reminders"><i class="fa-regular fa-bell"></i></button>
@@ -817,19 +784,9 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
  </section>
 
  <section class="panel" id="adminPanel">
-  <div class="admin-welcome card">
-   <div><span class="admin-kicker">BANKER TIPS · CONTROL CENTRE</span><h1>Administrator Dashboard</h1><p>Manage football predictions, customer access, subscriptions and payment records from one secure workspace.</p><div class="admin-session-label"><i class="fa-solid fa-shield-halved"></i> Administrator tools · Restricted access</div></div>
-   <button class="btn secondary" id="adminRefreshAll"><i class="fa-solid fa-arrows-rotate"></i> Refresh dashboard</button>
-  </div>
-  <nav class="admin-quick-nav" aria-label="Admin dashboard sections">
-   <button type="button" data-admin-target="adminPredictionSection"><i class="fa-solid fa-futbol"></i><span>Predictions</span></button>
-   <button type="button" data-admin-target="adminOverviewSection"><i class="fa-solid fa-chart-line"></i><span>Overview</span></button>
-   <button type="button" data-admin-target="adminPaymentsSection"><i class="fa-solid fa-money-bill-transfer"></i><span>Payments</span></button>
-   <button type="button" data-admin-target="adminMembershipSection"><i class="fa-solid fa-users"></i><span>Members</span></button>
-  </nav>
-  <div class="section-head admin-main-heading"><div><h2><i class="fa-solid fa-sliders"></i> Platform management</h2><p>Update content and monitor account activity. Data below is loaded from the connected admin APIs.</p></div><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div>
-  <div class="admin-layout" id="adminPredictionSection">
-   <div class="card pad"><h3 style="margin-top:0">Add / update prediction</h3><form id="tipForm">
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div>
+  <div class="admin-layout">
+   <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
     <div class="form-grid">
      <div class="field"><label for="tipDate">Date</label><input type="date" id="tipDate" required></div>
@@ -844,9 +801,9 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
    </form></div>
    <div class="card"><div class="pad"><div class="field"><label for="adminTipSearch">Search tips</label><input id="adminTipSearch" type="search" placeholder="Search by match, category or date"></div></div><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Changes are available to authorized administrators only.</div></div>
   </div>
-  <div class="section" id="adminOverviewSection"><div class="section-head"><div><h2><i class="fa-solid fa-chart-pie"></i> Business overview</h2><p>A clear snapshot of membership and payment activity.</p></div><button class="btn secondary small" id="adminOverviewReload"><i class="fa-solid fa-rotate"></i> Refresh overview</button></div><div class="account-summary"><div class="summary-tile"><strong id="overviewUsers">—</strong><span>Total accounts</span></div><div class="summary-tile"><strong id="overviewVip">—</strong><span>Active VIP</span></div><div class="summary-tile"><strong id="overviewPaid">—</strong><span>Verified payments (KES)</span></div></div><div class="notice" id="overviewNotice">Revenue includes completed payment records only.</div></div>
-  <div class="card admin-members" id="adminPaymentsSection"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Payment ledger</h3><p>Provider references and statuses for support and reconciliation.</p></div><button class="btn secondary small" id="paymentsReload"><i class="fa-solid fa-rotate"></i> Refresh payments</button></div><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Package</th><th>Amount</th><th>Status</th><th>Reference / Receipt</th></tr></thead><tbody id="adminPaymentsRows"><tr><td colspan="5">Load payment ledger from admin session.</td></tr></tbody></table></div><div class="notice" id="paymentsNotice">Only verified completed transactions should be treated as paid.</div></div>
-  <div class="card admin-members membership-approval-card" id="adminMembershipSection">
+  <div class="section"><div class="section-head"><div><h2>Business overview</h2><p>A clear snapshot of membership and payment activity.</p></div><button class="btn secondary small" id="adminOverviewReload"><i class="fa-solid fa-rotate"></i> Refresh overview</button></div><div class="account-summary"><div class="summary-tile"><strong id="overviewUsers">—</strong><span>Total accounts</span></div><div class="summary-tile"><strong id="overviewVip">—</strong><span>Active VIP</span></div><div class="summary-tile"><strong id="overviewPaid">—</strong><span>Verified payments (KES)</span></div></div><div class="notice" id="overviewNotice">Revenue includes completed payment records only.</div></div>
+  <div class="card admin-members"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Payment ledger</h3><p>Provider references and statuses for support and reconciliation.</p></div><button class="btn secondary small" id="paymentsReload"><i class="fa-solid fa-rotate"></i> Refresh payments</button></div><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Package</th><th>Amount</th><th>Status</th><th>Reference / Receipt</th></tr></thead><tbody id="adminPaymentsRows"><tr><td colspan="5">Load payment ledger from admin session.</td></tr></tbody></table></div><div class="notice" id="paymentsNotice">Only verified completed transactions should be treated as paid.</div></div>
+  <div class="card admin-members membership-approval-card">
    <div class="membership-admin-heading">
     <div><span class="admin-kicker"><i class="fa-solid fa-shield-halved"></i> MEMBERSHIP MANAGEMENT</span><h3>Membership approvals</h3><p>Review subscriber details, confirm payment timing and manage VIP access.</p></div>
     <div class="membership-admin-actions">
@@ -874,10 +831,10 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 </footer>
 <a class="whatsapp-float" href="https://wa.me/254101047400?text=Hello%20Banker%20Tips%20Support%2C%20I%20need%20assistance." target="_blank" rel="noopener noreferrer" aria-label="Chat with Banker Tips support on WhatsApp" title="WhatsApp Support"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i><span class="whatsapp-label">WhatsApp Support</span></a>
 <nav class="bottom-nav" aria-label="Main navigation">
- <a class="active" href="/" data-route="/" data-nav-panel="freePanel"><i class="fa-solid fa-house"></i><span>Home</span></a>
- <a href="/premium-tips" data-route="/premium-tips" data-nav-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP Tips</span></a>
- <a href="/my-account" data-route="/my-account" data-nav-panel="paymentPanel" id="bottomAccount"><i class="fa-solid fa-user-circle"></i><span>My Account</span></a>
- <a href="/admin" data-route="/admin" data-nav-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></a>
+ <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Home</span></button>
+ <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP</span></button>
+ <button data-panel="paymentPanel" id="bottomAccount"><i class="fa-solid fa-user-circle"></i><span>My Account</span></button>
+ <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
 </nav>
 
 <div class="modal registration-modal auth-modal" id="registerModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-register-layout"><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>VIP MEMBERSHIP</small></span></div><span class="auth-eyebrow">CREATE YOUR ACCOUNT</span><h2 id="registerTitle">Join Banker Tips</h2><p class="auth-intro">Create your account, choose your VIP plan and continue to secure M-Pesa checkout.</p><div class="reg-step" aria-hidden="true"><span class="active"></span><span class="active"></span><span></span></div><form id="registerForm"><input type="hidden" id="selectedPackage" value=""><input type="hidden" id="regCountry" value="KE"><div class="reg-price-note"><i class="fa-solid fa-shield-halved"></i> Kenya checkout · Secure M-Pesa payment</div><div class="field"><label for="regPhone">M-Pesa phone number</label><input type="tel" id="regPhone" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0712345678 or 254712345678" required><small class="subtext" id="regPhoneHelp">Enter a Kenyan Safaricom number, e.g. 0712345678.</small></div><div class="field" style="margin-top:15px"><label>Choose your VIP package</label></div><div class="reg-plan-grid"><button type="button" class="reg-plan" data-reg-package="daily"><strong>Daily VIP</strong><small data-ke-price="KSh 150">KSh 150</small><small>1 day</small></button><button type="button" class="reg-plan" data-reg-package="weekly"><strong>Weekly VIP</strong><small data-ke-price="KSh 1,500">KSh 1,500</small><small>7 days</small></button><button type="button" class="reg-plan" data-reg-package="monthly"><strong>Monthly VIP</strong><small data-ke-price="KSh 3,500">KSh 3,500</small><small>30 days</small></button></div><div class="reg-price-note" id="regPriceNote"><i class="fa-solid fa-circle-info"></i> Choose a package to see your subscription selection before checkout.</div><div class="field" style="margin-top:14px"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Create password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" placeholder="At least 10 characters" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn auth-submit" type="submit" id="registerSubmit"><i class="fa-solid fa-arrow-right"></i> Create account &amp; continue to payment</button><div class="msg" id="registerMessage" role="status"></div><div class="flow-footnote"><i class="fa-solid fa-lock"></i><span>Your VIP access stays locked until payment is verified. Never share your mobile-money PIN.</span></div></form><p class="auth-switch-mobile">Already have an account? <button type="button" data-switch-auth="login">Sign in</button></p></div><aside class="auth-side auth-side-register"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-trophy"></i></span><span class="auth-eyebrow">SMARTER FOOTBALL INSIGHTS</span><h2>Make every pick count.</h2><p>Unlock premium football predictions, membership updates and your VIP account in one place.</p><div class="auth-benefit"><i class="fa-solid fa-circle-check"></i> Exclusive VIP selections</div><div class="auth-benefit"><i class="fa-solid fa-shield-halved"></i> Secure M-Pesa checkout</div><div class="auth-benefit"><i class="fa-solid fa-clock"></i> Clear membership validity</div><div class="auth-side-bottom">Already a member? <button type="button" data-switch-auth="login">Sign in</button></div></div></aside></div></div></div>
@@ -969,7 +926,7 @@ function setPanel(panelId) {
   if(panelId==='subscriptionPanel') window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='paymentPanel' && typeof loadCustomerPayments==='function') loadCustomerPayments();
   if(panelId==='premiumPanel') loadPremium();
-  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); if(typeof loadAdminAudit==='function') loadAdminAudit(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
+  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
 }
 function showEmpty(tbodyId, columns, message) {
   $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
@@ -1170,7 +1127,7 @@ function updateAccountUI() {
   $('adminPanel').dataset.allowed=admin?'true':'false';
   // Only administrator accounts can use these management tools.
   const adminNav=$('adminNavButton');
-  if(adminNav) adminNav.classList.toggle('hidden',!admin); document.querySelectorAll('.admin-route-link').forEach(link=>link.classList.toggle('hidden',!admin));
+  if(adminNav) adminNav.classList.toggle('hidden',!admin);
   const accountState=$('accountState'); if(accountState) accountState.textContent=currentUser ? (currentUser.membershipStatus==='active' ? 'VIP Active' : 'Membership: '+String(currentUser.membershipStatus||'pending_approval').replaceAll('_',' ')) : 'Guest account';
   const planEl=$('memberPlanValue'), statusEl=$('memberStatusValue'), expiryEl=$('memberExpiryValue'), countdownEl=$('memberCountdownValue'), noticeEl=$('memberStatusNotice');
   if(planEl) planEl.textContent=currentUser ? packageLabel(currentUser.selectedPackage) : 'Not selected';
@@ -1559,8 +1516,6 @@ let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preve
 $('notifyButton').addEventListener('click',async()=>{if(!('Notification'in window)){alert('Notifications are not supported by this browser.');return;}const permission=await Notification.requestPermission();if(permission==='granted'){new Notification('Banker Tips notifications enabled',{body:'You can receive reminders while using this device.'});$('notifyButton').innerHTML='<i class="fa-solid fa-bell"></i>';}else alert('Notifications were not enabled. You can change this in browser settings.');});
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(e=>console.warn('PWA service worker registration failed',e)));}
 $('adminOverviewReload')?.addEventListener('click',loadAdminOverview);$('paymentsReload')?.addEventListener('click',loadAdminPayments);$('paymentHistoryReload')?.addEventListener('click',loadCustomerPayments);
-$('adminRefreshAll')?.addEventListener('click',async()=>{const b=$('adminRefreshAll');if(b){b.disabled=true;b.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Refreshing';}try{await Promise.allSettled([loadAdminTips(),loadAdminUsers(),loadAdminOverview(),loadAdminPayments()]);}finally{if(b){b.disabled=false;b.innerHTML='<i class="fa-solid fa-arrows-rotate"></i> Refresh dashboard';}}});
-document.querySelectorAll('[data-admin-target]').forEach(b=>b.addEventListener('click',()=>{const target=$(b.dataset.adminTarget);target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});document.querySelectorAll('[data-admin-target]').forEach(x=>x.classList.toggle('active',x===b));}));
 checkSession().then(()=>{renderUserProfile();loadFreeTips();checkExpiryReminder();});
 loadPerformanceStats();
 </script>
@@ -1584,7 +1539,7 @@ loadPerformanceStats();
   if(route.auth){const modal=document.getElementById(route.auth);if(modal){modal.classList.add('route-standalone-auth');modal.classList.add('open');modal.setAttribute('aria-hidden','false');if(route.auth==='registerModal'){const pkg=url.searchParams.get('package')||url.searchParams.get('plan')||'';if(['daily','weekly','monthly'].includes(pkg)){registrationPackage=pkg;const f=document.getElementById('selectedPackage');if(f)f.value=pkg;updateRegistrationFlow()}else if(!['daily','weekly','monthly'].includes(registrationPackage)){registrationPackage='';updateRegistrationFlow()}}}}
   else if(route.panel==='contact'){const c=ensureContact();c.classList.add('active','route-enter')}
   else {if(route.panel==='adminPanel'&&String(currentUser?.role||'').toLowerCase()!=='admin'){routeTo('/login',{replace:true});navigating=false;return}if(typeof setPanel==='function')setPanel(route.panel);const panel=document.getElementById(route.panel);if(panel){panel.classList.add('route-enter');setTimeout(()=>panel.classList.remove('route-enter'),240)}if(route.panel==='paymentPanel')sectionFilter(route.section||'account');else sectionFilter('all')}
-  document.querySelectorAll('[data-route]').forEach(a=>{const active=norm(a.getAttribute('href'))===path;a.toggleAttribute('aria-current',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');a.classList.toggle('active',active)});document.title=route.title;const nav=document.getElementById('topLinks');if(nav)nav.classList.remove('open');const menu=document.getElementById('menuToggle');if(menu)menu.setAttribute('aria-expanded','false');
+  document.querySelectorAll('[data-route]').forEach(a=>{const active=norm(a.getAttribute('href'))===path;a.toggleAttribute('aria-current',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});document.title=route.title;const nav=document.getElementById('topLinks');if(nav)nav.classList.remove('open');const menu=document.getElementById('menuToggle');if(menu)menu.setAttribute('aria-expanded','false');
   if(!opts.noHistory){if(opts.replace)history.replaceState({route:path},'',url.pathname+url.search);else history.pushState({route:path},'',url.pathname+url.search)}window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});setTimeout(()=>{if(loading)loading.hidden=true;navigating=false},220);
  }
  window.navigateBankerTips=routeTo;
