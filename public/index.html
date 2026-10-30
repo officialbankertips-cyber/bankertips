@@ -700,16 +700,106 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 }
 </style>
 
+
+<style id="banker-home-redesign">
+:root{--bt-blue:#087fc4;--bt-blue-dark:#075985;--bt-pale:#eaf5fc;--bt-line:#dce8f2;--bt-shadow:0 12px 34px rgba(12,58,94,.07)}
+body{font-family:"Comfortaa","Trebuchet MS",sans-serif!important}
+header .header-inner{gap:18px}
+.top-links{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.top-links>a{font-size:.76rem;font-weight:800;text-decoration:none;padding:9px 10px;border-radius:10px;color:var(--ink);white-space:nowrap}
+.top-links>a:hover,.top-links>a[aria-current=page]{background:var(--soft);color:var(--blue)}
+.more-menu{position:relative;font-size:.76rem;font-weight:800}
+.more-menu summary{cursor:pointer;list-style:none;padding:9px 10px;border-radius:10px}
+.more-menu summary::-webkit-details-marker{display:none}
+.more-menu[open] summary{background:var(--soft);color:var(--blue)}
+.more-menu-items{position:absolute;top:calc(100% + 8px);right:0;min-width:190px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);display:grid;z-index:50}
+.more-menu-items a{padding:10px;border-radius:8px;text-decoration:none;font-size:.78rem}
+.more-menu-items a:hover{background:var(--soft);color:var(--blue)}
+.hero{min-height:280px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero-actions .btn{margin-top:0}
+.hero .hero-vip-btn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);box-shadow:none}
+#freePanel .section:first-child{margin-top:0}
+#freePanel .section-head h2{font-weight:800}
+.feature-pick{min-height:190px;background:linear-gradient(125deg,#082f52,#075985 60%,#087fc4);color:#fff;padding:24px}
+.feature-pick-empty{display:grid;place-items:center;text-align:center;gap:8px;min-height:140px;color:#dcefff}
+.feature-pick-empty i{font-size:1.5rem;opacity:.8}
+.feature-pick-empty strong{font-size:1rem}
+.feature-pick-empty span{font-size:.8rem;opacity:.8}
+.feature-pick-content{max-width:760px}
+.feature-label{display:inline-flex;gap:8px;align-items:center;font-size:.7rem;font-weight:900;letter-spacing:.12em;color:#bce8ff}
+.feature-pick-content>.date-chip{float:right;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.2);color:#fff}
+.feature-pick-content h3{font-size:clamp(1.35rem,3vw,2rem);margin:16px 0 7px}
+.feature-meta{display:flex;gap:15px;flex-wrap:wrap;color:#cce8fa;font-size:.78rem}
+.feature-pick-bottom{display:flex;gap:30px;margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2)}
+.feature-pick-bottom div{display:grid;gap:5px}.feature-pick-bottom small{font-size:.7rem;color:#bce8ff}.feature-pick-bottom strong{font-size:1.12rem}
+.fixtures-grid,.results-grid,.announcements-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.fixture-card,.result-card,.announcement-card{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:17px;box-shadow:var(--bt-shadow);min-width:0}
+.fixture-card-top,.result-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:.72rem;font-weight:800}
+.fixture-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:9px;margin:22px 0;text-align:center}
+.fixture-teams strong{font-size:.88rem;overflow-wrap:anywhere}.fixture-teams span{font-size:.66rem;color:var(--blue);font-weight:900}
+.fixture-card-bottom{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:.73rem}
+.status.finished{background:var(--soft);color:var(--blue2)}.status.live{background:#fee2e2;color:#b91c1c}
+.result-card h3{font-size:.96rem;margin:15px 0 8px}.result-card p{margin:0;color:var(--muted);font-size:.8rem}.result-card p span{white-space:nowrap}.result-score{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);font-size:.78rem;font-weight:900;color:var(--blue)}
+.announcement-card h3{font-size:.96rem;margin:10px 0 7px}.announcement-card p{font-size:.8rem;color:var(--muted);line-height:1.65;margin:0;white-space:pre-line}
+.announcement-date{font-size:.68rem;color:var(--blue);font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.empty-dashboard{grid-column:1/-1;display:grid;justify-items:center;text-align:center;gap:8px;padding:25px;background:var(--surface);border:1px dashed var(--line);border-radius:16px;color:var(--muted);font-size:.82rem}
+.empty-dashboard i{font-size:1.3rem;color:var(--blue)}.empty-dashboard strong{color:var(--ink)}
+.vip-promo{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:clamp(22px,4vw,34px);border-radius:22px;background:linear-gradient(115deg,#e8f5ff,#f8fbff);border:1px solid #d5eafa}
+.vip-promo-copy{max-width:660px}.vip-promo h2{font-size:clamp(1.3rem,3vw,1.8rem);margin:10px 0}.vip-promo p{color:var(--muted);font-size:.86rem;line-height:1.7}
+.vip-promo ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:17px 0}.vip-promo li{font-size:.78rem;font-weight:700}.vip-promo li i{color:#16834a;margin-right:6px}
+.vip-promo-mark{width:150px;height:150px;flex:0 0 150px;border-radius:36px;background:linear-gradient(145deg,#087fc4,#075985);display:grid;place-content:center;justify-items:center;color:#fff;box-shadow:0 14px 30px rgba(7,89,133,.2)}
+.vip-promo-mark i{font-size:3.2rem}.vip-promo-mark span{font-size:.62rem;letter-spacing:.1em;font-weight:900;margin-top:9px}
+.steps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.step-card{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:20px;box-shadow:var(--bt-shadow)}
+.step-card>span{font-size:1.5rem;color:var(--blue);font-weight:900}.step-card h3{font-size:.95rem;margin:12px 0 6px}.step-card p{font-size:.8rem;color:var(--muted);margin:0;line-height:1.6}
+.stats-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.stat-card{padding:21px;background:var(--surface);border:1px solid var(--line);border-radius:17px;box-shadow:var(--bt-shadow);display:grid;gap:8px}
+.stat-card span{font-size:.75rem;color:var(--muted);font-weight:800}.stat-card strong{font-size:clamp(1.5rem,3vw,2rem);color:var(--blue-dark,#075985)}.stat-card small{font-size:.7rem;color:var(--muted)}
+.editorial-page{max-width:820px;margin:12px auto;line-height:1.8}.editorial-page h1{font-size:clamp(1.5rem,4vw,2.2rem);margin:14px 0}.editorial-page p{font-size:.9rem;color:var(--muted)}
+.score-inputs{display:flex;gap:7px}.score-inputs input{min-width:0;width:50%}
+.site-footer{padding:26px 14px 110px;max-width:900px;margin:auto;line-height:1.7}
+.footer-links,.footer-social{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.footer-links a,.footer-social a{font-weight:800;color:var(--blue);text-decoration:none;font-size:.78rem}
+.site-footer p{max-width:700px;margin:10px auto 15px;font-size:.76rem}
+.admin-content-tools{margin-top:30px}
+@media(max-width:900px){.top-links>a{font-size:.7rem;padding:8px 7px}.fixtures-grid,.results-grid,.announcements-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){
+ .top-links{display:none;position:absolute;top:70px;left:12px;right:12px;z-index:80;max-height:75vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow);flex-direction:column;align-items:stretch}
+ .top-links.open{display:flex}.top-links>a{font-size:.82rem;padding:11px}.more-menu-items{position:static;box-shadow:none;border:0;padding-left:16px}.more-menu summary{padding:11px}
+ .hero{min-height:0}.hero-actions{width:100%}.hero-actions .btn{flex:1}
+ .fixtures-grid,.results-grid,.announcements-grid,.steps-grid,.stats-dashboard-grid{grid-template-columns:1fr}
+ .vip-promo{align-items:flex-start}.vip-promo-mark{width:86px;height:86px;flex-basis:86px;border-radius:24px}.vip-promo-mark i{font-size:2rem}.vip-promo-mark span{font-size:.45rem}
+ .vip-promo ul{grid-template-columns:1fr}
+ .feature-pick{padding:20px}.feature-pick-content>.date-chip{float:none;display:inline-flex;margin-top:10px}
+ .tips-table tbody tr{grid-template-columns:minmax(0,1fr) auto}
+ .site-footer{padding-bottom:110px}
+}
+@media(max-width:420px){.hero-actions{flex-direction:column}.hero-actions .btn{width:100%}.vip-promo{display:block}.vip-promo-mark{display:none}.fixture-card,.result-card,.announcement-card{padding:15px}}
+</style>
+
 </head>
 <body data-theme="light">
 <header>
  <div class="wrap header-inner">
   <a class="brand" href="#" id="brandHome" aria-label="Banker Tips home"><span class="brand-mark"><img src="images/bankertipslogo.png" alt="Banker Tips logo"></span><span class="brand-copy"><span class="brand-name">BANKER <span>TIPS</span></span><span class="brand-tagline">FOOTBALL INTELLIGENCE</span></span></a>
   <div class="head-actions">
-   <nav class="top-links" id="topLinks" aria-label="Account navigation">
+   <nav class="top-links" id="topLinks" aria-label="Main navigation">
+    <a href="/" data-route="/">Home</a>
+    <a href="/free-tips" data-route="/free-tips">Free Tips</a>
+    <a href="/premium-tips" data-route="/premium-tips">VIP Tips</a>
+    <a href="/my-account" data-route="/my-account">My Account</a>
+    <details class="more-menu"><summary>More <i class="fa-solid fa-chevron-down"></i></summary><div class="more-menu-items">
+      <a href="/free-tips-history" data-route="/free-tips-history">Free Tips History</a>
+      <a href="/vip-tips-history" data-route="/vip-tips-history">VIP Tips History</a>
+      <a href="/performance" data-route="/performance">Performance</a>
+      <a href="/payment-history" data-route="/payment-history">Payment History</a>
+      <a href="/contact" data-route="/contact">Contact Us</a>
+      <a href="/about" data-route="/about">About Us</a>
+    </div></details>
+    <button class="btn secondary" id="headerVip"><i class="fa-solid fa-crown"></i> Join VIP</button>
     <button class="btn secondary" id="registerNavButton"><i class="fa-solid fa-user-plus"></i> Register</button>
     <button class="btn" id="authNavButton" data-open="loginModal"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
-    <button class="btn secondary" id="headerVip"><i class="fa-solid fa-crown"></i> VIP Access</button>
    </nav>
    <button class="icon-btn" id="installAppButton" aria-label="Install Banker Tips" title="Install app" style="display:none"><i class="fa-solid fa-download"></i></button>
    <button class="icon-btn" id="notifyButton" aria-label="Enable notifications" title="Enable reminders"><i class="fa-regular fa-bell"></i></button>
@@ -722,16 +812,16 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 
 <main class="wrap">
  <section class="hero">
-  <div><div class="eyebrow"><i class="fa-solid fa-chart-line"></i> DAILY MATCH INTELLIGENCE</div><h1>Best!<br>Soccer Predictions</h1><p>Get daily football tips, expert match analysis, and honest results. Stay informed, check every prediction, and make smarter choices.</p><button class="btn" id="heroVip"><i class="fa-solid fa-crown"></i> Get VIP Access</button></div>
+  <div><div class="eyebrow"><i class="fa-solid fa-chart-line"></i> DAILY MATCH INTELLIGENCE</div><h1>BANKER TIPS<br><span style="font-size:.62em;letter-spacing:-.02em">Your Daily Football Predictions</span></h1><p>Explore daily football predictions, match analysis and exclusive premium tips. Review our recorded results and make informed decisions.</p><div class="hero-actions"><a class="btn" href="/free-tips" data-route="/free-tips"><i class="fa-solid fa-futbol"></i> Explore Free Tips</a><button class="btn hero-vip-btn" id="heroVip"><i class="fa-solid fa-crown"></i> Join VIP</button></div></div>
   <div class="hero-icon"><i class="fa-solid fa-futbol"></i></div>
  </section>
 
  <section class="panel" id="subscriptionPanel">
   <div class="section-head"><div><h2>Choose Your VIP Subscription</h2><p>Choose a plan to renew your access. Payment confirmation is required before premium tips unlock.</p></div></div>
   <div class="grid-3">
-   <article class="info-card subscription-card"><i class="fa-solid fa-bolt"></i><h3>Daily VIP</h3><p class="package-price">Ksh 150 <span>/ daily access</span></p><p>2–5 odds · One-day package</p><button class="btn choose-package" data-package="daily">Choose Daily</button></article>
-   <article class="info-card subscription-card featured-package"><i class="fa-solid fa-calendar-week"></i><h3>Weekly VIP</h3><p class="package-price">Ksh 1,500 <span>/ $15</span></p><p>5–10 odds · Two tickets daily · 7-day access</p><button class="btn choose-package" data-package="weekly">Choose Weekly</button></article>
-   <article class="info-card subscription-card"><i class="fa-solid fa-crown"></i><h3>Monthly VIP</h3><p class="package-price">Ksh 3,500 <span>/ $35</span></p><p>10–15 odds · HT/FT and Correct Score · VIP support</p><button class="btn choose-package" data-package="monthly">Choose Monthly</button></article>
+   <article class="info-card subscription-card"><i class="fa-solid fa-bolt"></i><h3>Daily VIP</h3><p class="package-price"><span data-package-price="daily">KSh 150</span> <span>/ daily access</span></p><p>2–5 odds · One-day package</p><button class="btn choose-package" data-package="daily">Choose Daily</button></article>
+   <article class="info-card subscription-card featured-package"><i class="fa-solid fa-calendar-week"></i><h3>Weekly VIP</h3><p class="package-price"><span data-package-price="weekly">KSh 1,500</span> <span>/ weekly access</span></p><p>5–10 odds · Two tickets daily · 7-day access</p><button class="btn choose-package" data-package="weekly">Choose Weekly</button></article>
+   <article class="info-card subscription-card"><i class="fa-solid fa-crown"></i><h3>Monthly VIP</h3><p class="package-price"><span data-package-price="monthly">KSh 3,500</span> <span>/ monthly access</span></p><p>10–15 odds · HT/FT and Correct Score · VIP support</p><button class="btn choose-package" data-package="monthly">Choose Monthly</button></article>
   </div>
   <div class="notice" style="margin-top:16px"><i class="fa-solid fa-shield-halved"></i> Existing members can select a package to continue to secure payment. VIP access is restored only after payment is verified.</div><div class="form-actions"><button class="btn ghost" type="button" id="subscriptionHomeButton" data-panel="freePanel"><i class="fa-solid fa-house"></i> Go to Home / Free Tips</button></div>
  </section>
@@ -739,10 +829,56 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
  <section class="panel active" id="freePanel">
   <div class="section">
    <div class="section-head"><div><h2>Today's Free Tips</h2><p>Best selection for today </p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
-   <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Preparing today’s selections…</div></div>
-   <div class="form-actions"><button class="btn secondary" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</button><button class="btn ghost" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button></div>
+   <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Date</th><th>Match</th><th>Prediction</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Preparing today’s selections…</div></div>
+   <div class="form-actions"><a class="btn secondary" href="/free-tips-history" data-route="/free-tips-history"><i class="fa-solid fa-list"></i> View All Free Tips</a><button class="btn secondary" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</button><button class="btn ghost" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button></div>
   </div>
-  <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results do not guarantee future outcomes.</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="statsSettled">—</strong><span>Settled tips</span></div><div class="summary-tile"><strong id="statsWins">—</strong><span>Wins recorded</span></div><div class="summary-tile"><strong id="statsWinRate">—</strong><span>Win rate (void excluded)</span></div></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
+
+  <section class="section" id="predictionOfDaySection">
+   <div class="section-head"><div><h2>Prediction of the Day</h2><p>Only an administrator-selected free prediction is featured here.</p></div><span class="date-chip">Admin selected</span></div>
+   <div class="feature-pick card" id="featuredTipCard"><div class="feature-pick-empty"><i class="fa-solid fa-star"></i><strong>No featured prediction selected</strong><span>The administrator has not selected a Prediction of the Day yet.</span></div></div>
+  </section>
+  <section class="section" id="fixturesSection">
+   <div class="section-head"><div><h2>Today's Fixtures</h2><p>Fixture information entered by the Banker Tips team.</p></div><span class="date-chip" id="fixturesDate">Today</span></div>
+   <div class="fixtures-grid" id="fixturesGrid"><div class="empty-dashboard">Loading today's fixtures…</div></div>
+  </section>
+  <section class="section" id="latestResultsSection">
+   <div class="section-head"><div><h2>Latest Results</h2><p>Recently settled free predictions with recorded outcomes.</p></div><a class="btn secondary small" href="/free-tips-history" data-route="/free-tips-history">View Results</a></div>
+   <div class="results-grid" id="latestResultsGrid"><div class="empty-dashboard">Loading latest results…</div></div>
+  </section>
+  <section class="section" id="announcementsSection">
+   <div class="section-head"><div><h2>Latest Announcements</h2><p>Updates from the Banker Tips team.</p></div></div>
+   <div class="announcements-grid" id="announcementsGrid"><div class="empty-dashboard">Loading announcements…</div></div>
+  </section>
+  <section class="section" id="vipPromotionSection">
+   <div class="vip-promo">
+    <div class="vip-promo-copy"><span class="eyebrow">BANKER TIPS VIP</span><h2>More insight. One member dashboard.</h2><p>Access premium selections, VIP history and membership tools after your subscription payment is verified.</p>
+     <ul><li><i class="fa-solid fa-check"></i> Premium football predictions</li><li><i class="fa-solid fa-check"></i> VIP tips history</li><li><i class="fa-solid fa-check"></i> Clear membership status</li><li><i class="fa-solid fa-check"></i> Secure M-Pesa checkout</li></ul>
+     <div class="hero-actions"><a class="btn" href="/vip-packages" data-route="/vip-packages">View VIP Packages</a><a class="btn secondary" href="/premium-tips" data-route="/premium-tips">View VIP Tips</a><button class="btn secondary" id="homeVipJoin" type="button">Subscribe Now</button></div>
+    </div><div class="vip-promo-mark"><i class="fa-solid fa-crown"></i><span>PREMIUM ACCESS</span></div>
+   </div>
+  </section>
+  <section class="section">
+   <div class="section-head"><div><h2>Why Choose Banker Tips?</h2><p>Football insights with transparent records and secure member access.</p></div></div>
+   <div class="grid-3 why-grid">
+    <article class="info-card"><i class="fa-solid fa-calendar-day"></i><h3>Daily predictions</h3><p>Check available daily selections and match information.</p></article>
+    <article class="info-card"><i class="fa-solid fa-layer-group"></i><h3>Free and VIP tips</h3><p>Choose public predictions or verified premium membership.</p></article>
+    <article class="info-card"><i class="fa-solid fa-chart-line"></i><h3>Match analysis</h3><p>Review the selection, competition and listed odds.</p></article>
+    <article class="info-card"><i class="fa-solid fa-list-check"></i><h3>Transparent history</h3><p>Check historical predictions and settled outcomes.</p></article>
+    <article class="info-card"><i class="fa-solid fa-shield-halved"></i><h3>Secure accounts</h3><p>Account sessions and VIP permissions are checked by the server.</p></article>
+    <article class="info-card"><i class="fa-solid fa-headset"></i><h3>Customer support</h3><p>Contact the published support channel for account assistance.</p></article>
+   </div>
+  </section>
+  <section class="section">
+   <div class="section-head"><div><h2>How to Join VIP</h2><p>Three straightforward steps to premium membership.</p></div></div>
+   <div class="steps-grid">
+    <article class="step-card"><span>01</span><h3>Create your account</h3><p>Register with your email and Kenyan mobile number.</p></article>
+    <article class="step-card"><span>02</span><h3>Select a VIP package</h3><p>Choose daily, weekly or monthly access.</p></article>
+    <article class="step-card"><span>03</span><h3>Complete payment</h3><p>Pay securely and wait for provider verification.</p></article>
+   </div>
+   <div class="form-actions"><a class="btn" href="/vip-packages" data-route="/vip-packages">Join VIP</a></div>
+  </section>
+
+  <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results do not guarantee future outcomes.</p></div></div><div class="stats-dashboard-grid"><article class="stat-card"><span>Total Predictions</span><strong id="statsSettled">—</strong><small>Settled records</small></article><article class="stat-card"><span>Winning Predictions</span><strong id="statsWins">—</strong><small>Recorded wins</small></article><article class="stat-card"><span>Lost Predictions</span><strong id="statsLosses">—</strong><small>Recorded losses</small></article><article class="stat-card"><span>Overall Win Rate</span><strong id="statsWinRate">—</strong><small>Voids excluded</small></article></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
   <div class="section grid-3">
    <article class="info-card"><i class="fa-solid fa-magnifying-glass-chart"></i><h3>Thoughtful analysis</h3><p>Review match selections and odds before making your own decisions.</p></article>
    <article class="info-card"><i class="fa-solid fa-lock"></i><h3>Member access</h3><p>Premium content is available to approved VIP members only.</p></article>
@@ -763,7 +899,7 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 
  <section class="panel" id="premiumPanel">
   <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
-  <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
+  <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Date</th><th>Match</th><th>Prediction</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
  </section>
 
  <section class="panel" id="vipHistoryPanel">
@@ -796,6 +932,7 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
      <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
      <div class="field"><label for="tipStatus">Result</label><select id="tipStatus"><option value="Pending">Pending</option><option value="Won">Won</option><option value="Lost">Lost</option><option value="Void">Void</option></select></div>
+     <div class="field"><label for="tipScore">Final score (optional)</label><input id="tipScore" maxlength="20" placeholder="e.g. 2-1"></div>
     </div>
     <div class="form-actions"><button class="btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save tip</button><button class="btn ghost" type="button" id="clearTip">Clear form</button></div><div class="msg" id="adminMessage" role="status"></div>
    </form></div>
@@ -824,22 +961,96 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
    <div class="table-scroll membership-table-scroll"><table class="membership-table"><thead><tr><th>#</th><th>Subscriber</th><th>Package</th><th>Payment date &amp; time</th><th>Status</th><th>Membership expiry</th><th>Admin action</th></tr></thead><tbody id="adminUsersRows"><tr><td colspan="7">Load members after admin authentication.</td></tr></tbody></table></div>
    <div class="notice" id="membersNotice">Confirm each payment in your payment provider or transaction records before approving membership. Times are displayed in East Africa Time (EAT).</div>
   </div>
+
+  <div class="section">
+   <div class="card pad">
+    <h3>VIP subscription packages</h3><p class="subtext">Update the KES prices used by the public package display and server-side payment verification.</p>
+    <form id="adminPackageForm"><div class="form-grid">
+     <div class="field"><label for="adminDailyPrice">Daily VIP (KES)</label><input id="adminDailyPrice" type="number" min="1" max="1000000" step="1" required></div>
+     <div class="field"><label for="adminWeeklyPrice">Weekly VIP (KES)</label><input id="adminWeeklyPrice" type="number" min="1" max="1000000" step="1" required></div>
+     <div class="field"><label for="adminMonthlyPrice">Monthly VIP (KES)</label><input id="adminMonthlyPrice" type="number" min="1" max="1000000" step="1" required></div>
+    </div><div class="form-actions"><button class="btn" type="submit">Save package prices</button><button class="btn ghost" id="packageReload" type="button">Reload prices</button></div><div class="msg" id="packageMessage" role="status"></div></form>
+   </div>
+  </div>
+  <div class="section admin-content-tools">
+   <div class="section-head"><div><h2>Homepage content management</h2><p>Manage fixture listings, featured predictions and public announcements.</p></div></div>
+   <div class="admin-layout">
+    <div class="card pad">
+     <h3>Fixture manager</h3>
+     <form id="fixtureForm">
+      <input type="hidden" id="fixtureId">
+      <div class="form-grid">
+       <div class="field"><label for="fixtureDate">Date</label><input type="date" id="fixtureDate" required></div>
+       <div class="field"><label for="fixtureTime">Kickoff</label><input type="time" id="fixtureTime"></div>
+       <div class="field"><label for="fixtureHome">Home team</label><input id="fixtureHome" maxlength="120" required></div>
+       <div class="field"><label for="fixtureAway">Away team</label><input id="fixtureAway" maxlength="120" required></div>
+       <div class="field full"><label for="fixtureLeague">League / competition</label><input id="fixtureLeague" maxlength="120"></div>
+       <div class="field"><label for="fixtureStatus">Match status</label><select id="fixtureStatus"><option>Scheduled</option><option>Live</option><option>Finished</option><option>Postponed</option><option>Cancelled</option></select></div>
+       <div class="field"><label>Final score (finished only)</label><div class="score-inputs"><input id="fixtureHomeScore" type="number" min="0" placeholder="Home"><input id="fixtureAwayScore" type="number" min="0" placeholder="Away"></div></div>
+      </div>
+      <div class="form-actions"><button class="btn" type="submit">Save fixture</button><button class="btn ghost" id="fixtureClear" type="button">Clear</button></div><div class="msg" id="fixtureMessage" role="status"></div>
+     </form>
+    </div>
+    <div class="card pad">
+     <h3>Announcement manager</h3>
+     <form id="announcementForm">
+      <input type="hidden" id="announcementId">
+      <div class="form-grid">
+       <div class="field full"><label for="announcementTitle">Title</label><input id="announcementTitle" maxlength="120" required></div>
+       <div class="field full"><label for="announcementBody">Message</label><textarea id="announcementBody" rows="4" maxlength="1200" required></textarea></div>
+       <div class="field"><label for="announcementPriority">Priority (0–100)</label><input id="announcementPriority" type="number" min="0" max="100" value="0"></div>
+       <div class="field"><label for="announcementActive">Visibility</label><select id="announcementActive"><option value="true">Published</option><option value="false">Hidden</option></select></div>
+       <div class="field"><label for="announcementStart">Start (optional)</label><input id="announcementStart" type="datetime-local"></div>
+       <div class="field"><label for="announcementEnd">End (optional)</label><input id="announcementEnd" type="datetime-local"></div>
+      </div>
+      <div class="form-actions"><button class="btn" type="submit">Save announcement</button><button class="btn ghost" id="announcementClear" type="button">Clear</button></div><div class="msg" id="announcementMessage" role="status"></div>
+     </form>
+    </div>
+   </div>
+   <div class="card admin-members"><div class="pad"><h3>Fixtures</h3><div class="table-scroll"><table><thead><tr><th>Date</th><th>Match / League</th><th>Status / Score</th><th>Actions</th></tr></thead><tbody id="adminFixturesRows"><tr><td colspan="4">Loading fixtures…</td></tr></tbody></table></div></div></div>
+   <div class="card admin-members"><div class="pad"><h3>Announcements</h3><div class="table-scroll"><table><thead><tr><th>Announcement</th><th>Visibility</th><th>Actions</th></tr></thead><tbody id="adminAnnouncementsRows"><tr><td colspan="3">Loading announcements…</td></tr></tbody></table></div></div></div>
+  </div>
  </section>
+
+ <section class="panel" id="performancePanel">
+  <div class="section-head"><div><h2>Prediction Performance</h2><p>Calculated from actual settled prediction records. Pending selections are excluded.</p></div></div>
+  <div class="stats-dashboard-grid">
+   <article class="stat-card"><span>Total Predictions</span><strong id="performanceTotal">—</strong><small>Settled records</small></article>
+   <article class="stat-card"><span>Winning Predictions</span><strong id="performanceWins">—</strong><small>Recorded wins</small></article>
+   <article class="stat-card"><span>Lost Predictions</span><strong id="performanceLosses">—</strong><small>Recorded losses</small></article>
+   <article class="stat-card"><span>Overall Win Rate</span><strong id="performanceRate">—</strong><small>Wins ÷ (wins + losses)</small></article>
+  </div>
+  <div class="notice" id="performanceMethod">Statistics are calculated from settled database records. Void tips are excluded from the win-rate denominator.</div>
+ </section>
+ <section class="panel" id="aboutPanel">
+  <div class="card pad editorial-page"><span class="eyebrow">ABOUT BANKER TIPS</span><h1>Football insights with transparent records</h1><p>Banker Tips provides daily football predictions, match information, historical records and optional premium membership. Predictions are informational and are not guarantees of a particular match outcome.</p><p>Customers can review free selections, access VIP content when membership is active, and manage their account and payment history through the platform.</p></div>
+ </section>
+ <section class="panel" id="termsPanel">
+  <div class="card pad editorial-page"><span class="eyebrow">PLATFORM INFORMATION</span><h1>Terms and Conditions</h1><p>Banker Tips provides football prediction information for general entertainment and informational purposes. All predictions involve uncertainty. No outcome or profit is guaranteed.</p><p>Users are responsible for complying with local laws and deciding whether to place any wager. Never stake money you cannot afford to lose. Account credentials must be kept private. VIP access is subject to successful payment verification and a valid membership period.</p><p>Contact support for account or payment issues. Keep provider receipts when requesting payment assistance.</p></div>
+ </section>
+ <section class="panel" id="privacyPanel">
+  <div class="card pad editorial-page"><span class="eyebrow">YOUR INFORMATION</span><h1>Privacy Policy</h1><p>Banker Tips uses account information to provide authentication, membership, payment and customer-support services. Payment status is verified through the configured payment provider.</p><p>Passwords are stored as secure password hashes. Session tokens are held in HTTP-only cookies. Payment and account records are accessible only through authorized server endpoints.</p><p>Do not share your password, M-Pesa PIN or one-time verification codes. Contact support if you need help with your account information.</p></div>
+ </section>
+
 </main>
-<footer>
-  © Copyright <span id="year"></span> | Banker Tips - Rights reserved.
+<footer class="site-footer">
+ <div class="footer-links"><a href="/about" data-route="/about">About Us</a><a href="/terms" data-route="/terms">Terms &amp; Conditions</a><a href="/privacy" data-route="/privacy">Privacy Policy</a><a href="/contact" data-route="/contact">Contact Us</a></div>
+ <p>Responsible gambling: 18+ only where legally permitted. Betting involves risk. Never wager more than you can afford to lose. Banker Tips does not guarantee winning bets.</p>
+ <div class="footer-social"><a href="https://wa.me/254101047400" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a><a href="mailto:" id="footerEmail" class="hidden"><i class="fa-regular fa-envelope"></i> Email</a><a href="#" id="footerFacebook" class="hidden" target="_blank" rel="noopener noreferrer">Facebook</a><a href="#" id="footerTelegram" class="hidden" target="_blank" rel="noopener noreferrer">Telegram</a></div>
+ © Copyright <span id="year"></span> | Banker Tips - Rights reserved.
 </footer>
 <a class="whatsapp-float" href="https://wa.me/254101047400?text=Hello%20Banker%20Tips%20Support%2C%20I%20need%20assistance." target="_blank" rel="noopener noreferrer" aria-label="Chat with Banker Tips support on WhatsApp" title="WhatsApp Support"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i><span class="whatsapp-label">WhatsApp Support</span></a>
 <nav class="bottom-nav" aria-label="Main navigation">
  <button class="active" data-panel="freePanel"><i class="fa-solid fa-futbol"></i><span>Home</span></button>
  <button data-panel="premiumPanel" id="bottomVip"><i class="fa-solid fa-crown"></i><span>VIP</span></button>
  <button data-panel="paymentPanel" id="bottomAccount"><i class="fa-solid fa-user-circle"></i><span>My Account</span></button>
+ <button type="button" id="bottomMore"><i class="fa-solid fa-ellipsis"></i><span>More</span></button>
  <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
 </nav>
 
 <div class="modal registration-modal auth-modal" id="registerModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-register-layout"><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>VIP MEMBERSHIP</small></span></div><span class="auth-eyebrow">CREATE YOUR ACCOUNT</span><h2 id="registerTitle">Join Banker Tips</h2><p class="auth-intro">Create your account, choose your VIP plan and continue to secure M-Pesa checkout.</p><div class="reg-step" aria-hidden="true"><span class="active"></span><span class="active"></span><span></span></div><form id="registerForm"><input type="hidden" id="selectedPackage" value=""><input type="hidden" id="regCountry" value="KE"><div class="reg-price-note"><i class="fa-solid fa-shield-halved"></i> Kenya checkout · Secure M-Pesa payment</div><div class="field"><label for="regPhone">M-Pesa phone number</label><input type="tel" id="regPhone" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0712345678 or 254712345678" required><small class="subtext" id="regPhoneHelp">Enter a Kenyan Safaricom number, e.g. 0712345678.</small></div><div class="field" style="margin-top:15px"><label>Choose your VIP package</label></div><div class="reg-plan-grid"><button type="button" class="reg-plan" data-reg-package="daily"><strong>Daily VIP</strong><small data-ke-price="KSh 150">KSh 150</small><small>1 day</small></button><button type="button" class="reg-plan" data-reg-package="weekly"><strong>Weekly VIP</strong><small data-ke-price="KSh 1,500">KSh 1,500</small><small>7 days</small></button><button type="button" class="reg-plan" data-reg-package="monthly"><strong>Monthly VIP</strong><small data-ke-price="KSh 3,500">KSh 3,500</small><small>30 days</small></button></div><div class="reg-price-note" id="regPriceNote"><i class="fa-solid fa-circle-info"></i> Choose a package to see your subscription selection before checkout.</div><div class="field" style="margin-top:14px"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Create password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" placeholder="At least 10 characters" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn auth-submit" type="submit" id="registerSubmit"><i class="fa-solid fa-arrow-right"></i> Create account &amp; continue to payment</button><div class="msg" id="registerMessage" role="status"></div><div class="flow-footnote"><i class="fa-solid fa-lock"></i><span>Your VIP access stays locked until payment is verified. Never share your mobile-money PIN.</span></div></form><p class="auth-switch-mobile">Already have an account? <button type="button" data-switch-auth="login">Sign in</button></p></div><aside class="auth-side auth-side-register"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-trophy"></i></span><span class="auth-eyebrow">SMARTER FOOTBALL INSIGHTS</span><h2>Make every pick count.</h2><p>Unlock premium football predictions, membership updates and your VIP account in one place.</p><div class="auth-benefit"><i class="fa-solid fa-circle-check"></i> Exclusive VIP selections</div><div class="auth-benefit"><i class="fa-solid fa-shield-halved"></i> Secure M-Pesa checkout</div><div class="auth-benefit"><i class="fa-solid fa-clock"></i> Clear membership validity</div><div class="auth-side-bottom">Already a member? <button type="button" data-switch-auth="login">Sign in</button></div></div></aside></div></div></div>
 
-<div class="modal auth-modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="loginModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-login-layout"><aside class="auth-side auth-side-login"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-futbol"></i></span><span class="auth-eyebrow">WELCOME BACK</span><h2>Your next winning insight starts here.</h2><p>Sign in to manage your membership and access premium tips when your VIP payment is verified.</p><div class="auth-benefit"><i class="fa-solid fa-bolt"></i> Daily football insights</div><div class="auth-benefit"><i class="fa-solid fa-user-shield"></i> Personal member dashboard</div><div class="auth-side-bottom">New to Banker Tips? <button type="button" data-switch-auth="register">Create account</button></div></div></aside><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>MEMBER ACCESS</small></span></div><span class="auth-eyebrow">MEMBER SIGN IN</span><h2 id="loginTitle">Welcome back</h2><p class="auth-intro">Sign in to check your membership status and manage your VIP access.</p><form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input type="email" id="loginEmail" autocomplete="username" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:14px"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" maxlength="128" placeholder="Enter your password" required></div><button class="btn auth-submit" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Sign in securely</button><div class="msg" id="loginMessage" role="status"></div></form><p class="auth-switch-mobile">Don't have an account? <button type="button" data-switch-auth="register">Create one</button></p><div class="auth-security-note"><i class="fa-solid fa-lock"></i> Your account details are sent securely to the Banker Tips server.</div></div></div></div></div><div class="modal" id="renewModal" role="dialog" aria-modal="true" aria-labelledby="renewTitle"><div class="modal-box" style="max-width:520px"><button class="close" data-close="renewModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div style="width:58px;height:58px;border-radius:18px;background:#fff7df;color:#b77908;display:grid;place-items:center;font-size:1.5rem;margin-bottom:16px"><i class="fa-solid fa-crown"></i></div><span class="eyebrow">BANKER TIPS VIP MEMBERSHIP</span><h2 id="renewTitle">Your VIP subscription needs renewal</h2><p>Your membership has expired or is awaiting approval, so premium tips are currently locked. Choose a plan below to continue to payment. Access returns after the payment is successfully verified.</p><div style="display:grid;gap:10px;margin:18px 0"><button class="btn choose-package" data-package="daily"><i class="fa-solid fa-bolt"></i> Renew Daily VIP · KSh 150</button><button class="btn choose-package" data-package="weekly"><i class="fa-solid fa-calendar-week"></i> Renew Weekly VIP · KSh 1,500</button><button class="btn choose-package" data-package="monthly"><i class="fa-solid fa-crown"></i> Renew Monthly VIP · KSh 3,500</button></div><div class="notice"><i class="fa-solid fa-lock"></i> Secure checkout · No access is granted from a pending payment.</div></div></div>
+<div class="modal auth-modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="loginModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-login-layout"><aside class="auth-side auth-side-login"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-futbol"></i></span><span class="auth-eyebrow">WELCOME BACK</span><h2>Your next winning insight starts here.</h2><p>Sign in to manage your membership and access premium tips when your VIP payment is verified.</p><div class="auth-benefit"><i class="fa-solid fa-bolt"></i> Daily football insights</div><div class="auth-benefit"><i class="fa-solid fa-user-shield"></i> Personal member dashboard</div><div class="auth-side-bottom">New to Banker Tips? <button type="button" data-switch-auth="register">Create account</button></div></div></aside><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>MEMBER ACCESS</small></span></div><span class="auth-eyebrow">MEMBER SIGN IN</span><h2 id="loginTitle">Welcome back</h2><p class="auth-intro">Sign in to check your membership status and manage your VIP access.</p><form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input type="email" id="loginEmail" autocomplete="username" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:14px"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" maxlength="128" placeholder="Enter your password" required></div><button class="btn auth-submit" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Sign in securely</button><div class="msg" id="loginMessage" role="status"></div></form><p class="auth-switch-mobile">Don't have an account? <button type="button" data-switch-auth="register">Create one</button></p><div class="auth-security-note"><i class="fa-solid fa-lock"></i> Your account details are sent securely to the Banker Tips server.</div></div></div></div></div><div class="modal" id="renewModal" role="dialog" aria-modal="true" aria-labelledby="renewTitle"><div class="modal-box" style="max-width:520px"><button class="close" data-close="renewModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div style="width:58px;height:58px;border-radius:18px;background:#fff7df;color:#b77908;display:grid;place-items:center;font-size:1.5rem;margin-bottom:16px"><i class="fa-solid fa-crown"></i></div><span class="eyebrow">BANKER TIPS VIP MEMBERSHIP</span><h2 id="renewTitle">Your VIP subscription needs renewal</h2><p>Your membership has expired or is awaiting approval, so premium tips are currently locked. Choose a plan below to continue to payment. Access returns after the payment is successfully verified.</p><div style="display:grid;gap:10px;margin:18px 0"><button class="btn choose-package" data-package="daily"><i class="fa-solid fa-bolt"></i> Renew Daily VIP · <span data-package-price="daily">KSh 150</span></button><button class="btn choose-package" data-package="weekly"><i class="fa-solid fa-calendar-week"></i> Renew Weekly VIP · <span data-package-price="weekly">KSh 1,500</span></button><button class="btn choose-package" data-package="monthly"><i class="fa-solid fa-crown"></i> Renew Monthly VIP · <span data-package-price="monthly">KSh 3,500</span></button></div><div class="notice"><i class="fa-solid fa-lock"></i> Secure checkout · No access is granted from a pending payment.</div></div></div>
 <div class="modal" id="vipModal" role="dialog" aria-modal="true" aria-labelledby="vipTitle"><div class="modal-box"><button class="close" data-close="vipModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="vipTitle">Unlock VIP tips</h2><p>Sign in to access today's Premium Tips.</p><button class="btn" id="vipLoginButton"><i class="fa-solid fa-right-to-bracket"></i> Login to verify access</button><div class="msg" id="vipMessage" role="status"></div></div></div>
 
 <script>
@@ -910,7 +1121,7 @@ function openModal(id) { const modal=$(id); if(!modal) return; modal.classList.a
 function closeModal(id) { const modal=$(id); if(!modal) return; modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
 function setPanel(panelId) {
   renderUserProfile();
-  const permitted = ['freePanel','historyPanel','premiumPanel','vipHistoryPanel','paymentPanel','adminPanel','subscriptionPanel'];
+  const permitted = ['freePanel','historyPanel','premiumPanel','vipHistoryPanel','paymentPanel','adminPanel','subscriptionPanel','performancePanel','aboutPanel','termsPanel','privacyPanel'];
   if (!permitted.includes(panelId)) return;
   if (panelId === 'adminPanel' && String(currentUser?.role || '').toLowerCase() !== 'admin') {
     if (currentUser) alert('Your account does not have admin permissions.');
@@ -923,10 +1134,11 @@ function setPanel(panelId) {
   $('menuToggle').setAttribute('aria-expanded','false');
   window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='historyPanel') loadHistory();
+  if(panelId==='performancePanel') loadPerformanceStats();
   if(panelId==='subscriptionPanel') window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='paymentPanel' && typeof loadCustomerPayments==='function') loadCustomerPayments();
   if(panelId==='premiumPanel') loadPremium();
-  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
+  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminContent(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
 }
 function showEmpty(tbodyId, columns, message) {
   $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
@@ -939,7 +1151,7 @@ function renderTipRows(tips, target, withDate=false) {
     $(target).innerHTML += totalOddsRow([],withDate?6:5);
     return;
   }
-  const rows=tips.map(t => `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
+  const rows=tips.map(t => `<tr><td>${escapeHTML(withDate?prettyDate(t.date):prettyDate(t.date))}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
 async function loadFreeTips() {
@@ -1166,7 +1378,8 @@ async function beginRegistration(packageKey){
   registrationPackage=packageKey; $('selectedPackage').value=packageKey; updateRegistrationFlow();
   setPanel('freePanel'); openModal('registerModal');
 }
-const packagePrices={daily:150,weekly:1500,monthly:3500};
+const publicPackagePrices = {daily:150, weekly:1500, monthly:3500};
+const packagePrices=publicPackagePrices;
 function updatePaymentUI(){
   const input=$('mpesaPhone');
   if(input && currentUser && !input.value) input.value=currentUser.phoneNumber||'';
@@ -1297,7 +1510,7 @@ function showAdminMessage(message,kind='info') { showMessage('adminMessage',mess
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
   const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip].some(v=>String(v||'').toLowerCase().includes(q)));
-  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span></td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
+  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}${t.finalScore?' · Score '+escapeHTML(t.finalScore):''}</span></td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button>${t.type==='free'?`<button class="btn secondary small" data-feature-tip="${escapeHTML(t.id||t._id||'')}" data-featured="${t.isFeatured?'true':'false'}">${t.isFeatured?'Unfeature':'Feature'}</button>`:''}<button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
 }
 async function loadAdminTips() {
   const user=await checkSession();
@@ -1411,32 +1624,37 @@ async function handleMembershipAction(event) {
 async function saveTip(event) {
   event.preventDefault(); hideMessage('adminMessage');
   const id=$('tipId').value;
-  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value,finalScore:$('tipScore')?.value.trim()||''};
   if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
   try {
     const user=await checkSession();
     if(!user || String(user.role||'').toLowerCase()!=='admin') throw new Error('Admin authentication is required.');
     const path=id?`/api/admin/tips/${encodeURIComponent(id)}`:'/api/admin/tips';
     const data=await api(path,{method:id?'PUT':'POST',body:JSON.stringify(payload)});
-    showAdminMessage(data.message||(id?'Tip updated.':'Tip saved.'),'ok'); clearTipForm(); await loadAdminTips(); await loadFreeTips();
+    showAdminMessage(data.message||(id?'Tip updated.':'Tip saved.'),'ok'); clearTipForm(); await loadAdminTips(); await loadHomepageDashboard(true);
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
 async function adminRowAction(event) {
-  const edit=event.target.closest('[data-edit-tip]'), del=event.target.closest('[data-delete-tip]');
-  if(!edit&&!del) return;
-  const id=(edit||del).dataset[edit?'editTip':'deleteTip'];
+  const edit=event.target.closest('[data-edit-tip]'), del=event.target.closest('[data-delete-tip]'), feature=event.target.closest('[data-feature-tip]');
+  if(!edit&&!del&&!feature) return;
+  const id=(edit||del||feature).dataset[edit?'editTip':del?'deleteTip':'featureTip'];
   try {
     const user=await checkSession();
     if(!user||String(user.role||'').toLowerCase()!=='admin') throw new Error('Admin authentication is required.');
     if(del) {
       if(!confirm('Delete this tip permanently?')) return;
       await api(`/api/admin/tips/${encodeURIComponent(id)}`,{method:'DELETE'});
-      await loadAdminTips(); await loadFreeTips(); return;
+      await loadAdminTips(); await loadHomepageDashboard(true); return;
+    }
+    if(feature){
+      const makeFeatured=feature.dataset.featured!=='true';
+      await api(`/api/admin/tips/${encodeURIComponent(id)}/featured`,{method:'PATCH',body:JSON.stringify({featured:makeFeatured})});
+      await loadAdminTips();await loadHomepageDashboard(true);showAdminMessage(makeFeatured?'Prediction of the Day updated.':'Featured prediction cleared.','ok');return;
     }
     const data=await api('/api/admin/tips');
     const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
     if(!tip) throw new Error('Tip not found. Reload the list and try again.');
-    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending'; $('tipScore').value=tip.finalScore||'';
     $('tipMatch').focus();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
@@ -1464,7 +1682,7 @@ $('mpesaPaymentForm').addEventListener('submit',handleMpesaPayment);
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.open').forEach(m=>closeModal(m.id))});
-document.querySelectorAll('.bottom-nav [data-panel]').forEach(b=>b.addEventListener('click',()=>setPanel(b.dataset.panel)));
+document.querySelectorAll('.bottom-nav [data-panel]').forEach(b=>b.addEventListener('click',()=>{const map={freePanel:'/free-tips',premiumPanel:'/premium-tips',paymentPanel:'/my-account',adminPanel:'/admin'};if(map[b.dataset.panel]&&window.navigateBankerTips)window.navigateBankerTips(map[b.dataset.panel]);else setPanel(b.dataset.panel);}));
 $('themeToggle').addEventListener('click',()=>{const dark=document.body.dataset.theme!=='dark';document.body.dataset.theme=dark?'dark':'light';$('themeToggle').innerHTML=dark?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';});
 $('menuToggle').addEventListener('click',()=>{const open=$('topLinks').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open));});
 $('brandHome').addEventListener('click',e=>{e.preventDefault();setPanel('freePanel')});
@@ -1479,7 +1697,7 @@ $('headerVip').addEventListener('click',handleVipAccess);
 $('heroVip').addEventListener('click',handleVipAccess);
 $('bottomVip').addEventListener('click',handleVipAccess);
 $('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
-$('refreshTips').addEventListener('click',loadFreeTips);
+$('refreshTips').addEventListener('click',()=>loadHomepageDashboard(true));
 $('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
 $('vipHistoryButton').addEventListener('click',async()=>{if(!currentUser){openModal('vipModal');return;}const expired=currentUser.membershipStatus==='expired'||(currentUser.vipExpiresAt&&new Date(currentUser.vipExpiresAt)<=new Date());if(expired||!(currentUser.membershipStatus==='active'||currentUser.isActivated)){setPanel('subscriptionPanel');openModal('renewModal');return;}setPanel('vipHistoryPanel');loadVipHistory();});
 $('backVipToday').addEventListener('click',()=>setPanel('premiumPanel'));
@@ -1508,16 +1726,146 @@ $('vipDate').textContent=prettyDate(todayISO());
 function renderUserProfile(){const u=currentUser||{};const email=String(u.email||u.emailAddress||'').trim();const name=String(u.name||u.fullName||u.displayName||'').trim()||(email?email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Your Profile');const pkg=({daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'})[String(u.selectedPackage||u.package||'').toLowerCase()]||'No active plan';const active=u.isActivated===true||String(u.membershipStatus||'').toLowerCase()==='active';const expiry=u.vipExpiresAt?new Date(u.vipExpiresAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Not set';const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'BT';const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};set('profileAvatar',initials);set('profileTitle',name);set('profileEmail',email||'Sign in to view your account details');set('profileEmailDetail',email||'—');set('profilePlan',active?pkg:(u.selectedPackage?pkg+' · Pending':'No active plan'));set('profileExpiry',expiry);const status=$('profileStatus');if(status){status.classList.toggle('is-active',active);status.innerHTML='<span class="status-dot"></span> '+(currentUser?(active?'Active':String(u.membershipStatus||'Pending').replace(/_/g,' ')):'Guest');}}
 async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
 function checkExpiryReminder(){try{if(!currentUser?.vipExpiresAt||!('Notification'in window)||Notification.permission!=='granted')return;const expiry=new Date(currentUser.vipExpiresAt);const remaining=expiry-Date.now();if(remaining>0&&remaining<=3*86400000){const key='bt-expiry-reminder-'+currentUser.id+'-'+expiry.toISOString().slice(0,10);if(!sessionStorage.getItem(key)){new Notification('Banker Tips VIP expiry reminder',{body:'Your VIP membership expires '+expiry.toLocaleDateString()+'. Review your subscription to avoid interruption.'});sessionStorage.setItem(key,'1');}}}catch(e){console.debug('Expiry reminder unavailable',e);}}
-async function loadPerformanceStats(){try{const d=await api('/api/stats/performance');$('statsSettled').textContent=d.settled;$('statsWins').textContent=d.wins;$('statsWinRate').textContent=d.winRate===null?'—':d.winRate+'%';$('statsMethod').textContent=d.methodology;}catch(e){$('statsMethod').textContent='Performance statistics are temporarily unavailable.';}}
+async function loadPerformanceStats(){try{const d=await api('/api/stats/performance');renderPerformanceStats(d);}catch(e){$('statsMethod').textContent='Performance statistics are temporarily unavailable.';$('performanceMethod').textContent='Performance statistics are temporarily unavailable.';}}
 async function loadAdminOverview(){try{const d=await api('/api/admin/overview');$('overviewUsers').textContent=d.users.total||0;$('overviewVip').textContent=d.users.active||0;const paid=(d.payments||[]).filter(x=>String(x.status||'').toLowerCase()==='completed').reduce((a,x)=>a+(Number(x.amount)||0),0);$('overviewPaid').textContent='KES '+paid.toLocaleString('en-KE');$('overviewNotice').textContent='Revenue estimate sums completed payment records; reconcile with your provider statement.';}catch(e){$('overviewNotice').textContent=e.message||'Overview unavailable.';}}
 async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)return;body.innerHTML='<tr><td colspan="5">Loading payment records…</td></tr>';try{const d=await api('/api/admin/payments');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.email)}<span class="subtext">${escapeHTML(p.phone||'')}</span></td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference)}<span class="subtext">${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'')}</span></td></tr>`).join(''):'<tr><td colspan="5">No payment records found.</td></tr>';$('paymentsNotice').textContent=`${ps.length} recent payment record(s).`;}catch(e){body.innerHTML=`<tr><td colspan="5">${escapeHTML(e.message)}</td></tr>`;}}
+
+let homepageLoaded = false;
+function setText(id, value) { const el=$(id); if(el) el.textContent=value; }
+function statusClass(status) {
+  const s=String(status||"").toLowerCase();
+  return s==="won"||s==="win"?"won":s==="lost"||s==="lose"?"lost":s==="finished"?"finished":s==="live"?"live":s==="void"?"void":"pending";
+}
+function renderFeaturedTip(tip) {
+  const host=$("featuredTipCard"); if(!host) return;
+  if(!tip){host.innerHTML='<div class="feature-pick-empty"><i class="fa-solid fa-star"></i><strong>No featured prediction selected</strong><span>The administrator has not selected a Prediction of the Day yet.</span></div>';return;}
+  host.innerHTML=`<div class="feature-pick-content"><span class="feature-label"><i class="fa-solid fa-star"></i> PREDICTION OF THE DAY</span><span class="date-chip">${escapeHTML(prettyDate(tip.date))}</span><h3>${escapeHTML(tip.match||"—")}</h3><div class="feature-meta"><span>${escapeHTML(tip.league||"Competition not specified")}</span><span>Kick-off ${escapeHTML(tip.time||"—")}</span></div><div class="feature-pick-bottom"><div><small>Prediction</small><strong>${escapeHTML(tip.tip||"—")}</strong></div><div><small>Odds</small><strong>${escapeHTML(tip.odds??"—")}</strong></div></div></div>`;
+}
+function renderFixtures(fixtures) {
+  const host=$("fixturesGrid"); if(!host) return;
+  if(!fixtures.length){host.innerHTML='<div class="empty-dashboard"><i class="fa-regular fa-calendar-xmark"></i><strong>No fixtures published for today</strong><span>Check back later for fixture updates.</span></div>';return;}
+  host.innerHTML=fixtures.map(f=>`<article class="fixture-card"><div class="fixture-card-top"><span>${escapeHTML(f.league||"Competition")}</span><span class="status ${statusClass(f.status)}">${escapeHTML(f.status||"Scheduled")}</span></div><div class="fixture-teams"><strong>${escapeHTML(f.homeTeam)}</strong><span>VS</span><strong>${escapeHTML(f.awayTeam)}</strong></div><div class="fixture-card-bottom"><span><i class="fa-regular fa-clock"></i> ${escapeHTML(f.kickoffTime||"Time TBC")}</span>${String(f.status).toLowerCase()==="finished"?`<strong>${escapeHTML(f.homeScore)} - ${escapeHTML(f.awayScore)}</strong>`:""}</div></article>`).join("");
+}
+function renderLatestResults(tips) {
+  const host=$("latestResultsGrid"); if(!host) return;
+  if(!tips.length){host.innerHTML='<div class="empty-dashboard"><i class="fa-solid fa-chart-simple"></i><strong>No settled results available yet</strong><span>Completed prediction records will appear here.</span></div>';return;}
+  host.innerHTML=tips.map(t=>`<article class="result-card"><div class="result-card-top"><span>${escapeHTML(prettyDate(t.date))}</span><span class="status ${statusClass(t.status)}">${escapeHTML(t.status||"—")}</span></div><h3>${escapeHTML(t.match||"—")}</h3><p>${escapeHTML(t.tip||"—")} <span>· Odds ${escapeHTML(t.odds??"—")}</span></p><div class="result-score">${escapeHTML(t.finalScore||"Final score not recorded")}</div></article>`).join("");
+}
+function renderAnnouncements(items) {
+  const host=$("announcementsGrid"); if(!host) return;
+  if(!items.length){host.innerHTML='<div class="empty-dashboard"><i class="fa-regular fa-bell"></i><strong>No new announcements</strong><span>Official updates will be published here.</span></div>';return;}
+  host.innerHTML=items.map(a=>`<article class="announcement-card"><span class="announcement-date">${escapeHTML(a.createdAt?new Date(a.createdAt).toLocaleDateString("en-KE",{day:"2-digit",month:"short",year:"numeric"}):"Banker Tips update")}</span><h3>${escapeHTML(a.title)}</h3><p>${escapeHTML(a.body)}</p></article>`).join("");
+}
+async function loadHomepageDashboard(force=false) {
+  if(homepageLoaded&&!force)return;
+  const date=todayISO();
+  try {
+    const d=await api(`/api/homepage?date=${encodeURIComponent(date)}`);
+    if(d.date)setText("todayDate",prettyDate(d.date));
+    lastTips=Array.isArray(d.freeTips)?d.freeTips:[];
+    renderTipRows(lastTips,"freeRows");
+    setText("freeNotice",`${lastTips.length} free prediction(s) available for ${prettyDate(date)}.`);
+    renderFeaturedTip(d.featuredTip||null);
+    renderFixtures(Array.isArray(d.fixtures)?d.fixtures:[]);
+    renderLatestResults(Array.isArray(d.latestResults)?d.latestResults:[]);
+    renderAnnouncements(Array.isArray(d.announcements)?d.announcements:[]);
+    if(d.performance) renderPerformanceStats(d.performance);
+    homepageLoaded=true;
+  } catch(e) {
+    setText("freeNotice","Predictions could not be loaded. No sample matches or results are shown.");
+    ["fixturesGrid","latestResultsGrid","announcementsGrid"].forEach(id=>{const el=$(id);if(el)el.innerHTML='<div class="empty-dashboard">This information is temporarily unavailable.</div>';});
+  }
+}
+function renderPerformanceStats(d) {
+  setText("statsSettled",d.totalPredictions??d.settled??"—");setText("statsWins",d.wins??"—");setText("statsLosses",d.losses??"—");
+  setText("statsWinRate",d.winRate===null||d.winRate===undefined?"—":`${d.winRate}%`);
+  setText("statsMethod",d.methodology||"Settled recorded tips only.");
+  setText("performanceTotal",d.totalPredictions??d.settled??"—");
+  setText("performanceWins",d.wins??"—");setText("performanceLosses",d.losses??"—");
+  setText("performanceRate",d.winRate===null||d.winRate===undefined?"—":`${d.winRate}%`);
+  setText("performanceMethod",d.methodology||"Settled records only.");
+}
+async function loadPublicConfig() {
+  try {
+    const d=await api("/api/public/config");
+    window.bankerSupport=d.support||{};
+    const packages=d.packages||{};
+    for(const key of ["daily","weekly","monthly"]) if(Number.isFinite(Number(packages[key]?.price))) publicPackagePrices[key]=Number(packages[key].price);
+    const fmt=n=>`KSh ${Number(n).toLocaleString("en-KE")}`;
+    document.querySelectorAll("[data-package-price]").forEach(el=>{const key=el.dataset.packagePrice;if(publicPackagePrices[key])el.textContent=fmt(publicPackagePrices[key]);});
+    document.querySelectorAll("[data-ke-price]").forEach(el=>{const key=el.closest("[data-reg-package]")?.dataset.regPackage;if(key&&publicPackagePrices[key])el.textContent=fmt(publicPackagePrices[key]);});
+    if(d.support?.email){const link=$("footerEmail");if(link){link.href=`mailto:${d.support.email}`;link.innerHTML='<i class="fa-regular fa-envelope"></i> '+escapeHTML(d.support.email);link.classList.remove("hidden");}}
+    if(d.support?.whatsapp){const number=String(d.support.whatsapp).replace(/\D/g,"");const url=`https://wa.me/${number}`;const wa=document.querySelector(".whatsapp-float");if(wa)wa.href=url;const footerWa=$("footerWhatsApp");if(footerWa)footerWa.href=url;}
+    if(d.support?.facebook){const el=$("footerFacebook");if(el){el.href=d.support.facebook;el.classList.remove("hidden");}}
+    if(d.support?.telegram){const el=$("footerTelegram");if(el){el.href=d.support.telegram;el.classList.remove("hidden");}}
+  } catch(e){console.warn("Public configuration unavailable; existing server defaults remain in effect.",e.message);}
+}
+function resetFixtureForm(){ $("fixtureForm")?.reset();setText("fixtureId","");$("fixtureId").value="";$("fixtureDate").value=todayISO();$("fixtureStatus").value="Scheduled"; }
+function resetAnnouncementForm(){ $("announcementForm")?.reset();$("announcementId").value="";$("announcementPriority").value="0";$("announcementActive").value="true"; }
+function adminMessage(id,msg,kind="info"){const el=$(id);if(el){el.textContent=msg;el.className=`msg show ${kind}`;}}
+async function loadAdminContent(){
+  const user=await checkSession();if(!user||user.role!=="admin")return;
+  try{
+    const [fd,ad,pd]=await Promise.all([api("/api/admin/fixtures"),api("/api/admin/announcements"),api("/api/admin/packages")]);
+    const fixtures=fd.fixtures||[], announcements=ad.announcements||[], packages=pd.packages||{};
+    $("adminDailyPrice").value=packages.daily??publicPackagePrices.daily;
+    $("adminWeeklyPrice").value=packages.weekly??publicPackagePrices.weekly;
+    $("adminMonthlyPrice").value=packages.monthly??publicPackagePrices.monthly;
+    $("adminFixturesRows").innerHTML=fixtures.length?fixtures.map(f=>`<tr><td>${escapeHTML(prettyDate(f.date))}</td><td><strong>${escapeHTML(f.match)}</strong><span class="subtext">${escapeHTML(f.league||"")}</span></td><td>${escapeHTML(f.status)} ${f.status==="Finished"?`· ${escapeHTML(f.homeScore)}-${escapeHTML(f.awayScore)}`:""}</td><td><button class="btn secondary small" data-edit-fixture="${escapeHTML(f.id)}">Edit</button> <button class="btn danger small" data-delete-fixture="${escapeHTML(f.id)}">Delete</button></td></tr>`).join(""):'<tr><td colspan="4">No fixtures have been entered.</td></tr>';
+    $("adminAnnouncementsRows").innerHTML=announcements.length?announcements.map(a=>`<tr><td><strong>${escapeHTML(a.title)}</strong><span class="subtext">${escapeHTML(a.body)}</span></td><td>${a.active?"Published":"Hidden"}</td><td><button class="btn secondary small" data-edit-announcement="${escapeHTML(a.id)}">Edit</button> <button class="btn danger small" data-delete-announcement="${escapeHTML(a.id)}">Delete</button></td></tr>`).join(""):'<tr><td colspan="3">No announcements created.</td></tr>';
+  }catch(e){adminMessage("fixtureMessage",e.message,"error");}
+}
+async function submitAdminPackages(event){
+ event.preventDefault();
+ const payload={daily:Number($("adminDailyPrice").value),weekly:Number($("adminWeeklyPrice").value),monthly:Number($("adminMonthlyPrice").value)};
+ try{const d=await api("/api/admin/packages",{method:"PUT",body:JSON.stringify(payload)});Object.assign(publicPackagePrices,d.packages||payload);adminMessage("packageMessage",d.message||"VIP prices updated.","ok");await loadPublicConfig();}
+ catch(e){adminMessage("packageMessage",e.message,"error");}
+}
+async function reloadAdminPackages(){try{const d=await api("/api/admin/packages");$("adminDailyPrice").value=d.packages.daily;$("adminWeeklyPrice").value=d.packages.weekly;$("adminMonthlyPrice").value=d.packages.monthly;adminMessage("packageMessage","Package prices reloaded.","info");}catch(e){adminMessage("packageMessage",e.message,"error");}}
+
+async function submitFixture(event){
+ event.preventDefault();const id=$("fixtureId").value;
+ const payload={date:$("fixtureDate").value,homeTeam:$("fixtureHome").value.trim(),awayTeam:$("fixtureAway").value.trim(),league:$("fixtureLeague").value.trim(),kickoffTime:$("fixtureTime").value,status:$("fixtureStatus").value,homeScore:$("fixtureHomeScore").value,awayScore:$("fixtureAwayScore").value};
+ try{const d=await api(id?`/api/admin/fixtures/${encodeURIComponent(id)}`:"/api/admin/fixtures",{method:id?"PUT":"POST",body:JSON.stringify(payload)});adminMessage("fixtureMessage",d.message||"Fixture saved.","ok");resetFixtureForm();await loadAdminContent();await loadHomepageDashboard(true);}
+ catch(e){adminMessage("fixtureMessage",e.message,"error");}
+}
+async function submitAnnouncement(event){
+ event.preventDefault();const id=$("announcementId").value;
+ const payload={title:$("announcementTitle").value.trim(),body:$("announcementBody").value.trim(),priority:Number($("announcementPriority").value),active:$("announcementActive").value==="true",startsAt:$("announcementStart").value||null,endsAt:$("announcementEnd").value||null};
+ try{const d=await api(id?`/api/admin/announcements/${encodeURIComponent(id)}`:"/api/admin/announcements",{method:id?"PUT":"POST",body:JSON.stringify(payload)});adminMessage("announcementMessage",d.message||"Announcement saved.","ok");resetAnnouncementForm();await loadAdminContent();await loadHomepageDashboard(true);}
+ catch(e){adminMessage("announcementMessage",e.message,"error");}
+}
+async function adminContentAction(event){
+ const fEdit=event.target.closest("[data-edit-fixture]"),fDel=event.target.closest("[data-delete-fixture]");
+ const aEdit=event.target.closest("[data-edit-announcement]"),aDel=event.target.closest("[data-delete-announcement]");
+ try{
+  if(fEdit){const d=await api("/api/admin/fixtures");const f=(d.fixtures||[]).find(x=>x.id===fEdit.dataset.editFixture);if(!f)throw new Error("Fixture not found.");$("fixtureId").value=f.id;$("fixtureDate").value=f.date;$("fixtureHome").value=f.homeTeam;$("fixtureAway").value=f.awayTeam;$("fixtureLeague").value=f.league||"";$("fixtureTime").value=f.kickoffTime||"";$("fixtureStatus").value=f.status;$("fixtureHomeScore").value=f.homeScore??"";$("fixtureAwayScore").value=f.awayScore??"";return;}
+  if(fDel){if(!confirm("Delete this fixture?"))return;await api(`/api/admin/fixtures/${encodeURIComponent(fDel.dataset.deleteFixture)}`,{method:"DELETE"});await loadAdminContent();await loadHomepageDashboard(true);return;}
+  if(aEdit){const d=await api("/api/admin/announcements");const a=(d.announcements||[]).find(x=>x.id===aEdit.dataset.editAnnouncement);if(!a)throw new Error("Announcement not found.");$("announcementId").value=a.id;$("announcementTitle").value=a.title;$("announcementBody").value=a.body;$("announcementPriority").value=a.priority??0;$("announcementActive").value=String(a.active);$("announcementStart").value=a.startsAt?new Date(a.startsAt).toISOString().slice(0,16):"";$("announcementEnd").value=a.endsAt?new Date(a.endsAt).toISOString().slice(0,16):"";return;}
+  if(aDel){if(!confirm("Delete this announcement?"))return;await api(`/api/admin/announcements/${encodeURIComponent(aDel.dataset.deleteAnnouncement)}`,{method:"DELETE"});await loadAdminContent();await loadHomepageDashboard(true);}
+ }catch(e){adminMessage("announcementMessage",e.message,"error");}
+}
+
 let adminTipsCache=[];
 let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installAppButton').style.display='inline-grid';});$('installAppButton').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installAppButton').style.display='none';});
 $('notifyButton').addEventListener('click',async()=>{if(!('Notification'in window)){alert('Notifications are not supported by this browser.');return;}const permission=await Notification.requestPermission();if(permission==='granted'){new Notification('Banker Tips notifications enabled',{body:'You can receive reminders while using this device.'});$('notifyButton').innerHTML='<i class="fa-solid fa-bell"></i>';}else alert('Notifications were not enabled. You can change this in browser settings.');});
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(e=>console.warn('PWA service worker registration failed',e)));}
+
+resetFixtureForm();resetAnnouncementForm();
+$("adminPackageForm")?.addEventListener("submit",submitAdminPackages);
+$("packageReload")?.addEventListener("click",reloadAdminPackages);
+$("fixtureForm")?.addEventListener("submit",submitFixture);
+$("announcementForm")?.addEventListener("submit",submitAnnouncement);
+$("fixtureClear")?.addEventListener("click",resetFixtureForm);
+$("announcementClear")?.addEventListener("click",resetAnnouncementForm);
+$("adminFixturesRows")?.addEventListener("click",adminContentAction);
+$("adminAnnouncementsRows")?.addEventListener("click",adminContentAction);
+$("homeVipJoin")?.addEventListener("click",handleVipAccess);
+$("bottomMore")?.addEventListener("click",()=>{const nav=$("topLinks");nav?.classList.toggle("open");nav?.scrollIntoView({behavior:"smooth",block:"nearest"});});
+
 $('adminOverviewReload')?.addEventListener('click',loadAdminOverview);$('paymentsReload')?.addEventListener('click',loadAdminPayments);$('paymentHistoryReload')?.addEventListener('click',loadCustomerPayments);
-checkSession().then(()=>{renderUserProfile();loadFreeTips();checkExpiryReminder();});
-loadPerformanceStats();
+checkSession().then(()=>{renderUserProfile();loadHomepageDashboard(true);checkExpiryReminder();});
+loadPublicConfig();
 </script>
 
 <style id="independent-route-styles">
@@ -1527,15 +1875,15 @@ loadPerformanceStats();
 (function(){
  'use strict';
  const routes={
-  '/':{panel:'freePanel',title:'Banker Tips — Home'},'/free-tips':{panel:'freePanel',title:'Free Tips — Banker Tips'},'/free-tips-history':{panel:'historyPanel',title:'Free Tips History — Banker Tips'},'/vip-packages':{panel:'subscriptionPanel',title:'VIP Packages — Banker Tips'},'/subscription':{panel:'paymentPanel',section:'membership',title:'Subscription — Banker Tips'},'/my-account':{panel:'paymentPanel',section:'account',title:'My Account — Banker Tips'},'/payment-history':{panel:'paymentPanel',section:'payments',title:'Payment History — Banker Tips'},'/checkout':{panel:'paymentPanel',section:'checkout',title:'Secure Checkout — Banker Tips'},'/contact':{panel:'contact',title:'Contact — Banker Tips'},'/register':{auth:'registerModal',title:'Register — Banker Tips'},'/login':{auth:'loginModal',title:'Login — Banker Tips'},'/premium-tips':{panel:'premiumPanel',title:'VIP Tips — Banker Tips'},'/vip-tips-history':{panel:'vipHistoryPanel',title:'VIP Tips History — Banker Tips'},'/admin':{panel:'adminPanel',title:'Admin — Banker Tips'}
+  '/':{panel:'freePanel',title:'Banker Tips — Home'},'/free-tips':{panel:'freePanel',title:'Free Tips — Banker Tips'},'/free-tips-history':{panel:'historyPanel',title:'Free Tips History — Banker Tips'},'/vip-packages':{panel:'subscriptionPanel',title:'VIP Packages — Banker Tips'},'/subscription':{panel:'paymentPanel',section:'membership',title:'Subscription — Banker Tips'},'/my-account':{panel:'paymentPanel',section:'account',title:'My Account — Banker Tips'},'/payment-history':{panel:'paymentPanel',section:'payments',title:'Payment History — Banker Tips'},'/checkout':{panel:'paymentPanel',section:'checkout',title:'Secure Checkout — Banker Tips'},'/contact':{panel:'contact',title:'Contact — Banker Tips'},'/register':{auth:'registerModal',title:'Register — Banker Tips'},'/login':{auth:'loginModal',title:'Login — Banker Tips'},'/premium-tips':{panel:'premiumPanel',title:'VIP Tips — Banker Tips'},'/vip-tips-history':{panel:'vipHistoryPanel',title:'VIP Tips History — Banker Tips'},'/admin':{panel:'adminPanel',title:'Admin — Banker Tips'},'/performance':{panel:'performancePanel',title:'Performance — Banker Tips'},'/about':{panel:'aboutPanel',title:'About Banker Tips'},'/terms':{panel:'termsPanel',title:'Terms & Conditions — Banker Tips'},'/privacy':{panel:'privacyPanel',title:'Privacy Policy — Banker Tips'}
  };
  let navigating=false;
  const norm=p=>{p=(p||'/').replace(/\/+$/,'')||'/';return p};
  function closeRouteModals(){document.querySelectorAll('.modal.open').forEach(m=>{m.classList.remove('open');m.setAttribute('aria-hidden','true')})}
  function sectionFilter(section){const panel=document.getElementById('paymentPanel');if(!panel)return;const hero=panel.querySelector('.payment-hero');const steps=panel.querySelector('.payment-steps');const profile=panel.querySelector('.profile-card');const membership=panel.querySelector('.membership-card');const payments=panel.querySelector('.payment-history-card');const method=panel.querySelector('.payment-method-card');[hero,steps,profile,membership,payments,method].forEach(el=>{if(el)el.classList.remove('route-subsection-hidden')});if(section==='membership'){[hero,steps,profile,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='payments'){[hero,steps,profile,membership,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='checkout'){[hero,steps,profile,membership,payments].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='account'){[steps,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}}
- function ensureContact(){let el=document.getElementById('routeContactPage');if(!el){el=document.createElement('section');el.id='routeContactPage';el.className='panel';el.innerHTML='<div class="card pad" style="max-width:760px;margin:0 auto"><span class="eyebrow">BANKER TIPS SUPPORT</span><h1>Contact us</h1><p>For account, subscription or payment assistance, contact the support channel published by Banker Tips. Never share your M-Pesa PIN or password.</p><p>If you have paid, keep your transaction receipt and account email ready when contacting support.</p><p><a class="btn" href="/my-account" data-route="/my-account">Open My Account</a></p></div>';document.querySelector('main')?.appendChild(el)}return el}
+ function ensureContact(){let el=document.getElementById('routeContactPage');if(!el){el=document.createElement('section');el.id='routeContactPage';el.className='panel';const cfg=window.bankerSupport||{};const wa=cfg.whatsapp?('https://wa.me/'+String(cfg.whatsapp).replace(/\\D/g,'')):(document.querySelector('.whatsapp-float')?.href||'');const email=cfg.email?('mailto:'+cfg.email):'';const links=[email?'<a class="btn secondary" href="'+escapeHTML(email)+'"><i class="fa-regular fa-envelope"></i> '+escapeHTML(cfg.email)+'</a>':'',wa?'<a class="btn secondary" href="'+escapeHTML(wa)+'" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp support</a>':'',cfg.facebook?'<a class="btn secondary" href="'+escapeHTML(cfg.facebook)+'" target="_blank" rel="noopener noreferrer">Facebook</a>':'',cfg.telegram?'<a class="btn secondary" href="'+escapeHTML(cfg.telegram)+'" target="_blank" rel="noopener noreferrer">Telegram</a>':''].filter(Boolean).join(' ');el.innerHTML='<div class="card pad" style="max-width:760px;margin:0 auto"><span class="eyebrow">BANKER TIPS SUPPORT</span><h1>Contact us</h1><p>For account, subscription or payment assistance, use one of the official support channels configured by Banker Tips.</p><div class="form-actions">'+(links||'<span class="notice">No additional contact channels have been configured. Use the WhatsApp support button on this page if available.</span>')+'</div><p class="notice">Never share your M-Pesa PIN, password or one-time verification codes. If you have paid, keep your transaction receipt and account email ready.</p><p><a class="btn" href="/my-account" data-route="/my-account">Open My Account</a></p></div>';document.querySelector('main')?.appendChild(el)}return el}
  function routeTo(path,opts={}){path=norm(path);const url=new URL(path,location.origin);const route=routes[url.pathname];if(!route){location.assign('/404');return}if(navigating)return;navigating=true;const loading=document.getElementById('routeLoadingBar');if(loading)loading.hidden=false;
-  closeRouteModals();document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active','route-enter')});const oldContact=document.getElementById('routeContactPage');if(oldContact)oldContact.classList.remove('active');
+  closeRouteModals();document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active','route-enter')});const mainHero=document.querySelector('main.wrap > .hero');if(mainHero)mainHero.classList.toggle('hidden',!(url.pathname==='/'||url.pathname==='/free-tips'));const oldContact=document.getElementById('routeContactPage');if(oldContact)oldContact.classList.remove('active');
   if(route.auth){const modal=document.getElementById(route.auth);if(modal){modal.classList.add('route-standalone-auth');modal.classList.add('open');modal.setAttribute('aria-hidden','false');if(route.auth==='registerModal'){const pkg=url.searchParams.get('package')||url.searchParams.get('plan')||'';if(['daily','weekly','monthly'].includes(pkg)){registrationPackage=pkg;const f=document.getElementById('selectedPackage');if(f)f.value=pkg;updateRegistrationFlow()}else if(!['daily','weekly','monthly'].includes(registrationPackage)){registrationPackage='';updateRegistrationFlow()}}}}
   else if(route.panel==='contact'){const c=ensureContact();c.classList.add('active','route-enter')}
   else {if(route.panel==='adminPanel'&&String(currentUser?.role||'').toLowerCase()!=='admin'){routeTo('/login',{replace:true});navigating=false;return}if(typeof setPanel==='function')setPanel(route.panel);const panel=document.getElementById(route.panel);if(panel){panel.classList.add('route-enter');setTimeout(()=>panel.classList.remove('route-enter'),240)}if(route.panel==='paymentPanel')sectionFilter(route.section||'account');else sectionFilter('all')}
