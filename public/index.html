@@ -10,7 +10,7 @@
 <title>Banker Tips — Football Intelligence & Match Insights</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 :root{color-scheme:light;--bg:#f3f7fb;--surface:#fff;--ink:#102033;--muted:#617286;--line:#dce6ef;--blue:#0284c7;--blue2:#075985;--soft:#eaf6fd;--green:#15803d;--greenbg:#dcfce7;--red:#b91c1c;--redbg:#fee2e2;--amber:#a16207;--amberbg:#fef3c7;--radius:16px;--shadow:0 12px 35px rgba(15,53,82,.08)}
@@ -650,6 +650,56 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
 }
 @media print{header,.bottom-nav,footer,.whatsapp-float,.membership-admin-actions,.membership-toolbar{display:none!important}}
 </style>
+
+<style id="comfortaa-professional-font">
+/* Banker Tips — unified Comfortaa typography */
+:root {
+  --font-ui: "Comfortaa", "Trebuchet MS", sans-serif;
+}
+html, body,
+body :not(i):not([class^="fa"]):not([class*=" fa-"]),
+button, input, select, textarea {
+  font-family: var(--font-ui) !important;
+}
+body {
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3, h4, h5, h6,
+.brand-name, .hero h1, .section-head h2,
+.subscription-card h3, .package-price,
+.modal-box h2, .profile-name, .history-day-title h3,
+.history-empty strong, .membership-summary strong {
+  font-family: var(--font-ui) !important;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+button, .btn, .bottom-nav button, .status,
+.membership-status, .date-chip, .field label,
+th, .visitor-counter-title {
+  font-weight: 700;
+}
+input, select, textarea {
+  font-weight: 500;
+}
+.tips-table td, .tips-table th,
+.admin-members table td, .admin-members table th {
+  letter-spacing: -0.02em;
+}
+.subtext, .notice, .section-head p, footer {
+  letter-spacing: -0.015em;
+}
+/* Preserve Font Awesome and other icon-font glyphs. */
+i, .fa, [class^="fa-"], [class*=" fa-"] {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+}
+@media (max-width: 420px) {
+  body { letter-spacing: -0.03em; }
+}
+</style>
+
 </head>
 <body data-theme="light">
 <header>
@@ -1342,7 +1392,7 @@ function downloadMembershipPdf() {
   if(!w){alert('Please allow pop-ups to generate the membership PDF.');return;}
   const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   w.document.write(`<!doctype html><html><head><title>Banker Tips - Membership Register</title><style>
-  @page{size:A4 landscape;margin:14mm}body{font:11px Arial,sans-serif;color:#172b43}h1{font-size:21px;margin:0 0 5px;color:#075985}.meta{color:#64748b;margin-bottom:18px;font-size:10px}.brand{font-weight:bold;letter-spacing:2px;color:#0879c9;margin-bottom:7px}table{width:100%;border-collapse:collapse}th{background:#075985;color:#fff;text-align:left;padding:9px 7px;font-size:9px}td{padding:8px 7px;border-bottom:1px solid #dbe5ef;vertical-align:top;font-size:9px}tr:nth-child(even) td{background:#f2f7fb}.foot{margin-top:16px;color:#64748b;font-size:9px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="brand">BANKER TIPS</div><h1>Membership Approval Register</h1><div class="meta">Generated ${esc(new Date().toLocaleString('en-KE',{timeZone:'Africa/Nairobi'}))} EAT · Subscribers listed newest first</div><table><thead><tr><th>#</th><th>Email</th><th>Phone</th><th>Package</th><th>Payment date &amp; time</th><th>Status</th><th>Membership expiry</th></tr></thead><tbody>${rows.map(r=>'<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table><div class="foot">Payment times are shown only where a payment timestamp is available in the membership data. All displayed times use East Africa Time (EAT).</div><script>window.onload=()=>{window.print();};<\/script></body></html>`);
+  @page{size:A4 landscape;margin:14mm}body{font:500 11px "Comfortaa","Trebuchet MS",sans-serif;color:#172b43}h1{font:700 21px "Comfortaa","Trebuchet MS",sans-serif;margin:0 0 5px;color:#075985}.meta{color:#64748b;margin-bottom:18px;font-size:10px}.brand{font-weight:bold;letter-spacing:2px;color:#0879c9;margin-bottom:7px}table{width:100%;border-collapse:collapse}th{background:#075985;color:#fff;text-align:left;padding:9px 7px;font-size:9px}td{padding:8px 7px;border-bottom:1px solid #dbe5ef;vertical-align:top;font-size:9px}tr:nth-child(even) td{background:#f2f7fb}.foot{margin-top:16px;color:#64748b;font-size:9px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="brand">BANKER TIPS</div><h1>Membership Approval Register</h1><div class="meta">Generated ${esc(new Date().toLocaleString('en-KE',{timeZone:'Africa/Nairobi'}))} EAT · Subscribers listed newest first</div><table><thead><tr><th>#</th><th>Email</th><th>Phone</th><th>Package</th><th>Payment date &amp; time</th><th>Status</th><th>Membership expiry</th></tr></thead><tbody>${rows.map(r=>'<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table><div class="foot">Payment times are shown only where a payment timestamp is available in the membership data. All displayed times use East Africa Time (EAT).</div><script>window.onload=()=>{window.print();};<\/script></body></html>`);
   w.document.close();
 }
 async function handleMembershipAction(event) {
