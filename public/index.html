@@ -1158,8 +1158,7 @@ function liveScoreLine(t) {
   if(live){
     const phase=status==='1H'?'1st Half':status==='2H'?'2nd Half':'Extra Time';
     const minute=Number(t.elapsedMinute);
-    label=fresh&&t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0
-      ? `${minute} Min` : phase;
+    label=!fresh ? 'Live update delayed' : (t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0 ? `${minute} Min` : phase);
   }
   // Deliberately omit synchronization timestamps from public match cards.
   const parts=[score,label].filter(Boolean);
@@ -1764,14 +1763,17 @@ $('usersReload').addEventListener('click',loadAdminUsers);
 $('membershipSearch')?.addEventListener('input',renderAdminMembershipRows);
 $('downloadMembershipPdf')?.addEventListener('click',downloadMembershipPdf);
 $('year').textContent=new Date().getFullYear();
-setInterval(()=>{
-  if(document.visibilityState==='hidden') return;
-  // Keep both current-day feeds fresh, not only whichever tab is currently visible.
-  // These calls read MongoDB; API-Football polling remains server-side.
-  loadFreeTips({silent:true});
-  if(currentUser) loadPremium({silent:true});
-  if($('historyPanel')?.classList.contains('active')) loadHistory();
-  if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) loadVipHistory();
+let tipsRefreshInFlight = false;
+setInterval(async ()=>{
+  if(document.visibilityState==='hidden' || tipsRefreshInFlight) return;
+  tipsRefreshInFlight = true;
+  try {
+    // Both feeds read the same backend-updated MongoDB fixture state.
+    await loadFreeTips({silent:true});
+    if(currentUser) await loadPremium({silent:true});
+    if($('historyPanel')?.classList.contains('active')) await loadHistory();
+    if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) await loadVipHistory();
+  } finally { tipsRefreshInFlight = false; }
 },60000);
 $('tipDate').value=todayISO();
 $('todayDate').textContent=prettyDate(todayISO());
