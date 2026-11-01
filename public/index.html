@@ -1148,15 +1148,21 @@ function liveScoreLine(t) {
   const statusLabel=String(t.fixtureStatusLabel||status||'');
   if(!hasScore&&!statusLabel) return '';
   const score=hasScore?`Score ${escapeHTML(t.homeScore)}–${escapeHTML(t.awayScore)}`:'';
-  const updated=footballUpdateLabel(t.lastSyncedAt);
-  const age=t.lastSyncedAt?Math.max(0,Date.now()-new Date(t.lastSyncedAt).getTime()):Infinity;
-  const stale=age>3*60*1000;
+  const syncedAt=t.lastSyncedAt?new Date(t.lastSyncedAt).getTime():NaN;
+  const age=Number.isFinite(syncedAt)?Math.max(0,Date.now()-syncedAt):Infinity;
+  // Only show a numeric live minute while the API-Football observation is fresh.
+  // Never increment elapsedMinute locally or present an old minute as current.
+  const fresh=age<=3*60*1000;
   const live=['1H','2H','ET','1ET','2ET'].includes(status);
-  const label=live&&stale&&t.elapsedMinute!=null
-    ? `${Number(t.elapsedMinute)}' · ${status==='1H'?'1st Half':status==='2H'?'2nd Half':'Extra Time'}`
-    : statusLabel;
+  let label=statusLabel;
+  if(live){
+    const phase=status==='1H'?'1st Half':status==='2H'?'2nd Half':'Extra Time';
+    const minute=Number(t.elapsedMinute);
+    label=fresh&&t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0
+      ? `${minute} Min` : phase;
+  }
+  // Deliberately omit synchronization timestamps from public match cards.
   const parts=[score,label].filter(Boolean);
-  if(updated) parts.push(`${stale?'Last verified':'Updated'} ${updated}`);
   return `<span class="subtext">${parts.map(escapeHTML).join(' · ')}</span>`;
 }
 
