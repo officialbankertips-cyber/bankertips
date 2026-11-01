@@ -884,11 +884,11 @@ img{max-width:100%}
 
  <section class="panel active" id="freePanel">
   <div class="section">
-   <div class="section-head"><div><h2>Free Tips</h2><p>Choose a match date to view today's or upcoming selections.</p></div><div class="tip-date-control"><label for="freeTipDate">Match date</label><input type="date" id="freeTipDate" class="tip-date-picker" aria-label="Choose free tips date"></div></div>
+   <div class="section-head"><div><h2>Free Tips</h2><p>Explore our Free Tips Selections</p></div><div class="tip-date-control"><label for="freeTipDate">Match date</label><input type="date" id="freeTipDate" class="tip-date-picker" aria-label="Choose free tips date"></div></div>
    <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Preparing today’s selections…</div></div>
    <div class="form-actions"><button class="btn secondary" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</button><button class="btn ghost" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button></div>
   </div>
-  <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results do not guarantee future outcomes.</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="statsSettled">—</strong><span>Settled tips</span></div><div class="summary-tile"><strong id="statsWins">—</strong><span>Wins recorded</span></div><div class="summary-tile"><strong id="statsWinRate">—</strong><span>Win rate (void excluded)</span></div></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
+  <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results ascertain future outcomes.</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="statsSettled">—</strong><span>Settled tips</span></div><div class="summary-tile"><strong id="statsWins">—</strong><span>Wins recorded</span></div><div class="summary-tile"><strong id="statsWinRate">—</strong><span>Win rate (void excluded)</span></div></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
   <div class="section grid-3">
    <article class="info-card"><i class="fa-solid fa-magnifying-glass-chart"></i><h3>Thoughtful analysis</h3><p>Review match selections and odds before making your own decisions.</p></article>
    <article class="info-card"><i class="fa-solid fa-lock"></i><h3>Member access</h3><p>Premium content is available to approved VIP members only.</p></article>
@@ -935,12 +935,12 @@ img{max-width:100%}
  </section>
 
  <section class="panel" id="adminPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account. Live scores and automatic result synchronization are temporarily disabled; update tip results manually until a replacement provider is configured.</p></div><div class="form-actions"><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Admin Panel</h2><p>Manage tips, membership approvals and payment records from your administrator account. </p></div><div class="form-actions"><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
     <div class="form-grid">
-     <div class="field"><label for="tipDate">Match date / publication day</label><input type="date" id="tipDate" required><small class="subtext scheduled-hint">Choose a future date to schedule this tip. It stays hidden from visitors until that date, then appears automatically on Free Tips or VIP Tips.</small></div>
+     <div class="field"><label for="tipDate">Match date / publication day</label><input type="date" id="tipDate" required><small class="subtext scheduled-hint">Choose a future date to schedule this tip. </small></div>
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
