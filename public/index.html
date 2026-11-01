@@ -1178,17 +1178,17 @@ function renderTipRows(tips, target, withDate=false) {
   }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
-async function loadFreeTips() {
+async function loadFreeTips({silent=false} = {}) {
   const date=todayISO(); $('todayDate').textContent=prettyDate(date);
-  showEmpty('freeRows',5,'Loading tips…'); $('freeNotice').textContent='Preparing today’s selections…';
+  if(!silent){ showEmpty('freeRows',5,'Loading tips…'); $('freeNotice').textContent='Preparing today’s selections…'; }
   try {
     const data=await api(`/api/tips?type=free&date=${encodeURIComponent(date)}`);
     lastTips=Array.isArray(data.tips)?data.tips:[];
     renderTipRows(lastTips,'freeRows');
     $('freeNotice').textContent=`${lastTips.length} selection(s) available.`;
   } catch(e) {
-    showEmpty('freeRows',5,'Tips could not be loaded.');
-    $('freeNotice').textContent=`No invented fixtures or results are displayed.`;
+    if(!silent) showEmpty('freeRows',5,'Tips could not be loaded.');
+    if(!silent) $('freeNotice').textContent='Tips could not be refreshed. Please try again.';
   }
 }
 async function loadHistory() {
@@ -1329,9 +1329,9 @@ async function loadVipHistory() {
     $('vipHistoryNotice').textContent = 'There was a problem loading your history.';
   }
 }
-async function loadPremium() {
-  $('vipDate').textContent=prettyDate(todayISO()); $('vipSubheading').textContent='Checking membership access…';
-  showEmpty('premiumRows',5,'Verifying access…'); $('premiumNotice').textContent='Checking your VIP membership…';
+async function loadPremium({silent=false} = {}) {
+  $('vipDate').textContent=prettyDate(todayISO());
+  if(!silent){ $('vipSubheading').textContent='Checking membership access…'; showEmpty('premiumRows',5,'Verifying access…'); $('premiumNotice').textContent='Checking your VIP membership…'; }
   try {
     if(!currentUser) await checkSession();
     if(!currentUser) throw new Error('Please log in first to verify your membership.');
@@ -1342,9 +1342,7 @@ async function loadPremium() {
     $('vipSubheading').textContent='Authorized premium member';
     $('premiumNotice').textContent=`${tips.length} Premium Selection Today.`;
   } catch(e) {
-    $('vipSubheading').textContent='Membership verification required';
-    showEmpty('premiumRows',5,e.message);
-    $('premiumNotice').textContent='Access is pending verification. If you have paid, contact support or sign in with the activated account.';
+    if(!silent){ $('vipSubheading').textContent='Membership verification required'; showEmpty('premiumRows',5,e.message); $('premiumNotice').textContent='Access is pending verification. If you have paid, contact support or sign in with the activated account.'; }
   }
 }
 async function checkSession() {
@@ -1768,8 +1766,10 @@ $('downloadMembershipPdf')?.addEventListener('click',downloadMembershipPdf);
 $('year').textContent=new Date().getFullYear();
 setInterval(()=>{
   if(document.visibilityState==='hidden') return;
-  if($('freePanel')?.classList.contains('active')) loadFreeTips();
-  if($('premiumPanel')?.classList.contains('active')&&currentUser) loadPremium();
+  // Keep both current-day feeds fresh, not only whichever tab is currently visible.
+  // These calls read MongoDB; API-Football polling remains server-side.
+  loadFreeTips({silent:true});
+  if(currentUser) loadPremium({silent:true});
   if($('historyPanel')?.classList.contains('active')) loadHistory();
   if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) loadVipHistory();
 },60000);
