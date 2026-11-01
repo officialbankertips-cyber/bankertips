@@ -655,7 +655,7 @@ async function fetchFootballFixturesForDate(date, forceRefresh = false) {
   } catch (err) {
     const message = String(err.message || "Football provider request failed.").slice(0, 300);
     // Back off on provider/auth errors so a bad key cannot burn the free request allowance.
-    footballDateCache.set(date, { error: message, expiresAt: now + 30 * 60 * 1000 });
+    footballDateCache.set(date, { error: message, expiresAt: now + 30 * 1000 });
     throw err;
   }
 }
@@ -729,13 +729,15 @@ function fixtureStatusLabel(short, elapsed) {
 }
 async function syncTipResultsForDate(date, { forceRefresh = false } = {}) {
   const fixtures = await fetchFootballFixturesForDate(date, forceRefresh);
-  const tips = await Tip.find({ date, result: "Pending", publicationStatus: { $ne: "draft" } });
+  // Refresh all published tips for this date so manually-settled cards still receive
+  // current scores/status. Only Pending tips may be automatically settled below.
+  const tips = await Tip.find({ date, publicationStatus: { $ne: "draft" } });
   const summary = { date, checked: 0, linked: 0, settled: 0, needsReview: 0, unmatched: 0 };
   for (const tip of tips) {
     summary.checked++;
     let fixture = findMatchingFixture(tip, fixtures);
     if (!fixture && !tip.fixtureId) {
-      // Retry adjacent provider-local dates only for unresolved matches (timezone/date-boundary protection).
+      // Only try adjacent dates for unresolved name matches; date results are cached.
       for (const offset of [-1, 1]) {
         if (fixture) break;
         try {
@@ -761,10 +763,12 @@ async function syncTipResultsForDate(date, { forceRefresh = false } = {}) {
       summary.unmatched++;
       continue;
     }
+
     const fixtureStatus = String(fixture.fixture?.status?.long || "").slice(0, 40);
     const fixtureStatusShort = String(fixture.fixture?.status?.short || "").slice(0, 12).toUpperCase();
     const isFinished = ["FT", "AET", "PEN"].includes(fixtureStatusShort);
-    // For standard football markets, use the 90-minute full-time score even if extra time/penalties were played.
+    // Standard markets use the 90-minute score. For AET/PEN, never substitute
+    // the aggregate/penalty score when the provider has not supplied full-time score.
     const scoreHome = isFinished
       ? (fixture.score?.fulltime?.home != null ? fixture.score.fulltime.home : (fixtureStatusShort === "FT" ? fixture.goals?.home : null))
       : fixture.goals?.home;
@@ -773,6 +777,7 @@ async function syncTipResultsForDate(date, { forceRefresh = false } = {}) {
       : fixture.goals?.away;
     const homeScore = scoreHome == null ? null : Number(scoreHome);
     const awayScore = scoreAway == null ? null : Number(scoreAway);
+
     tip.fixtureId = Number(fixture.fixture?.id) || tip.fixtureId || null;
     tip.homeScore = Number.isFinite(homeScore) ? homeScore : null;
     tip.awayScore = Number.isFinite(awayScore) ? awayScore : null;
@@ -782,71 +787,96 @@ async function syncTipResultsForDate(date, { forceRefresh = false } = {}) {
     tip.elapsedMinute = elapsed == null || !Number.isFinite(Number(elapsed)) ? null : Number(elapsed);
     tip.lastSyncedAt = new Date(Number(fixture._bankerFetchedAt) || Date.now());
     tip.lastSyncAttemptAt = new Date();
-    tip.settlementNote = "";
+    if (tip.result === "Pending") tip.settlementNote = "";
     summary.linked++;
 
-    if (fixtureStatusShort === "CANC") {
-      tip.result = "Void";
-      tip.settlementSource = "automatic";
-      tip.settlementNote = "Automatically voided: fixture cancelled by the provider.";
-      summary.settled++;
-    } else if (fixtureStatusShort === "ABD") {
-      tip.settlementNote = "Match abandoned. Administrator review is required before settlement.";
-      summary.needsReview++;
-    } else if (["FT", "AET", "PEN"].includes(fixtureStatusShort)) {
-      if (tip.homeScore == null || tip.awayScore == null) {
-        tip.settlementNote = "Fixture is marked finished but the final score is unavailable; manual review required.";
+    // Never overwrite a manual or previously recorded result. Still refresh its score/status.
+    if (tip.result === "Pending") {
+      if (fixtureStatusShort === "CANC") {
+        tip.result = "Void";
+        tip.settlementSource = "automatic";
+        tip.settlementNote = "Automatically voided: fixture cancelled by the provider.";
+        summary.settled++;
+      } else if (fixtureStatusShort === "ABD") {
+        tip.settlementNote = "Match abandoned. Administrator review is required before settlement.";
         summary.needsReview++;
-      } else {
-        const outcome = evaluateTipResult(tip, tip.homeScore, tip.awayScore);
-        if (!outcome) {
-          tip.settlementNote = "Match finished; prediction market could not be identified safely. Settle this tip manually.";
+      } else if (isFinished) {
+        if (tip.homeScore == null || tip.awayScore == null) {
+          tip.settlementNote = "Fixture is marked finished but the 90-minute full-time score is unavailable; manual review required.";
           summary.needsReview++;
         } else {
-          tip.result = outcome;
-          tip.settlementSource = "automatic";
-          tip.settlementNote = `Automatically settled from full-time score ${tip.homeScore}-${tip.awayScore}.`;
-          summary.settled++;
-          await AuditLog.create({
-            actor: null, actorEmail: "system", action: "tip.auto_settled", entityType: "tip",
-            entityId: String(tip._id), summary: `${tip.type} tip ${tip.match} automatically settled as ${outcome} (${tip.homeScore}-${tip.awayScore}).`
-          }).catch(err => console.error("Automatic settlement audit failed:", err.message));
+          const outcome = evaluateTipResult(tip, tip.homeScore, tip.awayScore);
+          if (!outcome) {
+            tip.settlementNote = "Match finished; prediction market could not be identified safely. Settle this tip manually.";
+            summary.needsReview++;
+          } else {
+            tip.result = outcome;
+            tip.settlementSource = "automatic";
+            tip.settlementNote = `Automatically settled from full-time score ${tip.homeScore}-${tip.awayScore}.`;
+            summary.settled++;
+            await AuditLog.create({
+              actor: null, actorEmail: "system", action: "tip.auto_settled", entityType: "tip",
+              entityId: String(tip._id), summary: `${tip.type} tip ${tip.match} automatically settled as ${outcome} (${tip.homeScore}-${tip.awayScore}).`
+            }).catch(err => console.error("Automatic settlement audit failed:", err.message));
+          }
         }
+      } else if (fixtureStatusShort === "PST") {
+        tip.settlementNote = "Match postponed; result remains pending.";
+      } else if (["SUSP", "INT"].includes(fixtureStatusShort)) {
+        tip.settlementNote = "Match interrupted or suspended; result remains pending.";
       }
-    } else if (fixtureStatusShort === "PST") {
-      tip.settlementNote = "Match postponed; result remains pending.";
-    } else if (fixtureStatusShort === "SUSP" || fixtureStatusShort === "INT") {
-      tip.settlementNote = "Match interrupted or suspended; result remains pending.";
     }
     await tip.save();
   }
   return summary;
 }
+
 let footballSyncInProgress = false;
+let footballDateRotation = 0;
 async function syncPendingTipResults({ forceRefresh = false } = {}) {
   if (footballSyncInProgress) return { configured: true, skipped: true, message: "A synchronization is already running." };
   footballSyncInProgress = true;
   try {
-  if (!String(process.env.FOOTBALL_API_KEY || "").trim()) {
-    return { configured: false, message: "Add FOOTBALL_API_KEY to the server .env file to enable automatic settlement." };
+    if (!String(process.env.FOOTBALL_API_KEY || "").trim()) {
+      return { configured: false, message: "Add FOOTBALL_API_KEY to the server environment to enable automatic results." };
+    }
+    const today = footballDateISO();
+    const priorityDates = [shiftISODate(today, -1), today, shiftISODate(today, 1)];
+    const pendingDates = await Tip.distinct("date", {
+      result: "Pending", publicationStatus: { $ne: "draft" }
+    });
+    const publishedPriorityDates = await Tip.distinct("date", {
+      date: { $in: priorityDates }, publicationStatus: { $ne: "draft" }
+    });
+    const remaining = pendingDates.filter(d => !priorityDates.includes(d)).sort();
+    // Rotate the older pending-date backlog so a large backlog cannot starve later dates.
+    if (remaining.length) {
+      const offset = footballDateRotation % remaining.length;
+      remaining.push(...remaining.splice(0, offset));
+      footballDateRotation = (footballDateRotation + 1) % remaining.length;
+    }
+    const ordered = [...priorityDates.filter(d => publishedPriorityDates.includes(d)), ...remaining];
+    const maxDates = Math.max(1, Math.min(10, Number(process.env.FOOTBALL_MAX_DATES_PER_SYNC) || 5));
+    const dates = ordered.slice(0, maxDates);
+    const summaries = [];
+    for (const date of dates) {
+      try { summaries.push(await syncTipResultsForDate(date, { forceRefresh })); }
+      catch (err) {
+        console.error(`Automatic tip-result sync failed for ${date}:`, err.message);
+        summaries.push({ date, error: err.message });
+      }
+    }
+    return {
+      configured: true, datesChecked: summaries.length,
+      checked: summaries.reduce((n, x) => n + (x.checked || 0), 0),
+      linked: summaries.reduce((n, x) => n + (x.linked || 0), 0),
+      settled: summaries.reduce((n, x) => n + (x.settled || 0), 0),
+      needsReview: summaries.reduce((n, x) => n + (x.needsReview || 0), 0),
+      unmatched: summaries.reduce((n, x) => n + (x.unmatched || 0), 0), summaries
+    };
+  } finally {
+    footballSyncInProgress = false;
   }
-  const today = footballDateISO();
-  const dates = [shiftISODate(today, -1), today, shiftISODate(today, 1)];
-  const pendingDates = await Tip.distinct("date", { result: "Pending", publicationStatus: { $ne: "draft" }, date: { $in: dates } });
-  const summaries = [];
-  for (const date of dates.filter(d => pendingDates.includes(d))) {
-    try { summaries.push(await syncTipResultsForDate(date, { forceRefresh })); }
-    catch (err) { console.error(`Automatic tip-result sync failed for ${date}:`, err.message); summaries.push({ date, error: err.message }); }
-  }
-  return {
-    configured: true, datesChecked: summaries.length,
-    checked: summaries.reduce((n, x) => n + (x.checked || 0), 0),
-    linked: summaries.reduce((n, x) => n + (x.linked || 0), 0),
-    settled: summaries.reduce((n, x) => n + (x.settled || 0), 0),
-    needsReview: summaries.reduce((n, x) => n + (x.needsReview || 0), 0),
-    unmatched: summaries.reduce((n, x) => n + (x.unmatched || 0), 0), summaries
-  };
-  } finally { footballSyncInProgress = false; }
 }
 
 app.use("/api", apiLimiter);
@@ -1024,7 +1054,7 @@ app.get("/api/tips", async (req, res) => {
   res.set("Pragma", "no-cache");
   try {
     const type = String(req.query.type || "free");
-    const date = String(req.query.date || new Date().toISOString().slice(0, 10));
+    const date = String(req.query.date || footballDateISO());
     if (!["free", "premium"].includes(type)) return res.status(400).json({ success: false, message: "Invalid tips type." });
     if (type === "premium") {
       const token = req.cookies[COOKIE_NAME];
