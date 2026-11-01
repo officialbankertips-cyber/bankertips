@@ -353,12 +353,18 @@ function cleanAdvertisementInput(body = {}) {
   if (!title || title.length > 100) throw new Error("Advertisement title is required (maximum 100 characters).");
   if (!description || description.length > 240) throw new Error("Advertisement description is required (maximum 240 characters).");
   if (!validWebUrl(targetUrl) || targetUrl.length > 1000) throw new Error("Enter a valid HTTP or HTTPS destination URL (maximum 1000 characters).");
-  if (imageUrl && (!validWebUrl(imageUrl) || imageUrl.length > 1000)) throw new Error("Image URL must be a valid HTTP or HTTPS URL (maximum 1000 characters).");
+  const normalizedImagePath = imageUrl.replace(/^\/+/, "");
+  const isLocalBannerPath = /^banners\/[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(normalizedImagePath)
+    && !normalizedImagePath.split("/").includes("..");
+  if (imageUrl && ((!isLocalBannerPath && !validWebUrl(imageUrl)) || imageUrl.length > 1000)) {
+    throw new Error("Image must be a valid path inside public/banners (e.g. banners/helabet.jpg) or a valid HTTP/HTTPS URL.");
+  }
   if (!buttonText || buttonText.length > 35) throw new Error("Button text is required (maximum 35 characters).");
   if (!["draft", "active", "paused"].includes(status)) throw new Error("Choose draft, active or paused as the publication status.");
   if (position !== "home_vip") throw new Error("Unsupported advertisement placement.");
 
-  return { title, description, imageUrl, buttonText, targetUrl, status, position };
+  const storedImageUrl = isLocalBannerPath ? `/${normalizedImagePath}` : imageUrl;
+  return { title, description, imageUrl: storedImageUrl, buttonText, targetUrl, status, position };
 }
 function publicAdvertisement(ad) {
   return {
