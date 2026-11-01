@@ -935,7 +935,7 @@ img{max-width:100%}
  </section>
 
  <section class="panel" id="adminPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><div class="form-actions"><button class="btn secondary small" id="syncTipResults" type="button"><i class="fa-solid fa-arrows-rotate"></i> Sync results</button><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account. Live scores and automatic result synchronization are temporarily disabled; update tip results manually until a replacement provider is configured.</p></div><div class="form-actions"><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
@@ -944,8 +944,6 @@ img{max-width:100%}
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
-     <div class="field"><label for="tipMarket">Settlement market</label><select id="tipMarket"><option value="auto">Auto-detect from tip text</option><option value="home_win">Home Win (1)</option><option value="draw">Draw (X)</option><option value="away_win">Away Win (2)</option><option value="home_or_draw">Double Chance 1X</option><option value="draw_or_away">Double Chance X2</option><option value="home_or_away">Double Chance 12</option><option value="btts_yes">Both Teams To Score — Yes</option><option value="btts_no">Both Teams To Score — No</option><option value="over_0_5">Over 0.5 Goals</option><option value="under_0_5">Under 0.5 Goals</option><option value="over_1_5">Over 1.5 Goals</option><option value="under_1_5">Under 1.5 Goals</option><option value="over_2_5">Over 2.5 Goals</option><option value="under_2_5">Under 2.5 Goals</option><option value="over_3_5">Over 3.5 Goals</option><option value="under_3_5">Under 3.5 Goals</option><option value="over_4_5">Over 4.5 Goals</option><option value="under_4_5">Under 4.5 Goals</option><option value="over_5_5">Over 5.5 Goals</option><option value="under_5_5">Under 5.5 Goals</option><option value="home_dnb">Home Draw No Bet</option><option value="away_dnb">Away Draw No Bet</option></select><small class="subtext">Choose the exact market for safer automatic settlement. Unsupported markets remain pending for admin review.</small></div>
-     <div class="field"><label for="tipFixtureId">API-Football Fixture ID (optional)</label><input id="tipFixtureId" type="number" min="1" step="1" placeholder="Enter fixture ID to link manually"><small class="subtext">Use the provider fixture ID to override automatic discovery. Teams must still match.</small></div>
      <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
      <div class="field"><label for="tipStatus">Result</label><select id="tipStatus"><option value="Pending">Pending</option><option value="Won">Won</option><option value="Lost">Lost</option><option value="Void">Void</option></select></div>
@@ -1139,36 +1137,6 @@ function totalOddsRow(tips, columns=5){
   const total=calculateTotalOdds(tips);
   return `<tr class="total-odds-row"><td colspan="${columns}"><span class="total-odds-label">TOTAL ACCUMULATOR ODDS</span><strong class="total-odds-value">${total===null?'—':total.toFixed(2)}</strong></td></tr>`;
 }
-function footballUpdateLabel(value) {
-  if(!value) return '';
-  const date=new Date(value);
-  if(!Number.isFinite(date.getTime())) return '';
-  return date.toLocaleString('en-KE',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true})+' EAT';
-}
-function liveScoreLine(t) {
-  const hasScore=t.homeScore!==null&&t.homeScore!==undefined&&t.awayScore!==null&&t.awayScore!==undefined;
-  const status=String(t.fixtureStatusShort||'').toUpperCase();
-  const statusLabel=String(t.fixtureStatusLabel||status||'');
-  if(!hasScore&&!statusLabel) return '';
-  const score=hasScore?`Score ${escapeHTML(t.homeScore)}–${escapeHTML(t.awayScore)}`:'';
-  const syncedAt=t.lastSyncedAt?new Date(t.lastSyncedAt).getTime():NaN;
-  const age=Number.isFinite(syncedAt)?Math.max(0,Date.now()-syncedAt):Infinity;
-  // Only show a numeric live minute while the API-Football observation is fresh.
-  // Never increment elapsedMinute locally or present an old minute as current.
-  const fresh=age<=3*60*1000;
-  const live=['1H','2H','ET','1ET','2ET'].includes(status);
-  let label=statusLabel;
-  if(live){
-    const phase=status==='1H'?'1st Half':status==='2H'?'2nd Half':'Extra Time';
-    const minute=Number(t.elapsedMinute);
-    label=fresh&&t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0
-      ? `${minute} Min` : phase;
-  }
-  // Deliberately omit synchronization timestamps from public match cards.
-  const parts=[score,label].filter(Boolean);
-  return `<span class="subtext">${parts.map(escapeHTML).join(' · ')}</span>`;
-}
-
 function renderTipRows(tips, target, withDate=false) {
   if (!Array.isArray(tips) || tips.length===0) {
     showEmpty(target,withDate?6:5,'Tips are being updated. Please check back later.');
@@ -1176,8 +1144,7 @@ function renderTipRows(tips, target, withDate=false) {
     return;
   }
   const rows=tips.map(t => {
-    const scoreLine = liveScoreLine(t);
-    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}${scoreLine}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
+    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
   }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
@@ -1531,12 +1498,12 @@ async function handleLogin(event) {
     }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
-function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; if($('tipMarket')) $('tipMarket').value='auto'; if($('tipFixtureId')) $('tipFixtureId').value=''; }
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; }
 function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
-  const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip,t.fixtureId,t.settlementNote].some(v=>String(v||'').toLowerCase().includes(q)));
-  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span>${liveScoreLine(t)}${t.fixtureId?`<span class="subtext">Fixture ID: ${escapeHTML(t.fixtureId)}</span>`:'<span class="subtext">Fixture not linked</span>'}${(t.lastSyncAttemptAt||t.lastSyncedAt)?`<span class="subtext">Last sync attempt: ${escapeHTML(footballUpdateLabel(t.lastSyncAttemptAt||t.lastSyncedAt))}</span>`:''}${t.settlementNote?`<span class="subtext">${escapeHTML(t.settlementNote)}</span>`:''}</td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}${t.publicationStatus==='scheduled'?'<span class="schedule-tag">Scheduled</span>':t.publicationStatus==='draft'?'<span class="schedule-tag">Draft</span>':''}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
+  const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip].some(v=>String(v||'').toLowerCase().includes(q)));
+  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span></td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}${t.publicationStatus==='scheduled'?'<span class="schedule-tag">Scheduled</span>':t.publicationStatus==='draft'?'<span class="schedule-tag">Draft</span>':''}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
 }
 async function loadAdminTips() {
   const user=await checkSession();
@@ -1652,7 +1619,7 @@ async function saveTip(event) {
   event.preventDefault(); hideMessage('adminMessage');
   const id=$('tipId').value;
   const tipDate=$('tipDate').value;
-  const payload={date:tipDate,publicationStatus:tipDate>todayISO()?'scheduled':'published',time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),market:$('tipMarket')?.value||'auto',fixtureId:$('tipFixtureId')?.value?Number($('tipFixtureId').value):null,odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  const payload={date:tipDate,publicationStatus:tipDate>todayISO()?'scheduled':'published',time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
   if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
   try {
     const user=await checkSession();
@@ -1677,7 +1644,7 @@ async function adminRowAction(event) {
     const data=await api('/api/admin/tips');
     const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
     if(!tip) throw new Error('Tip not found. Reload the list and try again.');
-    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipMarket').value=tip.market||'auto'; if($('tipFixtureId')) $('tipFixtureId').value=tip.fixtureId||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
     $('tipMatch').focus();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
@@ -1756,16 +1723,6 @@ $('copyVipTicket')?.addEventListener('click',copyVipTicket);
 
 $('clearTip').addEventListener('click',clearTipForm);
 $('adminReload').addEventListener('click',loadAdminTips);
-$('syncTipResults')?.addEventListener('click',async()=>{
-  const button=$('syncTipResults'); button.disabled=true;
-  try {
-    const data=await api('/api/admin/tips/sync-results',{method:'POST'});
-    $('adminNotice').textContent=data.message||'Tip results synchronized.';
-    await loadAdminTips(); await loadFreeTips();
-    if($('premiumPanel')?.classList.contains('active')&&currentUser) await loadPremium();
-  } catch(e) { $('adminNotice').textContent=e.message||'Could not synchronize results. Check API configuration.'; }
-  finally { button.disabled=false; }
-});
 $('adminRows').addEventListener('click',adminRowAction);
 $('adminUsersRows').addEventListener('click',handleMembershipAction);
 $('usersReload').addEventListener('click',loadAdminUsers);
@@ -1775,7 +1732,7 @@ $('year').textContent=new Date().getFullYear();
 setInterval(()=>{
   if(document.visibilityState==='hidden') return;
   // Keep both current-day feeds fresh, not only whichever tab is currently visible.
-  // These calls read MongoDB; API-Football polling remains server-side.
+  // These calls read the latest tip records saved in MongoDB.
   loadFreeTips({silent:true});
   if(currentUser) loadPremium({silent:true});
   if($('historyPanel')?.classList.contains('active')) loadHistory();
