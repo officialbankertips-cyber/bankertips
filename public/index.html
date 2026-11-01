@@ -627,6 +627,8 @@ button, input, select, textarea {
   font-family: "Comfortaa", "Trebuchet MS", Arial, sans-serif !important;
 }
 
+
+.tip-date-control{display:grid;gap:5px;justify-items:end;min-width:145px}.tip-date-control label{font-size:.76rem;color:var(--muted,#64748b);font-weight:700}.tip-date-picker{max-width:170px;width:100%;padding:10px 12px;border:1px solid var(--line,#dbe5ef);border-radius:12px;background:var(--surface,#fff);color:var(--text,#172b43);font:inherit;font-size:.88rem}.scheduled-hint{display:block;margin-top:6px;color:var(--muted,#64748b);font-size:.78rem}.schedule-tag{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:999px;background:#fff2cf;color:#8a5a00;font-size:.72rem;font-weight:700}
 </style>
 
 <style id="membership-approval-redesign">
@@ -882,7 +884,7 @@ img{max-width:100%}
 
  <section class="panel active" id="freePanel">
   <div class="section">
-   <div class="section-head"><div><h2>Today's Free Tips</h2><p>Best selection for today </p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
+   <div class="section-head"><div><h2>Free Tips</h2><p>Choose a match date to view today's or upcoming selections.</p></div><div class="tip-date-control"><label for="freeTipDate">Match date</label><input type="date" id="freeTipDate" class="tip-date-picker" aria-label="Choose free tips date"></div></div>
    <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Preparing today’s selections…</div></div>
    <div class="form-actions"><button class="btn secondary" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</button><button class="btn ghost" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button></div>
   </div>
@@ -911,7 +913,7 @@ img{max-width:100%}
  
 
  <section class="panel" id="premiumPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><div class="tip-date-control"><label for="vipTipDate">Match date</label><input type="date" id="vipTipDate" class="tip-date-picker" aria-label="Choose VIP tips date"></div></div>
   <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="history-separator vip-history-separator premium-bottom-crown" role="separator" aria-label="End of VIP Premium tips"><span></span><i class="fa-solid fa-crown" aria-hidden="true"></i><span></span></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
  </section>
 
@@ -938,7 +940,7 @@ img{max-width:100%}
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
     <div class="form-grid">
-     <div class="field"><label for="tipDate">Date</label><input type="date" id="tipDate" required></div>
+     <div class="field"><label for="tipDate">Match date / publication day</label><input type="date" id="tipDate" required><small class="subtext scheduled-hint">Choose a future date to schedule this tip. It stays hidden from visitors until that date, then appears automatically on Free Tips or VIP Tips.</small></div>
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
@@ -948,7 +950,7 @@ img{max-width:100%}
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
      <div class="field"><label for="tipStatus">Result</label><select id="tipStatus"><option value="Pending">Pending</option><option value="Won">Won</option><option value="Lost">Lost</option><option value="Void">Void</option></select></div>
     </div>
-    <div class="form-actions"><button class="btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save tip</button><button class="btn ghost" type="button" id="clearTip">Clear form</button></div><div class="msg" id="adminMessage" role="status"></div>
+    <div class="form-actions"><button class="btn" type="submit" id="saveTipButton"><i class="fa-solid fa-calendar-check"></i> Save / schedule tip</button><button class="btn ghost" type="button" id="clearTip">Clear form</button></div><div class="msg" id="adminMessage" role="status"></div>
    </form></div>
    <div class="card"><div class="pad"><div class="field"><label for="adminTipSearch">Search tips</label><input id="adminTipSearch" type="search" placeholder="Search by match, category or date"></div></div><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Changes are available to authorized administrators only.</div></div>
   </div>
@@ -1047,8 +1049,9 @@ document.addEventListener('click', function(event) {
   } catch (error) { console.warn('Registration modal opened with partial initialisation:', error); }
 }, true);
 const todayISO = () => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const parts = new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Nairobi',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const v = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+  return `${v.year}-${v.month}-${v.day}`;
 };
 const prettyDate = (value) => {
   if (!value) return '—';
@@ -1158,7 +1161,8 @@ function liveScoreLine(t) {
   if(live){
     const phase=status==='1H'?'1st Half':status==='2H'?'2nd Half':'Extra Time';
     const minute=Number(t.elapsedMinute);
-    label=!fresh ? 'Live update delayed' : (t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0 ? `${minute} Min` : phase);
+    label=fresh&&t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0
+      ? `${minute} Min` : phase;
   }
   // Deliberately omit synchronization timestamps from public match cards.
   const parts=[score,label].filter(Boolean);
@@ -1177,14 +1181,15 @@ function renderTipRows(tips, target, withDate=false) {
   }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
+function selectedTipDate(id) { return $(id)?.value || todayISO(); }
 async function loadFreeTips({silent=false} = {}) {
-  const date=todayISO(); $('todayDate').textContent=prettyDate(date);
+  const date=selectedTipDate('freeTipDate');
   if(!silent){ showEmpty('freeRows',5,'Loading tips…'); $('freeNotice').textContent='Preparing today’s selections…'; }
   try {
     const data=await api(`/api/tips?type=free&date=${encodeURIComponent(date)}`);
     lastTips=Array.isArray(data.tips)?data.tips:[];
     renderTipRows(lastTips,'freeRows');
-    $('freeNotice').textContent=`${lastTips.length} selection(s) available.`;
+    $('freeNotice').textContent=`${lastTips.length} Free selection(s) for ${prettyDate(date)}.`;
   } catch(e) {
     if(!silent) showEmpty('freeRows',5,'Tips could not be loaded.');
     if(!silent) $('freeNotice').textContent='Tips could not be refreshed. Please try again.';
@@ -1329,17 +1334,17 @@ async function loadVipHistory() {
   }
 }
 async function loadPremium({silent=false} = {}) {
-  $('vipDate').textContent=prettyDate(todayISO());
+  const selectedDate=selectedTipDate('vipTipDate');
   if(!silent){ $('vipSubheading').textContent='Checking membership access…'; showEmpty('premiumRows',5,'Verifying access…'); $('premiumNotice').textContent='Checking your VIP membership…'; }
   try {
     if(!currentUser) await checkSession();
     if(!currentUser) throw new Error('Please log in first to verify your membership.');
-    const data=await api(`/api/tips?type=premium&date=${encodeURIComponent(todayISO())}`);
+    const data=await api(`/api/tips?type=premium&date=${encodeURIComponent(selectedDate)}`);
     if(data.authorized===false) throw new Error('Your account does not have an active VIP subscription.');
     const tips=Array.isArray(data.tips)?data.tips:[];
     renderTipRows(tips,'premiumRows');
     $('vipSubheading').textContent='Authorized premium member';
-    $('premiumNotice').textContent=`${tips.length} Premium Selection Today.`;
+    $('premiumNotice').textContent=`${tips.length} Premium selection(s) for ${prettyDate(selectedDate)}.`;
   } catch(e) {
     if(!silent){ $('vipSubheading').textContent='Membership verification required'; showEmpty('premiumRows',5,e.message); $('premiumNotice').textContent='Access is pending verification. If you have paid, contact support or sign in with the activated account.'; }
   }
@@ -1526,12 +1531,12 @@ async function handleLogin(event) {
     }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
-function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('tipMarket')) $('tipMarket').value='auto'; if($('tipFixtureId')) $('tipFixtureId').value=''; }
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; if($('tipMarket')) $('tipMarket').value='auto'; if($('tipFixtureId')) $('tipFixtureId').value=''; }
 function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
   const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip,t.fixtureId,t.settlementNote].some(v=>String(v||'').toLowerCase().includes(q)));
-  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span>${liveScoreLine(t)}${t.fixtureId?`<span class="subtext">Fixture ID: ${escapeHTML(t.fixtureId)}</span>`:'<span class="subtext">Fixture not linked</span>'}${(t.lastSyncAttemptAt||t.lastSyncedAt)?`<span class="subtext">Last sync attempt: ${escapeHTML(footballUpdateLabel(t.lastSyncAttemptAt||t.lastSyncedAt))}</span>`:''}${t.settlementNote?`<span class="subtext">${escapeHTML(t.settlementNote)}</span>`:''}</td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
+  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span>${liveScoreLine(t)}${t.fixtureId?`<span class="subtext">Fixture ID: ${escapeHTML(t.fixtureId)}</span>`:'<span class="subtext">Fixture not linked</span>'}${(t.lastSyncAttemptAt||t.lastSyncedAt)?`<span class="subtext">Last sync attempt: ${escapeHTML(footballUpdateLabel(t.lastSyncAttemptAt||t.lastSyncedAt))}</span>`:''}${t.settlementNote?`<span class="subtext">${escapeHTML(t.settlementNote)}</span>`:''}</td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}${t.publicationStatus==='scheduled'?'<span class="schedule-tag">Scheduled</span>':t.publicationStatus==='draft'?'<span class="schedule-tag">Draft</span>':''}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
 }
 async function loadAdminTips() {
   const user=await checkSession();
@@ -1555,7 +1560,7 @@ async function copyVipTicket(){
     const rows=[...$('premiumRows').querySelectorAll('tr')].filter(r=>!r.classList.contains('total-odds-row'));
     const lines=rows.map(r=>[...r.querySelectorAll('td')].map(td=>td.innerText.trim()).filter(Boolean).join(' | ')).filter(Boolean);
     if(!lines.length||/no tips|could not be loaded|verifying access/i.test(lines.join(' ')))throw new Error('There are no VIP selections available to copy yet.');
-    const ticket=`BANKER TIPS VIP TICKET\n${$('vipDate').textContent||prettyDate(todayISO())}\n\n${lines.join('\n')}\n\nPlease make your own informed decisions. Past results do not guarantee future outcomes.`;
+    const ticket=`BANKER TIPS VIP TICKET\n${prettyDate(selectedTipDate('vipTipDate'))}\n\n${lines.join('\n')}\n\nPlease make your own informed decisions. Past results do not guarantee future outcomes.`;
     await navigator.clipboard.writeText(ticket);const b=$('copyVipTicket');b.innerHTML='<i class="fa-solid fa-check"></i> Ticket copied';setTimeout(()=>{b.innerHTML='<i class="fa-solid fa-copy"></i> Copy VIP Ticket';},1800);
   }catch(e){alert(e.message||'Copying is unavailable in this browser.');}
 }
@@ -1646,14 +1651,15 @@ async function handleMembershipAction(event) {
 async function saveTip(event) {
   event.preventDefault(); hideMessage('adminMessage');
   const id=$('tipId').value;
-  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),market:$('tipMarket')?.value||'auto',fixtureId:$('tipFixtureId')?.value?Number($('tipFixtureId').value):null,odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  const tipDate=$('tipDate').value;
+  const payload={date:tipDate,publicationStatus:tipDate>todayISO()?'scheduled':'published',time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),market:$('tipMarket')?.value||'auto',fixtureId:$('tipFixtureId')?.value?Number($('tipFixtureId').value):null,odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
   if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
   try {
     const user=await checkSession();
     if(!user || String(user.role||'').toLowerCase()!=='admin') throw new Error('Admin authentication is required.');
     const path=id?`/api/admin/tips/${encodeURIComponent(id)}`:'/api/admin/tips';
     const data=await api(path,{method:id?'PUT':'POST',body:JSON.stringify(payload)});
-    showAdminMessage(data.message||(id?'Tip updated.':'Tip saved.'),'ok'); clearTipForm(); await loadAdminTips(); await loadFreeTips();
+    showAdminMessage(data.message||(id?'Tip updated.':(payload.publicationStatus==='scheduled'?'Tip scheduled. It will appear automatically on the selected date.':'Tip published.')),'ok'); clearTipForm(); await loadAdminTips(); await loadFreeTips();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
 async function adminRowAction(event) {
@@ -1731,6 +1737,9 @@ $('heroVip').addEventListener('click',handleVipAccess);
 $('bottomVip').addEventListener('click',handleVipAccess);
 $('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
 $('refreshTips').addEventListener('click',loadFreeTips);
+$('tipDate')?.addEventListener('change',()=>{if(!$('tipId').value&&$('saveTipButton')) $('saveTipButton').innerHTML=$('tipDate').value>todayISO()?'<i class="fa-solid fa-calendar-check"></i> Schedule tip':'<i class="fa-solid fa-floppy-disk"></i> Publish tip';});
+$('freeTipDate')?.addEventListener('change',()=>loadFreeTips());
+$('vipTipDate')?.addEventListener('change',()=>loadPremium());
 $('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
 $('vipHistoryButton').addEventListener('click',async()=>{if(!currentUser){openModal('vipModal');return;}const expired=currentUser.membershipStatus==='expired'||(currentUser.vipExpiresAt&&new Date(currentUser.vipExpiresAt)<=new Date());if(expired||!(currentUser.membershipStatus==='active'||currentUser.isActivated)){setPanel('subscriptionPanel');openModal('renewModal');return;}setPanel('vipHistoryPanel');loadVipHistory();});
 $('backVipToday').addEventListener('click',()=>setPanel('premiumPanel'));
@@ -1763,21 +1772,19 @@ $('usersReload').addEventListener('click',loadAdminUsers);
 $('membershipSearch')?.addEventListener('input',renderAdminMembershipRows);
 $('downloadMembershipPdf')?.addEventListener('click',downloadMembershipPdf);
 $('year').textContent=new Date().getFullYear();
-let tipsRefreshInFlight = false;
-setInterval(async ()=>{
-  if(document.visibilityState==='hidden' || tipsRefreshInFlight) return;
-  tipsRefreshInFlight = true;
-  try {
-    // Both feeds read the same backend-updated MongoDB fixture state.
-    await loadFreeTips({silent:true});
-    if(currentUser) await loadPremium({silent:true});
-    if($('historyPanel')?.classList.contains('active')) await loadHistory();
-    if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) await loadVipHistory();
-  } finally { tipsRefreshInFlight = false; }
+setInterval(()=>{
+  if(document.visibilityState==='hidden') return;
+  // Keep both current-day feeds fresh, not only whichever tab is currently visible.
+  // These calls read MongoDB; API-Football polling remains server-side.
+  loadFreeTips({silent:true});
+  if(currentUser) loadPremium({silent:true});
+  if($('historyPanel')?.classList.contains('active')) loadHistory();
+  if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) loadVipHistory();
 },60000);
 $('tipDate').value=todayISO();
-$('todayDate').textContent=prettyDate(todayISO());
-$('vipDate').textContent=prettyDate(todayISO());
+if($('tipDate')) $('tipDate').min=todayISO();
+if($('freeTipDate')) $('freeTipDate').value=todayISO();
+if($('vipTipDate')) $('vipTipDate').value=todayISO();
 function renderUserProfile(){const u=currentUser||{};const email=String(u.email||u.emailAddress||'').trim();const name=String(u.name||u.fullName||u.displayName||'').trim()||(email?email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Your Profile');const pkg=({daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'})[String(u.selectedPackage||u.package||'').toLowerCase()]||'No active plan';const active=u.isActivated===true||String(u.membershipStatus||'').toLowerCase()==='active';const expiry=u.vipExpiresAt?new Date(u.vipExpiresAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Not set';const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'BT';const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};set('profileAvatar',initials);set('profileTitle',name);set('profileEmail',email||'Sign in to view your account details');set('profileEmailDetail',email||'—');set('profilePlan',active?pkg:(u.selectedPackage?pkg+' · Pending':'No active plan'));set('profileExpiry',expiry);const status=$('profileStatus');if(status){status.classList.toggle('is-active',active);status.innerHTML='<span class="status-dot"></span> '+(currentUser?(active?'Active':String(u.membershipStatus||'Pending').replace(/_/g,' ')):'Guest');}}
 async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
 function checkExpiryReminder(){try{if(!currentUser?.vipExpiresAt||!('Notification'in window)||Notification.permission!=='granted')return;const expiry=new Date(currentUser.vipExpiresAt);const remaining=expiry-Date.now();if(remaining>0&&remaining<=3*86400000){const key='bt-expiry-reminder-'+currentUser.id+'-'+expiry.toISOString().slice(0,10);if(!sessionStorage.getItem(key)){new Notification('Banker Tips VIP expiry reminder',{body:'Your VIP membership expires '+expiry.toLocaleDateString()+'. Review your subscription to avoid interruption.'});sessionStorage.setItem(key,'1');}}}catch(e){console.debug('Expiry reminder unavailable',e);}}
