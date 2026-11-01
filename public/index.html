@@ -628,35 +628,7 @@ button, input, select, textarea {
 }
 
 
-/* Banker Tips secure checkout UI — theme-aware day/night surfaces */
-.payment-method-card{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--soft) 30%,var(--surface)));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
-.payment-method-card:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,#0284c7,#38bdf8,#8b5cf6);opacity:.9}
-.payment-method-card .payment-card-heading{margin-bottom:18px}
-.payment-method-card .payment-icon{width:48px;height:48px;border-radius:15px;background:color-mix(in srgb,var(--blue) 12%,var(--surface));color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 20%,var(--line))}
-.checkout-method-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 15px}
-.checkout-method{min-width:0;display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--surface);color:var(--ink);box-shadow:0 4px 14px rgba(15,53,82,.035)}
-.checkout-method.is-selected{border-color:color-mix(in srgb,var(--green) 58%,var(--line));background:color-mix(in srgb,var(--greenbg) 45%,var(--surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 10%,transparent)}
-.checkout-method-icon{width:39px;height:39px;flex:0 0 39px;display:grid;place-items:center;border-radius:12px;background:var(--soft);color:var(--blue);font-size:1.08rem}
-.checkout-method-icon.mpesa{background:#e2f8ed;color:#087b49}.checkout-method-icon.card-brand{background:#e8f1ff;color:#245da8}.checkout-method-icon.skrill{background:#f2eaff;color:#6c35a8}.checkout-method-icon.paypal{background:#e8f2ff;color:#1263a6}.checkout-method-icon.eversend{background:#e9f8f5;color:#087b70}.checkout-method-icon.binance{background:#fff4d9;color:#a66b00}
-.checkout-method-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}.checkout-method-copy strong{font-size:.8rem;line-height:1.25}.checkout-method-copy small{font-size:.66rem;color:var(--muted);line-height:1.3}
-.method-tag{flex:0 0 auto;padding:4px 7px;border-radius:99px;font-size:.59rem;font-weight:800;white-space:nowrap}.method-tag.available{background:var(--greenbg);color:var(--green)}.method-tag.upcoming{background:var(--soft);color:var(--muted)}
-.checkout-selected-label{display:flex;align-items:center;gap:8px;margin:5px 0 10px;color:var(--muted);font-size:.66rem;font-weight:800;letter-spacing:.09em}.checkout-selected-label strong{color:var(--ink);font-size:.78rem;letter-spacing:0}.checkout-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 15%,transparent)}
-.payment-method-card .mpesa-panel{margin-top:0;padding:20px;border-radius:17px;background:linear-gradient(135deg,#effcf5,#f7fffa);border:1px solid #c5ead5;color:#123b2b}.payment-method-card .mpesa-panel h3{margin:15px 0 5px;font-size:1.15rem}.payment-method-card .mpesa-panel>p{font-size:.82rem;line-height:1.65;color:#476658}
-.payment-method-card .mpesa-logo{width:46px;height:46px;border-radius:14px;background:#087b49}.payment-method-card .recommended-label{margin-left:auto;background:#d7f7e5;color:#12653d;padding:7px 10px}
-.payment-method-card .checkout-payment-form .field input{min-height:53px;border-radius:13px;background:var(--bg);border-color:var(--line);color:var(--ink);padding:13px 15px}.payment-method-card .checkout-payment-form .field input::placeholder{color:var(--muted);opacity:.8}.payment-method-card .checkout-pay-button{width:100%;min-height:54px;border-radius:14px;font-size:.95rem;background:linear-gradient(110deg,#0787cb,#075985);box-shadow:0 9px 22px rgba(2,132,199,.2)}
-.payment-method-card #mpesaPaymentNotice{border:1px solid var(--line);background:var(--soft);border-radius:13px;padding:13px 15px;color:var(--muted)}
-.payment-method-card .checkout-security-note{display:flex;align-items:flex-start;gap:9px;margin:13px 0 0;padding:12px 14px;border-radius:12px;background:var(--bg);border:1px solid var(--line);color:var(--muted);font-size:.75rem;line-height:1.55}.payment-method-card .checkout-security-note i{color:var(--green);margin-top:2px}
-[data-theme=dark] .payment-method-card{background:linear-gradient(145deg,#102238,#102b40);border-color:#29445d}
-[data-theme=dark] .checkout-method{background:#10263a;border-color:#29445d;box-shadow:none}
-[data-theme=dark] .checkout-method.is-selected{background:linear-gradient(135deg,#12372f,#142f38);border-color:#287451}
-[data-theme=dark] .checkout-method-icon.mpesa{background:#164b37;color:#79e6ae}.checkout-method-icon.card-brand{background:#1a3556;color:#9bc8ff}.checkout-method-icon.skrill{background:#35264e;color:#d2b4ff}.checkout-method-icon.paypal{background:#183a5a;color:#9bcfff}.checkout-method-icon.eversend{background:#16413e;color:#8ce2d6}.checkout-method-icon.binance{background:#493916;color:#ffd36e}
-[data-theme=dark] .payment-method-card .mpesa-panel{background:linear-gradient(135deg,#102c22,#12251f);border-color:#285a42;color:#e0fff0}
-[data-theme=dark] .payment-method-card .mpesa-panel>p,[data-theme=dark] .payment-method-card .mpesa-brand small{color:#a4c9b6}
-[data-theme=dark] .payment-method-card .recommended-label{background:#194b34;color:#b7f7d0}
-[data-theme=dark] .payment-method-card #mpesaPaymentNotice{background:#142b3d;border-color:#29465d;color:#bfd0df}
-@media(max-width:760px){.checkout-method-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:420px){.checkout-method-grid{gap:8px}.checkout-method{padding:10px 9px;gap:8px;border-radius:13px}.checkout-method-icon{width:34px;height:34px;flex-basis:34px;border-radius:10px;font-size:.95rem}.checkout-method-copy strong{font-size:.73rem}.checkout-method-copy small{font-size:.61rem}.method-tag{font-size:.54rem;padding:4px 6px}.payment-method-card{padding:14px}.payment-method-card .mpesa-panel{padding:16px}}
-
+.tip-date-control{display:grid;gap:5px;justify-items:end;min-width:145px}.tip-date-control label{font-size:.76rem;color:var(--muted,#64748b);font-weight:700}.tip-date-picker{max-width:170px;width:100%;padding:10px 12px;border:1px solid var(--line,#dbe5ef);border-radius:12px;background:var(--surface,#fff);color:var(--text,#172b43);font:inherit;font-size:.88rem}.scheduled-hint{display:block;margin-top:6px;color:var(--muted,#64748b);font-size:.78rem}.schedule-tag{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:999px;background:#fff2cf;color:#8a5a00;font-size:.72rem;font-weight:700}
 </style>
 
 <style id="membership-approval-redesign">
@@ -866,6 +838,113 @@ img{max-width:100%}
 @media(max-width:520px){.wrap{width:min(100% - 22px,1040px)}main{padding-top:17px}.card{border-radius:14px}.section{margin-top:22px}.hero{border-radius:17px}.section-head{align-items:flex-start}.section-head h2{font-size:1.18rem}.table-scroll{-webkit-overflow-scrolling:touch}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
+
+<style id="bankertips-unified-glass-account">
+/* Unified premium glassmorphism profile + membership card */
+.account-unified-card{position:relative;isolation:isolate;overflow:hidden;margin:0 0 18px;padding:clamp(16px,3vw,26px);border:1px solid rgba(151,183,255,.25);border-radius:26px;background:radial-gradient(ellipse at 8% 0%,rgba(68,126,255,.20),transparent 42%),radial-gradient(ellipse at 100% 12%,rgba(139,92,246,.20),transparent 38%),linear-gradient(145deg,#0b1d35 0%,#102b4b 52%,#1c2450 100%);box-shadow:0 22px 55px rgba(5,17,40,.24);color:#f4f7ff}
+.account-unified-card:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.055),transparent 38%,rgba(255,255,255,.025));}
+.account-unified-card .profile-card{margin:0;padding:clamp(8px,2vw,16px) clamp(4px,1vw,10px) 20px;border:0;border-radius:0;background:transparent!important;box-shadow:none!important;color:#f4f7ff!important}
+.account-unified-card .profile-avatar{border-color:#d5b66b;background:linear-gradient(145deg,#8058df,#5143a9);box-shadow:0 0 0 6px rgba(255,255,255,.07),0 0 28px rgba(127,95,231,.25)}
+.account-unified-card .profile-name{color:#fff!important;letter-spacing:-.035em}
+.account-unified-card .profile-email{color:#c6d4ed!important;margin-bottom:17px}
+.account-unified-card .profile-status{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.19);color:#f5f7ff}
+.account-unified-card .profile-details{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px;border:1px solid rgba(191,211,255,.17);border-radius:17px;background:rgba(255,255,255,.065);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.account-unified-card .profile-detail{padding:4px 7px}
+.account-unified-card .profile-detail span{color:#b8c9e4}
+.account-unified-card .profile-detail strong{color:#fff}
+.account-unified-card .membership-card{position:relative;margin:0!important;padding:20px 4px 4px!important;border:0!important;border-top:1px solid rgba(206,177,112,.34)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#f4f7ff!important}
+.account-unified-card .payment-card-heading{position:relative;margin-bottom:14px}
+.account-unified-card .payment-card-heading h3{color:#fff;font-family:inherit}
+.account-unified-card .payment-card-heading p{color:#bdcce4}
+.account-unified-card .payment-icon{background:linear-gradient(145deg,rgba(218,184,108,.23),rgba(218,184,108,.09));color:#e7c779;border:1px solid rgba(231,199,121,.3)}
+.account-unified-card .vip-gold-mark{margin-left:auto;padding:6px 11px;border:1px solid rgba(231,199,121,.48);border-radius:999px;background:rgba(191,145,53,.13);color:#f0d28b;font-size:.72rem;font-weight:900;letter-spacing:.12em}
+.account-unified-card .account-summary{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:0}
+.account-unified-card .summary-tile{min-width:0;padding:14px 12px;border:1px solid rgba(190,211,255,.16);border-radius:15px;background:rgba(255,255,255,.065)!important;box-shadow:inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.account-unified-card .summary-tile strong{display:block;color:#fff!important;font:800 1.05rem Outfit,sans-serif;overflow-wrap:anywhere}
+.account-unified-card .summary-tile span{display:block;margin-top:5px;color:#bdcce4;font-size:.72rem;line-height:1.45}
+.account-unified-card .countdown-tile{border-color:rgba(231,199,121,.36)!important;background:linear-gradient(145deg,rgba(190,145,53,.17),rgba(255,255,255,.055))!important}
+.account-unified-card .countdown-tile strong{color:#f0d28b!important}
+.account-unified-card .countdown-tile.expired strong{color:#ff9a9a!important}
+.account-unified-card #memberStatusNotice{border:1px solid rgba(190,211,255,.14);border-radius:14px;background:rgba(255,255,255,.065)!important;color:#d4e0f3!important;padding:13px 15px}
+@media(max-width:700px){.account-unified-card{padding:15px;border-radius:21px}.account-unified-card .profile-card{padding:5px 3px 17px}.account-unified-card .profile-avatar{width:65px;height:65px}.account-unified-card .profile-details{grid-template-columns:1fr;gap:0;padding:8px 12px}.account-unified-card .profile-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start;padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.1)}.account-unified-card .profile-detail:last-child{border-bottom:0}.account-unified-card .profile-detail strong{text-align:right;font-size:.84rem}.account-unified-card .membership-card{padding-top:16px!important}.account-unified-card .account-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.account-unified-card .summary-tile{padding:12px 10px}.account-unified-card .summary-tile strong{font-size:.94rem}}
+@media(max-width:380px){.account-unified-card .account-summary{grid-template-columns:1fr}.account-unified-card .summary-tile{display:flex;align-items:center;justify-content:space-between;gap:10px}.account-unified-card .summary-tile span{margin:0;text-align:right}.account-unified-card .vip-gold-mark{font-size:.64rem}}
+@media(prefers-reduced-motion:reduce){.account-unified-card *{scroll-behavior:auto}}
+
+/* Day/Night mode support for the unified glass account card.
+   The night palette remains the premium navy glass design; day mode
+   switches every nested account element to readable light glass surfaces. */
+[data-theme="light"] .account-unified-card{
+  color:#152b45!important;
+  border-color:rgba(103,151,207,.34)!important;
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(83,157,235,.19),transparent 43%),
+    radial-gradient(ellipse at 100% 12%,rgba(155,126,232,.14),transparent 40%),
+    linear-gradient(145deg,#fafdff 0%,#eaf4ff 54%,#f1edff 100%)!important;
+  box-shadow:0 18px 42px rgba(37,75,117,.12)!important;
+}
+[data-theme="light"] .account-unified-card:before{
+  background:linear-gradient(115deg,rgba(255,255,255,.72),transparent 42%,rgba(255,255,255,.25))!important;
+}
+[data-theme="light"] .account-unified-card .profile-card,
+[data-theme="light"] .account-unified-card .membership-card{
+  color:#152b45!important;
+}
+[data-theme="light"] .account-unified-card .profile-name,
+[data-theme="light"] .account-unified-card .profile-details strong,
+[data-theme="light"] .account-unified-card .payment-card-heading h3,
+[data-theme="light"] .account-unified-card .summary-tile strong{
+  color:#142f4c!important;
+}
+[data-theme="light"] .account-unified-card .profile-email,
+[data-theme="light"] .account-unified-card .payment-card-heading p,
+[data-theme="light"] .account-unified-card .summary-tile span{
+  color:#526b86!important;
+}
+[data-theme="light"] .account-unified-card .profile-status{
+  color:#24516f!important;
+  background:rgba(255,255,255,.72)!important;
+  border-color:rgba(91,137,184,.28)!important;
+}
+[data-theme="light"] .account-unified-card .profile-details{
+  background:rgba(255,255,255,.62)!important;
+  border-color:rgba(105,151,196,.27)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.9)!important;
+}
+[data-theme="light"] .account-unified-card .profile-detail span{color:#617b96!important}
+[data-theme="light"] .account-unified-card .membership-card{
+  border-top-color:rgba(183,143,61,.42)!important;
+}
+[data-theme="light"] .account-unified-card .summary-tile{
+  background:rgba(255,255,255,.72)!important;
+  border-color:rgba(111,153,194,.28)!important;
+  box-shadow:0 5px 16px rgba(46,83,122,.055),inset 0 1px rgba(255,255,255,.95)!important;
+}
+[data-theme="light"] .account-unified-card .countdown-tile{
+  background:linear-gradient(145deg,rgba(255,249,231,.98),rgba(255,255,255,.8))!important;
+  border-color:rgba(202,164,86,.42)!important;
+}
+[data-theme="light"] .account-unified-card .countdown-tile strong{color:#946817!important}
+[data-theme="light"] .account-unified-card .countdown-tile.expired strong{color:#b42332!important}
+[data-theme="light"] .account-unified-card #memberStatusNotice{
+  color:#405b76!important;
+  background:rgba(255,255,255,.66)!important;
+  border-color:rgba(111,153,194,.25)!important;
+}
+[data-theme="light"] .account-unified-card .payment-icon{
+  background:linear-gradient(145deg,#fff5d9,#fffaf0)!important;
+  color:#a87920!important;
+  border-color:rgba(194,151,63,.38)!important;
+}
+[data-theme="light"] .account-unified-card .vip-gold-mark{
+  background:linear-gradient(145deg,#fff4d5,#fffaf0)!important;
+  color:#946817!important;
+  border-color:rgba(194,151,63,.48)!important;
+}
+@media(max-width:700px){
+  [data-theme="light"] .account-unified-card .profile-detail{border-bottom-color:rgba(105,151,196,.2)!important}
+}
+</style>
+
 </head>
 <body data-theme="light">
 <script>
@@ -912,11 +991,11 @@ img{max-width:100%}
 
  <section class="panel active" id="freePanel">
   <div class="section">
-   <div class="section-head"><div><h2>Today's Free Tips</h2><p>Best selection for today </p></div><span class="date-chip" id="todayDate">Loading date…</span></div>
+   <div class="section-head"><div><h2>Free Tips</h2><p>Explore our Free Tips Selections</p></div><div class="tip-date-control"><label for="freeTipDate">Match date</label><input type="date" id="freeTipDate" class="tip-date-picker" aria-label="Choose free tips date"></div></div>
    <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="freeRows"><tr><td colspan="5">Loading tips…</td></tr></tbody></table></div><div class="notice" id="freeNotice">Preparing today’s selections…</div></div>
    <div class="form-actions"><button class="btn secondary" id="historyButton"><i class="fa-solid fa-clock-rotate-left"></i> Free Tips History</button><button class="btn ghost" id="refreshTips"><i class="fa-solid fa-rotate"></i> Refresh tips</button></div>
   </div>
-  <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results do not guarantee future outcomes.</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="statsSettled">—</strong><span>Settled tips</span></div><div class="summary-tile"><strong id="statsWins">—</strong><span>Wins recorded</span></div><div class="summary-tile"><strong id="statsWinRate">—</strong><span>Win rate (void excluded)</span></div></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
+  <div class="section"><div class="section-head"><div><h2>Historical Performance</h2><p>Calculated from recorded settled tips. Past results ascertain future outcomes.</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="statsSettled">—</strong><span>Settled tips</span></div><div class="summary-tile"><strong id="statsWins">—</strong><span>Wins recorded</span></div><div class="summary-tile"><strong id="statsWinRate">—</strong><span>Win rate (void excluded)</span></div></div><div class="notice" id="statsMethod">Statistics load from recorded results.</div></div>
   <div class="section grid-3">
    <article class="info-card"><i class="fa-solid fa-magnifying-glass-chart"></i><h3>Thoughtful analysis</h3><p>Review match selections and odds before making your own decisions.</p></article>
    <article class="info-card"><i class="fa-solid fa-lock"></i><h3>Member access</h3><p>Premium content is available to approved VIP members only.</p></article>
@@ -941,7 +1020,7 @@ img{max-width:100%}
  
 
  <section class="panel" id="premiumPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><span class="date-chip" id="vipDate"></span></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-crown" style="color:var(--blue)"></i> VIP Premium Tips</h2><p id="vipSubheading">Checking membership access…</p></div><div class="tip-date-control"><label for="vipTipDate">Match date</label><input type="date" id="vipTipDate" class="tip-date-picker" aria-label="Choose VIP tips date"></div></div>
   <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="history-separator vip-history-separator premium-bottom-crown" role="separator" aria-label="End of VIP Premium tips"><span></span><i class="fa-solid fa-crown" aria-hidden="true"></i><span></span></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
  </section>
 
@@ -952,46 +1031,33 @@ img{max-width:100%}
  </section>
 
  <section class="panel" id="paymentPanel">
-  <div class="payment-hero"><div class="payment-hero-copy"><span class="eyebrow"><i class="fa-solid fa-user-shield"></i> YOUR BANKER TIPS PROFILE</span><h1>My Account</h1><p>Manage your VIP membership, review payment history and track your account status securely in one place.</p><div class="payment-trust"><span><i class="fa-solid fa-lock"></i> Protected checkout</span><span><i class="fa-solid fa-circle-check"></i> Confirmation tracking</span></div></div><div class="payment-hero-icon"><i class="fa-solid fa-wallet"></i></div></div>
+  <div class="payment-hero"><div class="payment-hero-copy"><span class="eyebrow"><i class="fa-solid fa-user-shield"></i> YOUR BANKER TIPS PROFILE</span><h1>My Account</h1><p> </p><div class="payment-trust"><span><i class="fa-solid fa-lock"></i> Protected checkout</span><span><i class="fa-solid fa-circle-check"></i> Confirmation tracking</span></div></div><div class="payment-hero-icon"><i class="fa-solid fa-wallet"></i></div></div>
   <div class="payment-steps" aria-label="Payment steps"><div class="payment-step"><span>1</span><div><strong>Choose a plan</strong><small>Select Daily, Weekly or Monthly VIP</small></div></div><div class="payment-step"><span>2</span><div><strong>Make payment</strong><small>Follow the payment instructions</small></div></div><div class="payment-step"><span>3</span><div><strong>Get confirmed</strong><small>VIP access unlocks after approval</small></div></div></div>
-  <section class="profile-card" aria-labelledby="profileTitle"><div class="profile-top"><div class="profile-avatar" id="profileAvatar" aria-hidden="true">BT</div><span class="profile-status" id="profileStatus"><span class="status-dot"></span> Guest</span></div><h2 id="profileTitle" class="profile-name">Your Profile</h2><p class="profile-email" id="profileEmail">Sign in to view your account details</p><div class="profile-details"><div class="profile-detail"><span>Subscription plan</span><strong id="profilePlan">No active plan</strong></div><div class="profile-detail"><span>Membership expiry</span><strong id="profileExpiry">—</strong></div><div class="profile-detail"><span>Account email</span><strong id="profileEmailDetail">—</strong></div></div></section>
-  <div class="card pad membership-card" style="margin-bottom:16px"><div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-id-card"></i></span><div><h3 style="margin:0">Your membership</h3><p>Plan details and current access status</p></div></div><div class="account-summary"><div class="summary-tile"><strong id="memberPlanValue">Not selected</strong><span>Selected package</span></div><div class="summary-tile"><strong id="memberStatusValue">Guest</strong><span>Membership status</span></div><div class="summary-tile"><strong id="memberExpiryValue">—</strong><span>Expiry date & time (EAT)</span></div><div class="summary-tile countdown-tile"><strong id="memberCountdownValue">—</strong><span>Time remaining</span></div></div><div class="notice" id="memberStatusNotice" style="margin-top:12px">Register and choose a package to view your membership status here.</div></div>
-  <div class="card admin-members payment-history-card"><div class="section-head" style="padding:20px 20px 0"><div><h3 style="margin:0">Payment history</h3><p>Review recent payments and their confirmation status.</p></div><button class="btn secondary small" id="paymentHistoryReload"><i class="fa-solid fa-rotate"></i> Refresh</button></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Status</th><th>Receipt / Reference</th></tr></thead><tbody id="customerPaymentsRows"><tr><td colspan="5">Sign in to view your payment history.</td></tr></tbody></table></div><div class="notice" id="customerPaymentsNotice">Your VIP access is activated after your payment has been confirmed.</div></div>
-  <div class="card pad payment-method-card">
-   <div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-shield-halved"></i></span><div><h3 style="margin:0">Secure payment methods</h3><p>Select a payment option to see its checkout instructions.</p></div></div>
-   <div class="checkout-method-grid" aria-label="Available payment methods">
-    <div class="checkout-method is-selected" aria-current="true"><span class="checkout-method-icon mpesa"><i class="fa-solid fa-mobile-screen-button"></i></span><span class="checkout-method-copy"><strong>M-Pesa</strong><small>Mobile money</small></span><span class="method-tag available">Available</span></div>
-    <div class="checkout-method"><span class="checkout-method-icon card-brand"><i class="fa-regular fa-credit-card"></i></span><span class="checkout-method-copy"><strong>Card payment</strong><small>Visa · Mastercard</small></span><span class="method-tag upcoming">Coming soon</span></div>
-    <div class="checkout-method"><span class="checkout-method-icon skrill"><i class="fa-solid fa-wallet"></i></span><span class="checkout-method-copy"><strong>Skrill</strong><small>Digital wallet</small></span><span class="method-tag upcoming">Coming soon</span></div>
-    <div class="checkout-method"><span class="checkout-method-icon paypal"><i class="fa-brands fa-paypal"></i></span><span class="checkout-method-copy"><strong>PayPal</strong><small>Online wallet</small></span><span class="method-tag upcoming">Coming soon</span></div>
-    <div class="checkout-method"><span class="checkout-method-icon eversend"><i class="fa-solid fa-money-bill-transfer"></i></span><span class="checkout-method-copy"><strong>Eversend</strong><small>Digital payments</small></span><span class="method-tag upcoming">Coming soon</span></div>
-    <div class="checkout-method"><span class="checkout-method-icon binance"><i class="fa-brands fa-bitcoin"></i></span><span class="checkout-method-copy"><strong>Binance Pay</strong><small>Crypto payments</small></span><span class="method-tag upcoming">Coming soon</span></div>
-   </div>
-   <div class="checkout-selected-label"><span class="checkout-live-dot"></span> CURRENT CHECKOUT <strong>M-Pesa</strong></div>
-   <div class="mpesa-panel"><div class="mpesa-brand"><span class="mpesa-logo"><i class="fa-solid fa-mobile-screen-button"></i></span><div><strong>M-Pesa</strong><small>Instant phone prompt</small></div><span class="recommended-label">Recommended</span></div><h3>Pay securely with M-Pesa</h3><p>Enter your Safaricom number below. A payment prompt will be sent to your phone. Follow the instructions to complete your payment.</p></div>
-   <form id="mpesaPaymentForm" class="checkout-payment-form" style="margin-top:16px"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20"><small class="subtext">Use the Safaricom number that should receive the payment prompt.</small></div><div class="field full"><button class="btn checkout-pay-button" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Continue with M-Pesa</button></div></div></form>
-   <div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div>
-   <p class="checkout-security-note"><i class="fa-solid fa-shield-halved"></i> Never share your M-Pesa PIN or one-time verification codes with anyone.</p>
+  <div class="account-unified-card" aria-label="Account profile and VIP membership">
+   <section class="profile-card" aria-labelledby="profileTitle"><div class="profile-top"><div class="profile-avatar" id="profileAvatar" aria-hidden="true">BT</div><span class="profile-status" id="profileStatus"><span class="status-dot"></span> Guest</span></div><h2 id="profileTitle" class="profile-name">Your Profile</h2><p class="profile-email" id="profileEmail">Sign in to view your account details</p><div class="profile-details"><div class="profile-detail"><span>Subscription plan</span><strong id="profilePlan">No active plan</strong></div><div class="profile-detail"><span>Membership expiry</span><strong id="profileExpiry">—</strong></div><div class="profile-detail"><span>Account email</span><strong id="profileEmailDetail">—</strong></div></div></section>
+   <div class="card pad membership-card"><div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-crown"></i></span><div><h3 style="margin:0">Your VIP membership</h3><p>Plan details and current access status</p></div><span class="vip-gold-mark">VIP</span></div><div class="account-summary"><div class="summary-tile"><strong id="memberPlanValue">Not selected</strong><span>Selected package</span></div><div class="summary-tile"><strong id="memberStatusValue">Guest</strong><span>Membership status</span></div><div class="summary-tile"><strong id="memberExpiryValue">—</strong><span>Expiry date & time (EAT)</span></div><div class="summary-tile countdown-tile"><strong id="memberCountdownValue">—</strong><span>Time remaining</span></div></div><div class="notice" id="memberStatusNotice" style="margin-top:12px">Register and choose a package to view your membership status here.</div></div>
   </div>
+  <div class="card admin-members payment-history-card"><div class="section-head" style="padding:20px 20px 0"><div><h3 style="margin:0">Payment history</h3><p>Review recent payments and their confirmation status.</p></div><button class="btn secondary small" id="paymentHistoryReload"><i class="fa-solid fa-rotate"></i> Refresh</button></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Status</th><th>Receipt / Reference</th></tr></thead><tbody id="customerPaymentsRows"><tr><td colspan="5">Sign in to view your payment history.</td></tr></tbody></table></div><div class="notice" id="customerPaymentsNotice">Your VIP access is activated after your payment has been confirmed.</div></div>
+  <div class="card pad payment-method-card"><div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-credit-card"></i></span><div><h3 style="margin:0">Payment options</h3><p>Choose the method that works best for you.</p></div></div><div class="payment-methods"><div class="pay-pill"><i class="fa-solid fa-mobile-screen-button"></i> M-Pesa</div><div class="pay-pill"><i class="fa-solid fa-wallet"></i> Skrill</div><div class="pay-pill"><i class="fa-brands fa-paypal"></i> PayPal</div><div class="pay-pill"><i class="fa-solid fa-money-bill-transfer"></i> Eversend</div><div class="pay-pill"><i class="fa-brands fa-bitcoin"></i> Binance</div></div><div class="mpesa-panel"><div class="mpesa-brand"><span class="mpesa-logo"><i class="fa-solid fa-mobile-screen-button"></i></span><div><strong>M-Pesa</strong><small>Instant phone prompt</small></div><span class="recommended-label">Recommended</span></div><h3>Pay with M-Pesa</h3><p>Enter your Safaricom number below. Check your phone for the M-PESA prompt and follow the instructions to complete your payment.</p></div><form id="mpesaPaymentForm" style="margin-top:16px"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20"><small class="subtext">Enter your Safaricom number to make a payment.
+
+</small></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Pay with M-Pesa</button></div></div></form><div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div><p class="subtext" style="margin-top:14px">Never share your M-Pesa PIN or one-time verification codes with anyone.</p></div>
  </section>
 
  <section class="panel" id="adminPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><div class="form-actions"><button class="btn secondary small" id="syncTipResults" type="button"><i class="fa-solid fa-arrows-rotate"></i> Sync results</button><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Admin Panel</h2><p>Manage tips, membership approvals and payment records. </p></div><div class="form-actions"><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
     <div class="form-grid">
-     <div class="field"><label for="tipDate">Date</label><input type="date" id="tipDate" required></div>
+     <div class="field"><label for="tipDate">Match date / publication day</label><input type="date" id="tipDate" required><small class="subtext scheduled-hint">Choose a future date to schedule this tip. </small></div>
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
-     <div class="field"><label for="tipMarket">Settlement market</label><select id="tipMarket"><option value="auto">Auto-detect from tip text</option><option value="home_win">Home Win (1)</option><option value="draw">Draw (X)</option><option value="away_win">Away Win (2)</option><option value="home_or_draw">Double Chance 1X</option><option value="draw_or_away">Double Chance X2</option><option value="home_or_away">Double Chance 12</option><option value="btts_yes">Both Teams To Score — Yes</option><option value="btts_no">Both Teams To Score — No</option><option value="over_0_5">Over 0.5 Goals</option><option value="under_0_5">Under 0.5 Goals</option><option value="over_1_5">Over 1.5 Goals</option><option value="under_1_5">Under 1.5 Goals</option><option value="over_2_5">Over 2.5 Goals</option><option value="under_2_5">Under 2.5 Goals</option><option value="over_3_5">Over 3.5 Goals</option><option value="under_3_5">Under 3.5 Goals</option><option value="over_4_5">Over 4.5 Goals</option><option value="under_4_5">Under 4.5 Goals</option><option value="over_5_5">Over 5.5 Goals</option><option value="under_5_5">Under 5.5 Goals</option><option value="home_dnb">Home Draw No Bet</option><option value="away_dnb">Away Draw No Bet</option></select><small class="subtext">Choose the exact market for safer automatic settlement. Unsupported markets remain pending for admin review.</small></div>
-     <div class="field"><label for="tipFixtureId">API-Football Fixture ID (optional)</label><input id="tipFixtureId" type="number" min="1" step="1" placeholder="Enter fixture ID to link manually"><small class="subtext">Use the provider fixture ID to override automatic discovery. Teams must still match.</small></div>
      <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
      <div class="field"><label for="tipStatus">Result</label><select id="tipStatus"><option value="Pending">Pending</option><option value="Won">Won</option><option value="Lost">Lost</option><option value="Void">Void</option></select></div>
     </div>
-    <div class="form-actions"><button class="btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save tip</button><button class="btn ghost" type="button" id="clearTip">Clear form</button></div><div class="msg" id="adminMessage" role="status"></div>
+    <div class="form-actions"><button class="btn" type="submit" id="saveTipButton"><i class="fa-solid fa-calendar-check"></i> Save / schedule tip</button><button class="btn ghost" type="button" id="clearTip">Clear form</button></div><div class="msg" id="adminMessage" role="status"></div>
    </form></div>
    <div class="card"><div class="pad"><div class="field"><label for="adminTipSearch">Search tips</label><input id="adminTipSearch" type="search" placeholder="Search by match, category or date"></div></div><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Changes are available to authorized administrators only.</div></div>
   </div>
@@ -1090,8 +1156,9 @@ document.addEventListener('click', function(event) {
   } catch (error) { console.warn('Registration modal opened with partial initialisation:', error); }
 }, true);
 const todayISO = () => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const parts = new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Nairobi',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+  const v = Object.fromEntries(parts.map(p=>[p.type,p.value]));
+  return `${v.year}-${v.month}-${v.day}`;
 };
 const prettyDate = (value) => {
   if (!value) return '—';
@@ -1179,36 +1246,6 @@ function totalOddsRow(tips, columns=5){
   const total=calculateTotalOdds(tips);
   return `<tr class="total-odds-row"><td colspan="${columns}"><span class="total-odds-label">TOTAL ACCUMULATOR ODDS</span><strong class="total-odds-value">${total===null?'—':total.toFixed(2)}</strong></td></tr>`;
 }
-function footballUpdateLabel(value) {
-  if(!value) return '';
-  const date=new Date(value);
-  if(!Number.isFinite(date.getTime())) return '';
-  return date.toLocaleString('en-KE',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true})+' EAT';
-}
-function liveScoreLine(t) {
-  const hasScore=t.homeScore!==null&&t.homeScore!==undefined&&t.awayScore!==null&&t.awayScore!==undefined;
-  const status=String(t.fixtureStatusShort||'').toUpperCase();
-  const statusLabel=String(t.fixtureStatusLabel||status||'');
-  if(!hasScore&&!statusLabel) return '';
-  const score=hasScore?`Score ${escapeHTML(t.homeScore)}–${escapeHTML(t.awayScore)}`:'';
-  const syncedAt=t.lastSyncedAt?new Date(t.lastSyncedAt).getTime():NaN;
-  const age=Number.isFinite(syncedAt)?Math.max(0,Date.now()-syncedAt):Infinity;
-  // Only show a numeric live minute while the API-Football observation is fresh.
-  // Never increment elapsedMinute locally or present an old minute as current.
-  const fresh=age<=3*60*1000;
-  const live=['1H','2H','ET','1ET','2ET'].includes(status);
-  let label=statusLabel;
-  if(live){
-    const phase=status==='1H'?'1st Half':status==='2H'?'2nd Half':'Extra Time';
-    const minute=Number(t.elapsedMinute);
-    label=fresh&&t.elapsedMinute!==null&&t.elapsedMinute!==undefined&&Number.isFinite(minute)&&minute>0
-      ? `${minute} Min` : phase;
-  }
-  // Deliberately omit synchronization timestamps from public match cards.
-  const parts=[score,label].filter(Boolean);
-  return `<span class="subtext">${parts.map(escapeHTML).join(' · ')}</span>`;
-}
-
 function renderTipRows(tips, target, withDate=false) {
   if (!Array.isArray(tips) || tips.length===0) {
     showEmpty(target,withDate?6:5,'Tips are being updated. Please check back later.');
@@ -1216,19 +1253,19 @@ function renderTipRows(tips, target, withDate=false) {
     return;
   }
   const rows=tips.map(t => {
-    const scoreLine = liveScoreLine(t);
-    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}${scoreLine}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
+    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
   }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
+function selectedTipDate(id) { return $(id)?.value || todayISO(); }
 async function loadFreeTips({silent=false} = {}) {
-  const date=todayISO(); $('todayDate').textContent=prettyDate(date);
+  const date=selectedTipDate('freeTipDate');
   if(!silent){ showEmpty('freeRows',5,'Loading tips…'); $('freeNotice').textContent='Preparing today’s selections…'; }
   try {
     const data=await api(`/api/tips?type=free&date=${encodeURIComponent(date)}`);
     lastTips=Array.isArray(data.tips)?data.tips:[];
     renderTipRows(lastTips,'freeRows');
-    $('freeNotice').textContent=`${lastTips.length} selection(s) available.`;
+    $('freeNotice').textContent=`${lastTips.length} Free selection(s) for ${prettyDate(date)}.`;
   } catch(e) {
     if(!silent) showEmpty('freeRows',5,'Tips could not be loaded.');
     if(!silent) $('freeNotice').textContent='Tips could not be refreshed. Please try again.';
@@ -1373,17 +1410,17 @@ async function loadVipHistory() {
   }
 }
 async function loadPremium({silent=false} = {}) {
-  $('vipDate').textContent=prettyDate(todayISO());
+  const selectedDate=selectedTipDate('vipTipDate');
   if(!silent){ $('vipSubheading').textContent='Checking membership access…'; showEmpty('premiumRows',5,'Verifying access…'); $('premiumNotice').textContent='Checking your VIP membership…'; }
   try {
     if(!currentUser) await checkSession();
     if(!currentUser) throw new Error('Please log in first to verify your membership.');
-    const data=await api(`/api/tips?type=premium&date=${encodeURIComponent(todayISO())}`);
+    const data=await api(`/api/tips?type=premium&date=${encodeURIComponent(selectedDate)}`);
     if(data.authorized===false) throw new Error('Your account does not have an active VIP subscription.');
     const tips=Array.isArray(data.tips)?data.tips:[];
     renderTipRows(tips,'premiumRows');
     $('vipSubheading').textContent='Authorized premium member';
-    $('premiumNotice').textContent=`${tips.length} Premium Selection Today.`;
+    $('premiumNotice').textContent=`${tips.length} Premium selection(s) for ${prettyDate(selectedDate)}.`;
   } catch(e) {
     if(!silent){ $('vipSubheading').textContent='Membership verification required'; showEmpty('premiumRows',5,e.message); $('premiumNotice').textContent='Access is pending verification. If you have paid, contact support or sign in with the activated account.'; }
   }
@@ -1570,12 +1607,12 @@ async function handleLogin(event) {
     }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
-function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('tipMarket')) $('tipMarket').value='auto'; if($('tipFixtureId')) $('tipFixtureId').value=''; }
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; }
 function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
-  const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip,t.fixtureId,t.settlementNote].some(v=>String(v||'').toLowerCase().includes(q)));
-  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span>${liveScoreLine(t)}${t.fixtureId?`<span class="subtext">Fixture ID: ${escapeHTML(t.fixtureId)}</span>`:'<span class="subtext">Fixture not linked</span>'}${(t.lastSyncAttemptAt||t.lastSyncedAt)?`<span class="subtext">Last sync attempt: ${escapeHTML(footballUpdateLabel(t.lastSyncAttemptAt||t.lastSyncedAt))}</span>`:''}${t.settlementNote?`<span class="subtext">${escapeHTML(t.settlementNote)}</span>`:''}</td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
+  const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip].some(v=>String(v||'').toLowerCase().includes(q)));
+  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span></td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}${t.publicationStatus==='scheduled'?'<span class="schedule-tag">Scheduled</span>':t.publicationStatus==='draft'?'<span class="schedule-tag">Draft</span>':''}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
 }
 async function loadAdminTips() {
   const user=await checkSession();
@@ -1599,7 +1636,7 @@ async function copyVipTicket(){
     const rows=[...$('premiumRows').querySelectorAll('tr')].filter(r=>!r.classList.contains('total-odds-row'));
     const lines=rows.map(r=>[...r.querySelectorAll('td')].map(td=>td.innerText.trim()).filter(Boolean).join(' | ')).filter(Boolean);
     if(!lines.length||/no tips|could not be loaded|verifying access/i.test(lines.join(' ')))throw new Error('There are no VIP selections available to copy yet.');
-    const ticket=`BANKER TIPS VIP TICKET\n${$('vipDate').textContent||prettyDate(todayISO())}\n\n${lines.join('\n')}\n\nPlease make your own informed decisions. Past results do not guarantee future outcomes.`;
+    const ticket=`BANKER TIPS VIP TICKET\n${prettyDate(selectedTipDate('vipTipDate'))}\n\n${lines.join('\n')}\n\nPlease make your own informed decisions. Past results do not guarantee future outcomes.`;
     await navigator.clipboard.writeText(ticket);const b=$('copyVipTicket');b.innerHTML='<i class="fa-solid fa-check"></i> Ticket copied';setTimeout(()=>{b.innerHTML='<i class="fa-solid fa-copy"></i> Copy VIP Ticket';},1800);
   }catch(e){alert(e.message||'Copying is unavailable in this browser.');}
 }
@@ -1657,7 +1694,7 @@ async function loadAdminUsers() {
     $('membersPendingCount').textContent=pending; $('membersActiveCount').textContent=active; $('membersExpiredCount').textContent=other;
     if($('membersTotalCount')) $('membersTotalCount').textContent=users.length;
     renderAdminMembershipRows();
-    $('membersNotice').textContent='Sorted by payment date/time where supplied, with newest records first. Payment timestamps not supplied by the account API are clearly marked as unavailable. Verify external payments before approving.';
+    $('membersNotice').textContent='N/B Verify external payments before approving.';
   } catch(e) { showEmpty('adminUsersRows',7,e.message); $('membersNotice').textContent='Membership data could not be loaded.'; }
 }
 function downloadMembershipPdf() {
@@ -1690,14 +1727,15 @@ async function handleMembershipAction(event) {
 async function saveTip(event) {
   event.preventDefault(); hideMessage('adminMessage');
   const id=$('tipId').value;
-  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),market:$('tipMarket')?.value||'auto',fixtureId:$('tipFixtureId')?.value?Number($('tipFixtureId').value):null,odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  const tipDate=$('tipDate').value;
+  const payload={date:tipDate,publicationStatus:tipDate>todayISO()?'scheduled':'published',time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
   if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
   try {
     const user=await checkSession();
     if(!user || String(user.role||'').toLowerCase()!=='admin') throw new Error('Admin authentication is required.');
     const path=id?`/api/admin/tips/${encodeURIComponent(id)}`:'/api/admin/tips';
     const data=await api(path,{method:id?'PUT':'POST',body:JSON.stringify(payload)});
-    showAdminMessage(data.message||(id?'Tip updated.':'Tip saved.'),'ok'); clearTipForm(); await loadAdminTips(); await loadFreeTips();
+    showAdminMessage(data.message||(id?'Tip updated.':(payload.publicationStatus==='scheduled'?'Tip scheduled. It will appear automatically on the selected date.':'Tip published.')),'ok'); clearTipForm(); await loadAdminTips(); await loadFreeTips();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
 async function adminRowAction(event) {
@@ -1715,7 +1753,7 @@ async function adminRowAction(event) {
     const data=await api('/api/admin/tips');
     const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
     if(!tip) throw new Error('Tip not found. Reload the list and try again.');
-    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipMarket').value=tip.market||'auto'; if($('tipFixtureId')) $('tipFixtureId').value=tip.fixtureId||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
     $('tipMatch').focus();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
@@ -1775,6 +1813,9 @@ $('heroVip').addEventListener('click',handleVipAccess);
 $('bottomVip').addEventListener('click',handleVipAccess);
 $('vipLoginButton').addEventListener('click',()=>{closeModal('vipModal');openModal('loginModal')});
 $('refreshTips').addEventListener('click',loadFreeTips);
+$('tipDate')?.addEventListener('change',()=>{if(!$('tipId').value&&$('saveTipButton')) $('saveTipButton').innerHTML=$('tipDate').value>todayISO()?'<i class="fa-solid fa-calendar-check"></i> Schedule tip':'<i class="fa-solid fa-floppy-disk"></i> Publish tip';});
+$('freeTipDate')?.addEventListener('change',()=>loadFreeTips());
+$('vipTipDate')?.addEventListener('change',()=>loadPremium());
 $('historyButton').addEventListener('click',()=>setPanel('historyPanel'));
 $('vipHistoryButton').addEventListener('click',async()=>{if(!currentUser){openModal('vipModal');return;}const expired=currentUser.membershipStatus==='expired'||(currentUser.vipExpiresAt&&new Date(currentUser.vipExpiresAt)<=new Date());if(expired||!(currentUser.membershipStatus==='active'||currentUser.isActivated)){setPanel('subscriptionPanel');openModal('renewModal');return;}setPanel('vipHistoryPanel');loadVipHistory();});
 $('backVipToday').addEventListener('click',()=>setPanel('premiumPanel'));
@@ -1791,16 +1832,6 @@ $('copyVipTicket')?.addEventListener('click',copyVipTicket);
 
 $('clearTip').addEventListener('click',clearTipForm);
 $('adminReload').addEventListener('click',loadAdminTips);
-$('syncTipResults')?.addEventListener('click',async()=>{
-  const button=$('syncTipResults'); button.disabled=true;
-  try {
-    const data=await api('/api/admin/tips/sync-results',{method:'POST'});
-    $('adminNotice').textContent=data.message||'Tip results synchronized.';
-    await loadAdminTips(); await loadFreeTips();
-    if($('premiumPanel')?.classList.contains('active')&&currentUser) await loadPremium();
-  } catch(e) { $('adminNotice').textContent=e.message||'Could not synchronize results. Check API configuration.'; }
-  finally { button.disabled=false; }
-});
 $('adminRows').addEventListener('click',adminRowAction);
 $('adminUsersRows').addEventListener('click',handleMembershipAction);
 $('usersReload').addEventListener('click',loadAdminUsers);
@@ -1810,15 +1841,16 @@ $('year').textContent=new Date().getFullYear();
 setInterval(()=>{
   if(document.visibilityState==='hidden') return;
   // Keep both current-day feeds fresh, not only whichever tab is currently visible.
-  // These calls read MongoDB; API-Football polling remains server-side.
+  // These calls read the latest tip records saved in MongoDB.
   loadFreeTips({silent:true});
   if(currentUser) loadPremium({silent:true});
   if($('historyPanel')?.classList.contains('active')) loadHistory();
   if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) loadVipHistory();
 },60000);
 $('tipDate').value=todayISO();
-$('todayDate').textContent=prettyDate(todayISO());
-$('vipDate').textContent=prettyDate(todayISO());
+if($('tipDate')) $('tipDate').min=todayISO();
+if($('freeTipDate')) $('freeTipDate').value=todayISO();
+if($('vipTipDate')) $('vipTipDate').value=todayISO();
 function renderUserProfile(){const u=currentUser||{};const email=String(u.email||u.emailAddress||'').trim();const name=String(u.name||u.fullName||u.displayName||'').trim()||(email?email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Your Profile');const pkg=({daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'})[String(u.selectedPackage||u.package||'').toLowerCase()]||'No active plan';const active=u.isActivated===true||String(u.membershipStatus||'').toLowerCase()==='active';const expiry=u.vipExpiresAt?new Date(u.vipExpiresAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Not set';const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'BT';const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};set('profileAvatar',initials);set('profileTitle',name);set('profileEmail',email||'Sign in to view your account details');set('profileEmailDetail',email||'—');set('profilePlan',active?pkg:(u.selectedPackage?pkg+' · Pending':'No active plan'));set('profileExpiry',expiry);const status=$('profileStatus');if(status){status.classList.toggle('is-active',active);status.innerHTML='<span class="status-dot"></span> '+(currentUser?(active?'Active':String(u.membershipStatus||'Pending').replace(/_/g,' ')):'Guest');}}
 async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
 function checkExpiryReminder(){try{if(!currentUser?.vipExpiresAt||!('Notification'in window)||Notification.permission!=='granted')return;const expiry=new Date(currentUser.vipExpiresAt);const remaining=expiry-Date.now();if(remaining>0&&remaining<=3*86400000){const key='bt-expiry-reminder-'+currentUser.id+'-'+expiry.toISOString().slice(0,10);if(!sessionStorage.getItem(key)){new Notification('Banker Tips VIP expiry reminder',{body:'Your VIP membership expires '+expiry.toLocaleDateString()+'. Review your subscription to avoid interruption.'});sessionStorage.setItem(key,'1');}}}catch(e){console.debug('Expiry reminder unavailable',e);}}
