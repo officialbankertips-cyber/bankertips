@@ -102,6 +102,15 @@ const tipSchema = new mongoose.Schema({
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
+  market: { type: String, trim: true, maxlength: 40, default: "auto" },
+  fixtureId: { type: Number, default: null, index: true },
+  homeScore: { type: Number, default: null },
+  awayScore: { type: Number, default: null },
+  fixtureStatus: { type: String, trim: true, maxlength: 40, default: "" },
+  fixtureStatusShort: { type: String, trim: true, maxlength: 12, default: "" },
+  lastSyncedAt: { type: Date, default: null },
+  settlementNote: { type: String, trim: true, maxlength: 240, default: "" },
+  settlementSource: { type: String, enum: ["manual", "automatic", "pending"], default: "pending" },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -326,8 +335,23 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
+  const market = String(body.market || "auto").trim().toLowerCase();
+  const allowedMarkets = new Set([
+    "auto", "home_win", "draw", "away_win", "home_or_draw", "draw_or_away", "home_or_away",
+    "btts_yes", "btts_no", "over_0_5", "under_0_5", "over_1_5", "under_1_5",
+    "over_2_5", "under_2_5", "over_3_5", "under_3_5", "over_4_5", "under_4_5",
+    "over_5_5", "under_5_5", "home_dnb", "away_dnb"
+  ]);
+  if (!allowedMarkets.has(market)) throw new Error("Choose a supported prediction market.");
+  const fixtureIdValue = body.fixtureId == null || body.fixtureId === "" ? null : Number(body.fixtureId);
+  if (fixtureIdValue !== null && (!Number.isSafeInteger(fixtureIdValue) || fixtureIdValue <= 0)) {
+    throw new Error("Fixture ID must be a positive whole number.");
+  }
   return {
-    type, date, homeTeam, awayTeam, match, time, tip, odds, result,
+    type, date, homeTeam, awayTeam, match, time, tip, odds, result, market,
+    fixtureId: fixtureIdValue,
+    settlementSource: result === "Pending" ? "pending" : "manual",
+    settlementNote: "",
     league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
   };
 }
@@ -462,6 +486,220 @@ function publicTip(tip) {
     ...tipFields,
     id: String(obj._id || obj.id || ""),
     status: resultToStatus[obj.result] || obj.status || "Pending",
+  };
+}
+
+
+// API-Football result synchronization. The API key stays server-side in .env.
+const FOOTBALL_API_BASE = String(process.env.FOOTBALL_API_BASE_URL || "https://v3.football.api-sports.io").replace(/\/+$/, "");
+const footballDateCache = new Map();
+const FOOTBALL_TIME_ZONE = String(process.env.FOOTBALL_API_TIMEZONE || "Africa/Nairobi");
+const FOOTBALL_SYNC_INTERVAL_MS = 10 * 60 * 1000;
+
+function footballDateISO(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: FOOTBALL_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+function shiftISODate(iso, days) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function normalizeTeamName(value) {
+  let name = String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
+  name = name.replace(/\b(football club|fc|afc|cf|sc|club)\b/g, " ").replace(/\s+/g, " ").trim();
+  const aliases = {
+    "man utd": "manchester united", "man united": "manchester united",
+    "man city": "manchester city", "spurs": "tottenham hotspur",
+    "psg": "paris saint germain", "inter": "internazionale"
+  };
+  return aliases[name] || name;
+}
+function resolveTipMarket(tip) {
+  const explicit = String(tip.market || "auto").toLowerCase();
+  if (explicit && explicit !== "auto") return { code: explicit };
+  const raw = String(tip.tip || "").toLowerCase().replace(/[–—]/g, "-").trim();
+  const compact = raw.replace(/[\s_-]+/g, "");
+  if (/^(1|home|homewin|1x2\s*1)$/.test(compact)) return { code: "home_win" };
+  if (/^(x|draw|tie|1x2x)$/.test(compact)) return { code: "draw" };
+  if (/^(2|away|awaywin|1x22)$/.test(compact)) return { code: "away_win" };
+  if (/^(1x|hom or draw|homeordraw)$/.test(compact)) return { code: "home_or_draw" };
+  if (/^(x2|draworaway)$/.test(compact)) return { code: "draw_or_away" };
+  if (/^(12|homeoraway)$/.test(compact)) return { code: "home_or_away" };
+  if (/^(gg|bttyes|bothteamstoscoreyes|yesbtts)$/.test(compact) || /both teams to score\s*[:\-]?\s*yes|btts\s*[:\-]?\s*yes/i.test(raw)) return { code: "btts_yes" };
+  if (/^(ng|bttsno|bothteamstoscoreno|nobtts)$/.test(compact) || /both teams to score\s*[:\-]?\s*no|btts\s*[:\-]?\s*no/i.test(raw)) return { code: "btts_no" };
+  const total = raw.match(/\b(over|under)\s*(0\.5|1\.5|2\.5|3\.5|4\.5|5\.5)\b/);
+  if (total) return { code: `${total[1]}_${total[2].replace(".", "_")}` };
+  if (/\b(home|1)\s*(draw no bet|dnb)\b|\bhome dnb\b/i.test(raw)) return { code: "home_dnb" };
+  if (/\b(away|2)\s*(draw no bet|dnb)\b|\baway dnb\b/i.test(raw)) return { code: "away_dnb" };
+  return null;
+}
+function evaluateTipResult(tip, homeGoals, awayGoals) {
+  const market = resolveTipMarket(tip);
+  if (!market) return null;
+  const total = homeGoals + awayGoals;
+  let won;
+  switch (market.code) {
+    case "home_win": won = homeGoals > awayGoals; break;
+    case "draw": won = homeGoals === awayGoals; break;
+    case "away_win": won = awayGoals > homeGoals; break;
+    case "home_or_draw": won = homeGoals >= awayGoals; break;
+    case "draw_or_away": won = awayGoals >= homeGoals; break;
+    case "home_or_away": won = homeGoals !== awayGoals; break;
+    case "btts_yes": won = homeGoals > 0 && awayGoals > 0; break;
+    case "btts_no": won = homeGoals === 0 || awayGoals === 0; break;
+    case "home_dnb": if (homeGoals === awayGoals) return "Void"; won = homeGoals > awayGoals; break;
+    case "away_dnb": if (homeGoals === awayGoals) return "Void"; won = awayGoals > homeGoals; break;
+    default: {
+      const totalMarket = market.code.match(/^(over|under)_(\d)_(\d)$/);
+      if (!totalMarket) return null;
+      const line = Number(`${totalMarket[2]}.${totalMarket[3]}`);
+      won = totalMarket[1] === "over" ? total > line : total < line;
+    }
+  }
+  return won ? "Win" : "Lose";
+}
+async function fetchFootballFixturesForDate(date) {
+  const apiKey = String(process.env.FOOTBALL_API_KEY || "").trim();
+  if (!apiKey) throw new Error("FOOTBALL_API_KEY is not configured.");
+  const now = Date.now();
+  const today = footballDateISO();
+  const ttl = date === today ? 60 * 60 * 1000 : (date < today ? 24 * 60 * 60 * 1000 : 6 * 60 * 60 * 1000);
+  const cached = footballDateCache.get(date);
+  if (cached && cached.expiresAt > now) {
+    if (cached.error) throw new Error(cached.error);
+    return cached.fixtures;
+  }
+  const url = `${FOOTBALL_API_BASE}/fixtures?date=${encodeURIComponent(date)}&timezone=${encodeURIComponent(FOOTBALL_TIME_ZONE)}`;
+  try {
+    const response = await fetch(url, {
+      headers: { "x-apisports-key": apiKey, "Accept": "application/json" },
+      signal: AbortSignal.timeout(15000)
+    });
+    let payload;
+    try { payload = await response.json(); } catch { payload = null; }
+    if (!response.ok || !payload || (payload.errors && Object.keys(payload.errors).length)) {
+      const detail = payload?.message || (payload?.errors ? JSON.stringify(payload.errors) : `HTTP ${response.status}`);
+      throw new Error(`API-Football request failed: ${String(detail).slice(0, 240)}`);
+    }
+    const fixtures = Array.isArray(payload.response) ? payload.response : [];
+    footballDateCache.set(date, { fixtures, expiresAt: now + ttl });
+    return fixtures;
+  } catch (err) {
+    const message = String(err.message || "Football provider request failed.").slice(0, 300);
+    // Back off on provider/auth errors so a bad key cannot burn the free request allowance.
+    footballDateCache.set(date, { error: message, expiresAt: now + 30 * 60 * 1000 });
+    throw err;
+  }
+}
+function findMatchingFixture(tip, fixtures) {
+  if (tip.fixtureId) {
+    const byId = fixtures.find(f => Number(f.fixture?.id) === Number(tip.fixtureId));
+    if (byId) return byId;
+  }
+  const home = normalizeTeamName(tip.homeTeam);
+  const away = normalizeTeamName(tip.awayTeam);
+  const candidates = fixtures.filter(f =>
+    normalizeTeamName(f.teams?.home?.name) === home && normalizeTeamName(f.teams?.away?.name) === away
+  );
+  if (candidates.length <= 1) return candidates[0] || null;
+  if (!tip.time) return null;
+  const target = new Date(`${tip.date}T${tip.time}:00+03:00`).getTime();
+  candidates.sort((a, b) => Math.abs(new Date(a.fixture?.date || 0).getTime() - target) - Math.abs(new Date(b.fixture?.date || 0).getTime() - target));
+  const nearest = candidates[0];
+  return Math.abs(new Date(nearest.fixture?.date || 0).getTime() - target) <= 8 * 60 * 60 * 1000 ? nearest : null;
+}
+async function syncTipResultsForDate(date) {
+  const fixtures = await fetchFootballFixturesForDate(date);
+  const tips = await Tip.find({ date, result: "Pending", publicationStatus: { $ne: "draft" } });
+  const summary = { date, checked: 0, linked: 0, settled: 0, needsReview: 0, unmatched: 0 };
+  for (const tip of tips) {
+    summary.checked++;
+    const fixture = findMatchingFixture(tip, fixtures);
+    if (!fixture) {
+      tip.lastSyncedAt = new Date();
+      tip.settlementNote = "Fixture not matched. Check the team names, date or API fixture ID.";
+      await tip.save();
+      summary.unmatched++;
+      continue;
+    }
+    const fixtureStatus = String(fixture.fixture?.status?.long || "").slice(0, 40);
+    const fixtureStatusShort = String(fixture.fixture?.status?.short || "").slice(0, 12).toUpperCase();
+    const isFinished = ["FT", "AET", "PEN"].includes(fixtureStatusShort);
+    // For standard football markets, use the 90-minute full-time score even if extra time/penalties were played.
+    const scoreHome = isFinished && fixture.score?.fulltime?.home != null ? fixture.score.fulltime.home : fixture.goals?.home;
+    const scoreAway = isFinished && fixture.score?.fulltime?.away != null ? fixture.score.fulltime.away : fixture.goals?.away;
+    const homeScore = scoreHome == null ? null : Number(scoreHome);
+    const awayScore = scoreAway == null ? null : Number(scoreAway);
+    tip.fixtureId = Number(fixture.fixture?.id) || tip.fixtureId || null;
+    tip.homeScore = Number.isFinite(homeScore) ? homeScore : null;
+    tip.awayScore = Number.isFinite(awayScore) ? awayScore : null;
+    tip.fixtureStatus = fixtureStatus;
+    tip.fixtureStatusShort = fixtureStatusShort;
+    tip.lastSyncedAt = new Date();
+    tip.settlementNote = "";
+    summary.linked++;
+
+    if (fixtureStatusShort === "CANC") {
+      tip.result = "Void";
+      tip.settlementSource = "automatic";
+      tip.settlementNote = "Automatically voided: fixture cancelled by the provider.";
+      summary.settled++;
+    } else if (fixtureStatusShort === "ABD") {
+      tip.settlementNote = "Match abandoned. Administrator review is required before settlement.";
+      summary.needsReview++;
+    } else if (["FT", "AET", "PEN"].includes(fixtureStatusShort)) {
+      if (tip.homeScore == null || tip.awayScore == null) {
+        tip.settlementNote = "Fixture is marked finished but the final score is unavailable; manual review required.";
+        summary.needsReview++;
+      } else {
+        const outcome = evaluateTipResult(tip, tip.homeScore, tip.awayScore);
+        if (!outcome) {
+          tip.settlementNote = "Match finished; prediction market could not be identified safely. Settle this tip manually.";
+          summary.needsReview++;
+        } else {
+          tip.result = outcome;
+          tip.settlementSource = "automatic";
+          tip.settlementNote = `Automatically settled from full-time score ${tip.homeScore}-${tip.awayScore}.`;
+          summary.settled++;
+          await AuditLog.create({
+            actor: null, actorEmail: "system", action: "tip.auto_settled", entityType: "tip",
+            entityId: String(tip._id), summary: `${tip.type} tip ${tip.match} automatically settled as ${outcome} (${tip.homeScore}-${tip.awayScore}).`
+          }).catch(err => console.error("Automatic settlement audit failed:", err.message));
+        }
+      }
+    } else if (fixtureStatusShort === "PST") {
+      tip.settlementNote = "Match postponed; result remains pending.";
+    } else if (fixtureStatusShort === "SUSP" || fixtureStatusShort === "INT") {
+      tip.settlementNote = "Match interrupted or suspended; result remains pending.";
+    }
+    await tip.save();
+  }
+  return summary;
+}
+async function syncPendingTipResults() {
+  if (!String(process.env.FOOTBALL_API_KEY || "").trim()) {
+    return { configured: false, message: "Add FOOTBALL_API_KEY to the server .env file to enable automatic settlement." };
+  }
+  const today = footballDateISO();
+  const dates = [shiftISODate(today, -1), today, shiftISODate(today, 1)];
+  const pendingDates = await Tip.distinct("date", { result: "Pending", publicationStatus: { $ne: "draft" }, date: { $in: dates } });
+  const summaries = [];
+  for (const date of dates.filter(d => pendingDates.includes(d))) {
+    try { summaries.push(await syncTipResultsForDate(date)); }
+    catch (err) { console.error(`Automatic tip-result sync failed for ${date}:`, err.message); summaries.push({ date, error: err.message }); }
+  }
+  return {
+    configured: true, datesChecked: summaries.length,
+    checked: summaries.reduce((n, x) => n + (x.checked || 0), 0),
+    linked: summaries.reduce((n, x) => n + (x.linked || 0), 0),
+    settled: summaries.reduce((n, x) => n + (x.settled || 0), 0),
+    needsReview: summaries.reduce((n, x) => n + (x.needsReview || 0), 0),
+    unmatched: summaries.reduce((n, x) => n + (x.unmatched || 0), 0), summaries
   };
 }
 
@@ -855,6 +1093,18 @@ app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   res.json({ success: true, tips: tips.map(publicTip) });
 });
 
+app.post("/api/admin/tips/sync-results", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const summary = await syncPendingTipResults();
+    if (!summary.configured) return res.status(503).json({ success: false, message: summary.message, summary });
+    await recordAudit(req, "tips.results_sync", "tip", "", `Manual result sync: ${summary.settled} settled, ${summary.needsReview} need review, ${summary.unmatched} unmatched.`);
+    res.json({ success: true, message: `Checked ${summary.checked} pending tip(s): ${summary.settled} settled, ${summary.needsReview} need review, ${summary.unmatched} unmatched.`, summary });
+  } catch (err) {
+    console.error("Manual tip-result sync error:", err.message);
+    res.status(502).json({ success: false, message: "Could not synchronize tip results. Check the API key and server logs." });
+  }
+});
+
 app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
     const data = cleanTipInput(req.body);
@@ -945,6 +1195,17 @@ mongoose.connect(process.env.MONGODB_URI)
       console.log(`Restored permanent active status for ${repairedAdmins.modifiedCount} admin account(s).`);
     }
     await expireMemberships().catch(err => console.error("Initial membership expiry sweep failed:", err.message));
+    if (String(process.env.FOOTBALL_API_KEY || "").trim()) {
+      syncPendingTipResults().then(result => console.log("Initial automatic tip-result sync:", result)).catch(err => console.error("Initial automatic tip-result sync failed:", err.message));
+      const footballSyncTimer = setInterval(() => {
+        syncPendingTipResults().then(result => {
+          if (result.settled || result.needsReview || result.unmatched) console.log("Automatic tip-result sync:", result);
+        }).catch(err => console.error("Automatic tip-result sync failed:", err.message));
+      }, FOOTBALL_SYNC_INTERVAL_MS);
+      if (typeof footballSyncTimer.unref === "function") footballSyncTimer.unref();
+    } else {
+      console.warn("FOOTBALL_API_KEY not set; automatic tip-result settlement is disabled.");
+    }
     const expirySweep = setInterval(() => {
       expireMemberships().catch(err => console.error("Membership expiry sweep failed:", err.message));
     }, MEMBERSHIP_SWEEP_INTERVAL_MS);
