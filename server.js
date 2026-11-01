@@ -108,7 +108,9 @@ const tipSchema = new mongoose.Schema({
   awayScore: { type: Number, default: null },
   fixtureStatus: { type: String, trim: true, maxlength: 40, default: "" },
   fixtureStatusShort: { type: String, trim: true, maxlength: 12, default: "" },
+  elapsedMinute: { type: Number, default: null },
   lastSyncedAt: { type: Date, default: null },
+  lastSyncAttemptAt: { type: Date, default: null },
   settlementNote: { type: String, trim: true, maxlength: 240, default: "" },
   settlementSource: { type: String, enum: ["manual", "automatic", "pending"], default: "pending" },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -486,6 +488,7 @@ function publicTip(tip) {
     ...tipFields,
     id: String(obj._id || obj.id || ""),
     status: resultToStatus[obj.result] || obj.status || "Pending",
+    fixtureStatusLabel: fixtureStatusLabel(obj.fixtureStatusShort, obj.elapsedMinute),
   };
 }
 
@@ -494,7 +497,9 @@ function publicTip(tip) {
 const FOOTBALL_API_BASE = String(process.env.FOOTBALL_API_BASE_URL || "https://v3.football.api-sports.io").replace(/\/+$/, "");
 const footballDateCache = new Map();
 const FOOTBALL_TIME_ZONE = String(process.env.FOOTBALL_API_TIMEZONE || "Africa/Nairobi");
-const FOOTBALL_SYNC_INTERVAL_MS = 10 * 60 * 1000;
+const configuredFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 10 * 60 * 1000);
+const FOOTBALL_SYNC_INTERVAL_MS = Number.isFinite(configuredFootballInterval)
+  ? Math.max(2 * 60 * 1000, configuredFootballInterval) : 10 * 60 * 1000;
 
 function footballDateISO(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -509,15 +514,66 @@ function shiftISODate(iso, days) {
   return d.toISOString().slice(0, 10);
 }
 function normalizeTeamName(value) {
-  let name = String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
-  name = name.replace(/\b(football club|fc|afc|cf|sc|club)\b/g, " ").replace(/\s+/g, " ").trim();
+  let name = String(value || "").replace(/[ıİşŞğĞüÜöÖçÇæÆøØłŁđĐ]/g, ch => ({
+    "ı":"i","İ":"i","ş":"s","Ş":"s","ğ":"g","Ğ":"g","ü":"u","Ü":"u","ö":"o","Ö":"o",
+    "ç":"c","Ç":"c","æ":"ae","Æ":"ae","ø":"o","Ø":"o","ł":"l","Ł":"l","đ":"d","Đ":"d"
+  }[ch] || ch)).normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/&/g, " and ").replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, " ").trim();
+  name = name.replace(/\b(football club|association football club|fc|afc|cf|sc|club|sk|jk|fk|ks|as|ac|bk|nk|fk|cd|ud|ss|sv|tsv|vfb|vfl|the)\b/g, " ")
+    .replace(/\s+/g, " ").trim();
   const aliases = {
     "man utd": "manchester united", "man united": "manchester united",
     "man city": "manchester city", "spurs": "tottenham hotspur",
-    "psg": "paris saint germain", "inter": "internazionale"
+    "psg": "paris saint germain", "paris sg": "paris saint germain",
+    "inter": "internazionale", "inter milan": "internazionale",
+    "ath madrid": "atletico madrid", "atletico": "atletico madrid",
+    "besiktas": "besiktas", "kasimpasa": "kasimpasa",
+    "bayern": "bayern munich", "bayern munchen": "bayern munich",
+    "real": "real madrid", "barca": "barcelona",
+    "sporting lisbon": "sporting cp", "sporting clube de portugal": "sporting cp",
+    "red bull salzburg": "salzburg", "rb salzburg": "salzburg",
+    "a villa": "aston villa", "bvb": "borussia dortmund", "b dortmund": "borussia dortmund",
+    "ath bilbao": "athletic bilbao", "athletic club": "athletic bilbao",
+    "nottm forest": "nottingham forest", "wolves": "wolverhampton wanderers",
+    "west ham": "west ham united", "newcastle": "newcastle united",
+    "leverkusen": "bayer leverkusen", "gladbach": "borussia monchengladbach",
+    "m gladbach": "borussia monchengladbach", "sporting lisbon": "sporting cp",
+    "olympiakos": "olympiacos"
   };
   return aliases[name] || name;
+}
+
+function zonedDateTimeToEpoch(date, time, timeZone) {
+  const [year, month, day] = String(date).split("-").map(Number);
+  const [hour, minute] = String(time).split(":").map(Number);
+  if (![year, month, day, hour, minute].every(Number.isFinite)) return null;
+  const desired = Date.UTC(year, month - 1, day, hour, minute);
+  let guess = desired;
+  for (let i = 0; i < 2; i++) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone, year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+    }).formatToParts(new Date(guess));
+    const values = Object.fromEntries(parts.map(p => [p.type, p.value]));
+    const represented = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day),
+      Number(values.hour), Number(values.minute));
+    guess += desired - represented;
+  }
+  return guess;
+}
+
+function teamNameSimilarity(left, right) {
+  const a = normalizeTeamName(left), b = normalizeTeamName(right);
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const at = new Set(a.split(" ")), bt = new Set(b.split(" "));
+  const intersection = [...at].filter(token => bt.has(token)).length;
+  const dice = (2 * intersection) / (at.size + bt.size);
+  // Prefix tolerance handles provider variants such as "Besiktas JK" after suffix cleanup.
+  const compactA = a.replace(/\s/g, ""), compactB = b.replace(/\s/g, "");
+  const prefix = compactA.startsWith(compactB) || compactB.startsWith(compactA);
+  return Math.max(dice, prefix ? Math.min(compactA.length, compactB.length) / Math.max(compactA.length, compactB.length) : 0);
 }
 function resolveTipMarket(tip) {
   const explicit = String(tip.market || "auto").toLowerCase();
@@ -563,14 +619,14 @@ function evaluateTipResult(tip, homeGoals, awayGoals) {
   }
   return won ? "Win" : "Lose";
 }
-async function fetchFootballFixturesForDate(date) {
+async function fetchFootballFixturesForDate(date, forceRefresh = false) {
   const apiKey = String(process.env.FOOTBALL_API_KEY || "").trim();
   if (!apiKey) throw new Error("FOOTBALL_API_KEY is not configured.");
   const now = Date.now();
   const today = footballDateISO();
-  const ttl = date === today ? 60 * 60 * 1000 : (date < today ? 24 * 60 * 60 * 1000 : 6 * 60 * 60 * 1000);
+  const ttl = date === today ? Math.min(FOOTBALL_SYNC_INTERVAL_MS - 5000, 9 * 60 * 1000) : (date < today ? 24 * 60 * 60 * 1000 : 6 * 60 * 60 * 1000);
   const cached = footballDateCache.get(date);
-  if (cached && cached.expiresAt > now) {
+  if (!forceRefresh && cached && cached.expiresAt > now) {
     if (cached.error) throw new Error(cached.error);
     return cached.fixtures;
   }
@@ -587,7 +643,8 @@ async function fetchFootballFixturesForDate(date) {
       throw new Error(`API-Football request failed: ${String(detail).slice(0, 240)}`);
     }
     const fixtures = Array.isArray(payload.response) ? payload.response : [];
-    footballDateCache.set(date, { fixtures, expiresAt: now + ttl });
+    fixtures.forEach(fixture => { fixture._bankerFetchedAt = now; });
+    footballDateCache.set(date, { fixtures, fetchedAt: now, expiresAt: now + ttl });
     return fixtures;
   } catch (err) {
     const message = String(err.message || "Football provider request failed.").slice(0, 300);
@@ -596,33 +653,104 @@ async function fetchFootballFixturesForDate(date) {
     throw err;
   }
 }
-function findMatchingFixture(tip, fixtures) {
-  if (tip.fixtureId) {
-    const byId = fixtures.find(f => Number(f.fixture?.id) === Number(tip.fixtureId));
-    if (byId) return byId;
+const footballFixtureIdCache = new Map();
+async function fetchFootballFixtureById(fixtureId, forceRefresh = false) {
+  const id = Number(fixtureId);
+  if (!Number.isSafeInteger(id) || id <= 0) return null;
+  const cached = footballFixtureIdCache.get(id);
+  if (!forceRefresh && cached && cached.expiresAt > Date.now()) return cached.fixture;
+  const apiKey = String(process.env.FOOTBALL_API_KEY || "").trim();
+  if (!apiKey) throw new Error("FOOTBALL_API_KEY is not configured.");
+  const response = await fetch(`${FOOTBALL_API_BASE}/fixtures?id=${encodeURIComponent(id)}&timezone=${encodeURIComponent(FOOTBALL_TIME_ZONE)}`, {
+    headers: { "x-apisports-key": apiKey, "Accept": "application/json" },
+    signal: AbortSignal.timeout(15000)
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || !payload || (payload.errors && Object.keys(payload.errors).length)) {
+    throw new Error(`API-Football fixture lookup failed (HTTP ${response.status}).`);
   }
-  const home = normalizeTeamName(tip.homeTeam);
-  const away = normalizeTeamName(tip.awayTeam);
-  const candidates = fixtures.filter(f =>
-    normalizeTeamName(f.teams?.home?.name) === home && normalizeTeamName(f.teams?.away?.name) === away
-  );
-  if (candidates.length <= 1) return candidates[0] || null;
-  if (!tip.time) return null;
-  const target = new Date(`${tip.date}T${tip.time}:00+03:00`).getTime();
-  candidates.sort((a, b) => Math.abs(new Date(a.fixture?.date || 0).getTime() - target) - Math.abs(new Date(b.fixture?.date || 0).getTime() - target));
-  const nearest = candidates[0];
-  return Math.abs(new Date(nearest.fixture?.date || 0).getTime() - target) <= 8 * 60 * 60 * 1000 ? nearest : null;
+  const fixture = Array.isArray(payload.response) ? payload.response[0] || null : null;
+  if (fixture) fixture._bankerFetchedAt = Date.now();
+  footballFixtureIdCache.set(id, { fixture, expiresAt: Date.now() + 2 * 60 * 1000 });
+  return fixture;
 }
-async function syncTipResultsForDate(date) {
-  const fixtures = await fetchFootballFixturesForDate(date);
+
+function findMatchingFixture(tip, fixtures) {
+  const list = Array.isArray(fixtures) ? fixtures : [];
+  if (tip.fixtureId) {
+    const byId = list.find(f => Number(f.fixture?.id) === Number(tip.fixtureId));
+    if (byId && teamNameSimilarity(tip.homeTeam, byId.teams?.home?.name) >= 0.88 &&
+        teamNameSimilarity(tip.awayTeam, byId.teams?.away?.name) >= 0.88) return byId;
+  }
+  const targetHome = normalizeTeamName(tip.homeTeam);
+  const targetAway = normalizeTeamName(tip.awayTeam);
+  if (!targetHome || !targetAway) return null;
+  const candidates = list.map(f => {
+    const home = teamNameSimilarity(tip.homeTeam, f.teams?.home?.name);
+    const away = teamNameSimilarity(tip.awayTeam, f.teams?.away?.name);
+    // Home/away orientation is mandatory; reversed fixtures are never accepted.
+    const orientation = home >= 0.88 && away >= 0.88;
+    const exact = home === 1 && away === 1;
+    const targetTime = tip.time && /^\d{1,2}:\d{2}$/.test(tip.time)
+      ? zonedDateTimeToEpoch(tip.date, tip.time, FOOTBALL_TIME_ZONE) : null;
+    const fixtureTime = Number.isFinite(Number(f.fixture?.timestamp))
+      ? Number(f.fixture.timestamp) * 1000 : new Date(f.fixture?.date || 0).getTime();
+    const timeDistance = targetTime && Number.isFinite(fixtureTime) ? Math.abs(fixtureTime - targetTime) : null;
+    return { fixture: f, home, away, score: (home + away) / 2, orientation, exact, timeDistance };
+  }).filter(x => x.orientation);
+  if (!candidates.length) return null;
+  candidates.sort((a, b) => {
+    if (a.exact !== b.exact) return a.exact ? -1 : 1;
+    if (b.score !== a.score) return b.score - a.score;
+    return (a.timeDistance ?? Infinity) - (b.timeDistance ?? Infinity);
+  });
+  const best = candidates[0], second = candidates[1];
+  if (second && best.score - second.score < 0.035 && best.timeDistance === second.timeDistance) return null;
+  if (best.timeDistance != null && best.timeDistance > 12 * 60 * 60 * 1000) return null;
+  return best.fixture;
+}
+
+function fixtureStatusLabel(short, elapsed) {
+  const code = String(short || "").toUpperCase();
+  const minute = Number.isFinite(Number(elapsed)) ? `${Number(elapsed)}'` : "";
+  if (code === "P") return "PEN";
+  if (code === "1H") return minute ? `${minute} · 1st Half` : "1st Half";
+  if (code === "2H") return minute ? `${minute} · 2nd Half` : "2nd Half";
+  if (["ET", "1ET", "2ET"].includes(code)) return minute ? `${minute} · Extra Time` : "Extra Time";
+  return ({ HT: "HT", FT: "FT", AET: "AET", PEN: "PEN", PST: "PST", CANC: "CANC",
+    SUSP: "Suspended", INT: "Interrupted", ABD: "Abandoned", AWD: "Awarded", WO: "Walkover",
+    TBD: "Time to be determined", NS: "Not started", BT: "Break", LIVE: "Live" })[code] || code || "";
+}
+async function syncTipResultsForDate(date, { forceRefresh = false } = {}) {
+  const fixtures = await fetchFootballFixturesForDate(date, forceRefresh);
   const tips = await Tip.find({ date, result: "Pending", publicationStatus: { $ne: "draft" } });
   const summary = { date, checked: 0, linked: 0, settled: 0, needsReview: 0, unmatched: 0 };
   for (const tip of tips) {
     summary.checked++;
-    const fixture = findMatchingFixture(tip, fixtures);
+    let fixture = findMatchingFixture(tip, fixtures);
+    if (!fixture && !tip.fixtureId) {
+      // Retry adjacent provider-local dates only for unresolved matches (timezone/date-boundary protection).
+      for (const offset of [-1, 1]) {
+        if (fixture) break;
+        try {
+          const adjacent = await fetchFootballFixturesForDate(shiftISODate(date, offset), forceRefresh);
+          fixture = findMatchingFixture(tip, adjacent);
+        } catch (adjacentError) {
+          console.warn(`Adjacent fixture lookup failed for ${tip.match} (${offset} day):`, adjacentError.message);
+        }
+      }
+    }
+    if (!fixture && tip.fixtureId) {
+      try {
+        const byId = await fetchFootballFixtureById(tip.fixtureId, forceRefresh);
+        if (byId && teamNameSimilarity(tip.homeTeam, byId.teams?.home?.name) >= 0.88 &&
+            teamNameSimilarity(tip.awayTeam, byId.teams?.away?.name) >= 0.88) fixture = byId;
+        else if (byId) tip.settlementNote = "Supplied fixture ID does not match the saved home/away teams; no settlement performed.";
+      } catch (lookupError) { tip.settlementNote = `Fixture ID lookup failed: ${lookupError.message}`; }
+    }
     if (!fixture) {
-      tip.lastSyncedAt = new Date();
-      tip.settlementNote = "Fixture not matched. Check the team names, date or API fixture ID.";
+      tip.lastSyncAttemptAt = new Date();
+      if (!tip.settlementNote) tip.settlementNote = "Fixture not matched. Check team names, date or API fixture ID.";
       await tip.save();
       summary.unmatched++;
       continue;
@@ -631,8 +759,12 @@ async function syncTipResultsForDate(date) {
     const fixtureStatusShort = String(fixture.fixture?.status?.short || "").slice(0, 12).toUpperCase();
     const isFinished = ["FT", "AET", "PEN"].includes(fixtureStatusShort);
     // For standard football markets, use the 90-minute full-time score even if extra time/penalties were played.
-    const scoreHome = isFinished && fixture.score?.fulltime?.home != null ? fixture.score.fulltime.home : fixture.goals?.home;
-    const scoreAway = isFinished && fixture.score?.fulltime?.away != null ? fixture.score.fulltime.away : fixture.goals?.away;
+    const scoreHome = isFinished
+      ? (fixture.score?.fulltime?.home != null ? fixture.score.fulltime.home : (fixtureStatusShort === "FT" ? fixture.goals?.home : null))
+      : fixture.goals?.home;
+    const scoreAway = isFinished
+      ? (fixture.score?.fulltime?.away != null ? fixture.score.fulltime.away : (fixtureStatusShort === "FT" ? fixture.goals?.away : null))
+      : fixture.goals?.away;
     const homeScore = scoreHome == null ? null : Number(scoreHome);
     const awayScore = scoreAway == null ? null : Number(scoreAway);
     tip.fixtureId = Number(fixture.fixture?.id) || tip.fixtureId || null;
@@ -640,7 +772,10 @@ async function syncTipResultsForDate(date) {
     tip.awayScore = Number.isFinite(awayScore) ? awayScore : null;
     tip.fixtureStatus = fixtureStatus;
     tip.fixtureStatusShort = fixtureStatusShort;
-    tip.lastSyncedAt = new Date();
+    const elapsed = fixture.fixture?.status?.elapsed;
+    tip.elapsedMinute = elapsed == null || !Number.isFinite(Number(elapsed)) ? null : Number(elapsed);
+    tip.lastSyncedAt = new Date(Number(fixture._bankerFetchedAt) || Date.now());
+    tip.lastSyncAttemptAt = new Date();
     tip.settlementNote = "";
     summary.linked++;
 
@@ -681,7 +816,11 @@ async function syncTipResultsForDate(date) {
   }
   return summary;
 }
-async function syncPendingTipResults() {
+let footballSyncInProgress = false;
+async function syncPendingTipResults({ forceRefresh = false } = {}) {
+  if (footballSyncInProgress) return { configured: true, skipped: true, message: "A synchronization is already running." };
+  footballSyncInProgress = true;
+  try {
   if (!String(process.env.FOOTBALL_API_KEY || "").trim()) {
     return { configured: false, message: "Add FOOTBALL_API_KEY to the server .env file to enable automatic settlement." };
   }
@@ -690,7 +829,7 @@ async function syncPendingTipResults() {
   const pendingDates = await Tip.distinct("date", { result: "Pending", publicationStatus: { $ne: "draft" }, date: { $in: dates } });
   const summaries = [];
   for (const date of dates.filter(d => pendingDates.includes(d))) {
-    try { summaries.push(await syncTipResultsForDate(date)); }
+    try { summaries.push(await syncTipResultsForDate(date, { forceRefresh })); }
     catch (err) { console.error(`Automatic tip-result sync failed for ${date}:`, err.message); summaries.push({ date, error: err.message }); }
   }
   return {
@@ -701,6 +840,7 @@ async function syncPendingTipResults() {
     needsReview: summaries.reduce((n, x) => n + (x.needsReview || 0), 0),
     unmatched: summaries.reduce((n, x) => n + (x.unmatched || 0), 0), summaries
   };
+  } finally { footballSyncInProgress = false; }
 }
 
 app.use("/api", apiLimiter);
@@ -1095,7 +1235,7 @@ app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
 
 app.post("/api/admin/tips/sync-results", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
-    const summary = await syncPendingTipResults();
+    const summary = await syncPendingTipResults({ forceRefresh: true });
     if (!summary.configured) return res.status(503).json({ success: false, message: summary.message, summary });
     await recordAudit(req, "tips.results_sync", "tip", "", `Manual result sync: ${summary.settled} settled, ${summary.needsReview} need review, ${summary.unmatched} unmatched.`);
     res.json({ success: true, message: `Checked ${summary.checked} pending tip(s): ${summary.settled} settled, ${summary.needsReview} need review, ${summary.unmatched} unmatched.`, summary });
