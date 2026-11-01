@@ -933,7 +933,7 @@ img{max-width:100%}
  </section>
 
  <section class="panel" id="adminPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Tips Admin</h2><p>Manage tips, membership approvals and payment records from your administrator account.</p></div><div class="form-actions"><button class="btn secondary small" id="syncTipResults" type="button"><i class="fa-solid fa-arrows-rotate"></i> Sync results</button><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
@@ -942,6 +942,7 @@ img{max-width:100%}
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
+     <div class="field"><label for="tipMarket">Settlement market</label><select id="tipMarket"><option value="auto">Auto-detect from tip text</option><option value="home_win">Home Win (1)</option><option value="draw">Draw (X)</option><option value="away_win">Away Win (2)</option><option value="home_or_draw">Double Chance 1X</option><option value="draw_or_away">Double Chance X2</option><option value="home_or_away">Double Chance 12</option><option value="btts_yes">Both Teams To Score — Yes</option><option value="btts_no">Both Teams To Score — No</option><option value="over_1_5">Over 1.5 Goals</option><option value="under_1_5">Under 1.5 Goals</option><option value="over_2_5">Over 2.5 Goals</option><option value="under_2_5">Under 2.5 Goals</option><option value="over_3_5">Over 3.5 Goals</option><option value="under_3_5">Under 3.5 Goals</option><option value="home_dnb">Home Draw No Bet</option><option value="away_dnb">Away Draw No Bet</option></select><small class="subtext">Choose the exact market for safer automatic settlement. Unsupported markets remain pending for admin review.</small></div>
      <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
      <div class="field"><label for="tipStatus">Result</label><select id="tipStatus"><option value="Pending">Pending</option><option value="Won">Won</option><option value="Lost">Lost</option><option value="Void">Void</option></select></div>
@@ -1140,7 +1141,12 @@ function renderTipRows(tips, target, withDate=false) {
     $(target).innerHTML += totalOddsRow([],withDate?6:5);
     return;
   }
-  const rows=tips.map(t => `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`).join('');
+  const rows=tips.map(t => {
+    const scoreLine = t.homeScore !== null && t.homeScore !== undefined && t.awayScore !== null && t.awayScore !== undefined
+      ? `<span class="subtext">Score ${escapeHTML(t.homeScore)}–${escapeHTML(t.awayScore)}${t.fixtureStatusShort ? ` · ${escapeHTML(t.fixtureStatusShort)}` : ''}</span>`
+      : (t.fixtureStatusShort ? `<span class="subtext">${escapeHTML(t.fixtureStatus || t.fixtureStatusShort)}</span>` : '');
+    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}${scoreLine}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
+  }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
 async function loadFreeTips() {
@@ -1494,12 +1500,12 @@ async function handleLogin(event) {
     }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
-function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; }
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('tipMarket')) $('tipMarket').value='auto'; }
 function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
   const tips=adminTipsCache.filter(t=>[t.date,t.match,t.type,t.status,t.tip].some(v=>String(v||'').toLowerCase().includes(q)));
-  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span></td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
+  $('adminRows').innerHTML=tips.length?tips.map(t=>`<tr><td><strong>${escapeHTML(prettyDate(t.date))}</strong><span class="subtext">${escapeHTML(t.match||'—')} · ${escapeHTML(t.time||'—')} · ${escapeHTML(t.tip||'—')}</span>${t.homeScore!==null&&t.homeScore!==undefined&&t.awayScore!==null&&t.awayScore!==undefined?`<span class="subtext">API score: ${escapeHTML(t.homeScore)}–${escapeHTML(t.awayScore)} · ${escapeHTML(t.fixtureStatusShort||'')}</span>`:''}${t.settlementNote?`<span class="subtext">${escapeHTML(t.settlementNote)}</span>`:''}</td><td>${escapeHTML(t.type||'free')}</td><td>${safeStatus(t.status)}</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn secondary small" data-edit-tip="${escapeHTML(t.id||t._id||'')}">Edit</button><button class="btn danger small" data-delete-tip="${escapeHTML(t.id||t._id||'')}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="4">No tips match this search.</td></tr>';
 }
 async function loadAdminTips() {
   const user=await checkSession();
@@ -1614,7 +1620,7 @@ async function handleMembershipAction(event) {
 async function saveTip(event) {
   event.preventDefault(); hideMessage('adminMessage');
   const id=$('tipId').value;
-  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  const payload={date:$('tipDate').value,time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),market:$('tipMarket')?.value||'auto',odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
   if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
   try {
     const user=await checkSession();
@@ -1639,7 +1645,7 @@ async function adminRowAction(event) {
     const data=await api('/api/admin/tips');
     const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
     if(!tip) throw new Error('Tip not found. Reload the list and try again.');
-    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipMarket').value=tip.market||'auto'; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
     $('tipMatch').focus();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
@@ -1715,12 +1721,29 @@ $('copyVipTicket')?.addEventListener('click',copyVipTicket);
 
 $('clearTip').addEventListener('click',clearTipForm);
 $('adminReload').addEventListener('click',loadAdminTips);
+$('syncTipResults')?.addEventListener('click',async()=>{
+  const button=$('syncTipResults'); button.disabled=true;
+  try {
+    const data=await api('/api/admin/tips/sync-results',{method:'POST'});
+    $('adminNotice').textContent=data.message||'Tip results synchronized.';
+    await loadAdminTips(); await loadFreeTips();
+    if($('premiumPanel')?.classList.contains('active')&&currentUser) await loadPremium();
+  } catch(e) { $('adminNotice').textContent=e.message||'Could not synchronize results. Check API configuration.'; }
+  finally { button.disabled=false; }
+});
 $('adminRows').addEventListener('click',adminRowAction);
 $('adminUsersRows').addEventListener('click',handleMembershipAction);
 $('usersReload').addEventListener('click',loadAdminUsers);
 $('membershipSearch')?.addEventListener('input',renderAdminMembershipRows);
 $('downloadMembershipPdf')?.addEventListener('click',downloadMembershipPdf);
 $('year').textContent=new Date().getFullYear();
+setInterval(()=>{
+  if(document.visibilityState==='hidden') return;
+  if($('freePanel')?.classList.contains('active')) loadFreeTips();
+  if($('premiumPanel')?.classList.contains('active')&&currentUser) loadPremium();
+  if($('historyPanel')?.classList.contains('active')) loadHistory();
+  if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) loadVipHistory();
+},60000);
 $('tipDate').value=todayISO();
 $('todayDate').textContent=prettyDate(todayISO());
 $('vipDate').textContent=prettyDate(todayISO());
