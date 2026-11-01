@@ -734,6 +734,59 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
   #premiumPanel .premium-bottom-crown{margin:0 14px;padding:13px 8px 12px}
 }
 </style>
+
+<style id="banker-tips-advertisement-and-odds-fix">
+.advert-panel{position:relative;isolation:isolate;overflow:hidden;margin:26px 0 18px;padding:20px 22px;border:1px solid #c9dff0;border-radius:22px;background:linear-gradient(115deg,#f8fcff 0%,#eaf5ff 58%,#dceeff 100%);box-shadow:0 12px 30px rgba(19,70,112,.07);color:#12314d}
+.advert-topline{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#58748d;font-size:.68rem;font-weight:900;letter-spacing:.12em}
+.advert-topline>span:first-child{display:inline-flex;align-items:center;gap:8px}.advert-topline i{color:#0879c9}
+.advert-tag{padding:6px 9px;border:1px solid #c7dfef;border-radius:99px;background:#ffffffa8;font-size:.61rem;letter-spacing:.08em}
+.advert-content{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:18px 0 16px}
+.advert-copy{max-width:620px}.advert-kicker{color:#0879b9;font-size:.67rem;font-weight:900;letter-spacing:.13em}
+.advert-copy h2{margin:7px 0 8px;color:#102d49;font:800 clamp(1.35rem,3vw,1.9rem)/1.15 Outfit,sans-serif;letter-spacing:-.045em}
+.advert-copy p{max-width:570px;margin:0;color:#5c748b;font-size:.87rem;line-height:1.65}
+.advert-cta{display:inline-flex;align-items:center;gap:10px;margin-top:15px;padding:10px 15px;border-radius:11px;background:linear-gradient(135deg,#0788d5,#075985);color:#fff;text-decoration:none;font-size:.82rem;font-weight:800;box-shadow:0 7px 16px #0879c92b;transition:transform .18s ease}
+.advert-cta:hover{transform:translateY(-2px)}
+.advert-art{position:relative;flex:0 0 150px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border:1px solid #c5e0f2;border-radius:20px;background:linear-gradient(145deg,#fff,#e4f3ff);color:#0879b9}
+.advert-art>i{z-index:1;font-size:2.6rem}.advert-art small{z-index:1;font-size:.58rem;font-weight:900;letter-spacing:.15em;color:#58748d}
+.advert-orbit{position:absolute;width:88px;height:88px;border:1px solid #9ccdea;border-radius:50%;box-shadow:0 0 0 13px #cce8fa55,0 0 0 27px #cce8fa35}
+.advert-foot{display:flex;flex-wrap:wrap;gap:10px 22px;padding-top:13px;border-top:1px solid #cfe2f0;color:#5b7891;font-size:.7rem;font-weight:700}
+.advert-foot span{display:inline-flex;align-items:center;gap:7px}.advert-foot i{color:#0784c4}
+[data-theme="dark"] .advert-panel{background:linear-gradient(115deg,#14283b,#17364f 60%,#193d5b);border-color:#31536d;color:#e5f4ff}
+[data-theme="dark"] .advert-copy h2{color:#f0f8ff}
+[data-theme="dark"] .advert-copy p,[data-theme="dark"] .advert-topline,[data-theme="dark"] .advert-foot{color:#b4cde0}
+[data-theme="dark"] .advert-tag,[data-theme="dark"] .advert-art{background:#18364d;border-color:#315a76;color:#9cddff}
+[data-theme="dark"] .advert-art small{color:#b4cde0}
+[data-theme="dark"] .advert-foot{border-color:#31536d}
+#premiumPanel .total-odds-label{letter-spacing:.06em}
+#premiumPanel .total-odds-value{font-variant-numeric:tabular-nums}
+@media(max-width:600px){
+ .advert-panel{margin:22px 0 15px;padding:16px;border-radius:18px}
+ .advert-content{gap:12px;padding:15px 0 13px}
+ .advert-art{flex-basis:92px;min-height:100px;border-radius:15px}
+ .advert-art>i{font-size:1.9rem}.advert-orbit{width:58px;height:58px;box-shadow:0 0 0 9px #cce8fa55,0 0 0 18px #cce8fa35}
+ .advert-copy h2{font-size:1.28rem}.advert-copy p{font-size:.78rem;line-height:1.5}
+ .advert-foot{gap:8px 13px;font-size:.65rem}.advert-tag{font-size:.53rem}
+}
+@media(max-width:390px){.advert-content{align-items:flex-start}.advert-art{flex-basis:74px;min-height:82px}.advert-art small{font-size:.48rem}.advert-topline{font-size:.61rem}}
+</style>
+
+
+<style id="admin-advertisement-management-styles">
+#adminAdvertisementsSection .admin-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#adminAdvertisementsSection .table-scroll{overflow:auto}
+#adminAdsRows td{vertical-align:middle}
+.admin-ad-preview{display:flex;align-items:center;gap:10px;min-width:180px}
+.admin-ad-thumb{width:54px;height:42px;flex:0 0 54px;object-fit:cover;border-radius:8px;background:#eaf5ff;border:1px solid #d6e7f4}
+.admin-ad-name{font-weight:800;color:var(--ink);font-size:.82rem}
+.admin-ad-meta{font-size:.7rem;color:var(--muted);margin-top:3px}
+.admin-ad-status{display:inline-flex;padding:5px 8px;border-radius:99px;font-size:.68rem;font-weight:800;text-transform:capitalize;background:#eef2f7;color:#53657a}
+.admin-ad-status.active{background:#e6f7ee;color:#16804a}.admin-ad-status.paused{background:#fff4dc;color:#99620a}
+.admin-ad-actions{display:flex;gap:6px;flex-wrap:wrap}.admin-ad-actions button{padding:7px 9px;font-size:.72rem}
+.advert-image{display:block;width:100%;max-height:210px;object-fit:cover;border-radius:14px;border:1px solid #c9dff0}
+.advert-copy{min-width:0}.advert-art{overflow:hidden}
+@media(max-width:700px){#adminAdvertisementsSection .admin-layout{grid-template-columns:1fr}.admin-ad-actions{min-width:110px}}
+</style>
+
 </head>
 <body data-theme="light">
 <header>
@@ -782,6 +835,11 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
    <article class="info-card"><i class="fa-solid fa-lock"></i><h3>Member access</h3><p>Premium content is available to approved VIP members only.</p></article>
    <article class="info-card"><i class="fa-solid fa-mobile-screen-button"></i><h3>Mobile friendly</h3><p>Responsive layouts for phones, tablets and desktop screens.</p></article>
   </div>
+  <section class="advert-panel" id="homeAdvertisement" aria-label="Advertisement" hidden>
+   <div class="advert-topline"><span><i class="fa-solid fa-bullhorn"></i> ADVERTISEMENT</span><span class="advert-tag">SPONSORED</span></div>
+   <div class="advert-content" id="homeAdvertisementContent" aria-live="polite"></div>
+   <div class="advert-foot" id="homeAdvertisementFoot"><span><i class="fa-solid fa-circle-check"></i> Sponsored partner</span><span><i class="fa-solid fa-mobile-screen"></i> Mobile-friendly placement</span></div>
+  </section>
   <div class="banner"><div><h2>Join VIP Premium</h2><p>Sign in to access today's premium tips.</p></div><button class="btn" data-open="loginModal"><i class="fa-solid fa-crown"></i> Member login</button></div>
  </section>
 
@@ -835,6 +893,33 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
    </form></div>
    <div class="card"><div class="pad"><div class="field"><label for="adminTipSearch">Search tips</label><input id="adminTipSearch" type="search" placeholder="Search by match, category or date"></div></div><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Changes are available to authorized administrators only.</div></div>
   </div>
+  <section class="section" id="adminAdvertisementsSection">
+   <div class="section-head"><div><h2><i class="fa-solid fa-rectangle-ad"></i> Advertisement management</h2><p>Create, publish, pause and remove the advertisement shown on the homepage above Join VIP Premium.</p></div><button class="btn secondary small" type="button" id="adminAdsReload"><i class="fa-solid fa-rotate"></i> Refresh ads</button></div>
+   <div class="admin-layout">
+    <div class="card pad">
+     <h3 style="margin-top:0" id="adminAdFormHeading">Create advertisement</h3>
+     <form id="adminAdForm">
+      <input type="hidden" id="adminAdId">
+      <div class="form-grid">
+       <div class="field full"><label for="adminAdTitle">Advertisement title</label><input id="adminAdTitle" maxlength="100" placeholder="e.g. Your brand, seen by football fans" required></div>
+       <div class="field full"><label for="adminAdDescription">Description</label><input id="adminAdDescription" maxlength="240" placeholder="Short promotional message" required></div>
+       <div class="field full"><label for="adminAdImage">Image URL (optional)</label><input id="adminAdImage" type="url" maxlength="1000" placeholder="https://example.com/banner.jpg"><small class="subtext">Use a publicly accessible HTTPS image URL. Leave blank for the professional built-in design.</small></div>
+       <div class="field"><label for="adminAdButton">Button text</label><input id="adminAdButton" maxlength="35" value="Learn more" placeholder="Learn more"></div>
+       <div class="field"><label for="adminAdTarget">Destination URL</label><input id="adminAdTarget" type="url" maxlength="1000" placeholder="https://example.com" required></div>
+       <div class="field"><label for="adminAdStatus">Publication status</label><select id="adminAdStatus"><option value="draft">Draft</option><option value="active">Published</option><option value="paused">Paused</option></select></div>
+       <div class="field"><label for="adminAdPosition">Placement</label><select id="adminAdPosition"><option value="home_vip">Home page · Before Join VIP Premium</option></select></div>
+      </div>
+      <div class="form-actions"><button class="btn" type="submit" id="adminAdSave"><i class="fa-solid fa-floppy-disk"></i> Save advertisement</button><button class="btn ghost" type="button" id="adminAdClear">Clear</button></div>
+      <div class="msg" id="adminAdMessage" role="status" aria-live="polite"></div>
+     </form>
+    </div>
+    <div class="card">
+     <div class="pad"><h3 style="margin:0">Saved advertisements</h3><p class="subtext" style="margin:6px 0 0">Only published advertisements are displayed to visitors.</p></div>
+     <div class="table-scroll"><table><thead><tr><th>Advertisement</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminAdsRows"><tr><td colspan="3">Loading advertisements…</td></tr></tbody></table></div>
+     <div class="notice" id="adminAdsNotice">Manage homepage advertisements here.</div>
+    </div>
+   </div>
+  </section>
   <div class="section"><div class="section-head"><div><h2>Business overview</h2><p>A clear snapshot of membership and payment activity.</p></div><button class="btn secondary small" id="adminOverviewReload"><i class="fa-solid fa-rotate"></i> Refresh overview</button></div><div class="account-summary"><div class="summary-tile"><strong id="overviewUsers">—</strong><span>Total accounts</span></div><div class="summary-tile"><strong id="overviewVip">—</strong><span>Active VIP</span></div><div class="summary-tile"><strong id="overviewPaid">—</strong><span>Verified payments (KES)</span></div></div><div class="notice" id="overviewNotice">Revenue includes completed payment records only.</div></div>
   <div class="card admin-members"><div class="section-head" style="padding:16px 16px 0"><div><h3 style="margin:0">Payment ledger</h3><p>Provider references and statuses for support and reconciliation.</p></div><button class="btn secondary small" id="paymentsReload"><i class="fa-solid fa-rotate"></i> Refresh payments</button></div><div class="table-scroll"><table><thead><tr><th>Customer</th><th>Package</th><th>Amount</th><th>Status</th><th>Reference / Receipt</th></tr></thead><tbody id="adminPaymentsRows"><tr><td colspan="5">Load payment ledger from admin session.</td></tr></tbody></table></div><div class="notice" id="paymentsNotice">Only verified completed transactions should be treated as paid.</div></div>
   <div class="card admin-members membership-approval-card">
@@ -957,16 +1042,40 @@ function setPanel(panelId) {
   $('menuToggle').setAttribute('aria-expanded','false');
   window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='historyPanel') loadHistory();
+  if(panelId==='freePanel') loadHomeAdvertisement();
   if(panelId==='subscriptionPanel') window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='paymentPanel' && typeof loadCustomerPayments==='function') loadCustomerPayments();
   if(panelId==='premiumPanel') loadPremium();
-  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
+  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); loadAdminAdvertisements(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
 }
 function showEmpty(tbodyId, columns, message) {
   $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
 }
-function calculateTotalOdds(tips){return (Array.isArray(tips)?tips:[]).reduce((sum,t)=>{const n=Number.parseFloat(String(t.odds??'').replace(/[^0-9.]/g,''));return sum+(Number.isFinite(n)?n:0);},0);}
-function totalOddsRow(tips, columns=5){return `<tr class="total-odds-row"><td colspan="${columns}"><span class="total-odds-label">TOTAL ODDS</span><strong class="total-odds-value">${calculateTotalOdds(tips).toFixed(2)}</strong></td></tr>`;}
+function parseDecimalOdds(value){
+  if(typeof value==='number') return Number.isFinite(value)&&value>=1?value:null;
+  let raw=String(value??'').trim();
+  if(!raw) return null;
+  const fraction=raw.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if(fraction){
+    const numerator=Number(fraction[1]), denominator=Number(fraction[2]);
+    return denominator>0&&numerator>=0?1+(numerator/denominator):null;
+  }
+  raw=raw.replace(/\s/g,'');
+  if(raw.includes(',')&&!raw.includes('.')) raw=raw.replace(',','.');
+  else raw=raw.replace(/,/g,'');
+  const match=raw.match(/\d+(?:\.\d+)?/);
+  if(!match) return null;
+  const odds=Number(match[0]);
+  return Number.isFinite(odds)&&odds>=1?odds:null;
+}
+function calculateTotalOdds(tips){
+  const valid=(Array.isArray(tips)?tips:[]).map(t=>parseDecimalOdds(t?.odds)).filter(n=>n!==null);
+  return valid.length?valid.reduce((product,odds)=>product*odds,1):null;
+}
+function totalOddsRow(tips, columns=5){
+  const total=calculateTotalOdds(tips);
+  return `<tr class="total-odds-row"><td colspan="${columns}"><span class="total-odds-label">TOTAL ACCUMULATOR ODDS</span><strong class="total-odds-value">${total===null?'—':total.toFixed(2)}</strong></td></tr>`;
+}
 function renderTipRows(tips, target, withDate=false) {
   if (!Array.isArray(tips) || tips.length===0) {
     showEmpty(target,withDate?6:5,'Tips are being updated. Please check back later.');
@@ -1545,12 +1654,74 @@ function checkExpiryReminder(){try{if(!currentUser?.vipExpiresAt||!('Notificatio
 async function loadPerformanceStats(){try{const d=await api('/api/stats/performance');$('statsSettled').textContent=d.settled;$('statsWins').textContent=d.wins;$('statsWinRate').textContent=d.winRate===null?'—':d.winRate+'%';$('statsMethod').textContent=d.methodology;}catch(e){$('statsMethod').textContent='Performance statistics are temporarily unavailable.';}}
 async function loadAdminOverview(){try{const d=await api('/api/admin/overview');$('overviewUsers').textContent=d.users.total||0;$('overviewVip').textContent=d.users.active||0;const paid=(d.payments||[]).filter(x=>String(x.status||'').toLowerCase()==='completed').reduce((a,x)=>a+(Number(x.amount)||0),0);$('overviewPaid').textContent='KES '+paid.toLocaleString('en-KE');$('overviewNotice').textContent='Revenue estimate sums completed payment records; reconcile with your provider statement.';}catch(e){$('overviewNotice').textContent=e.message||'Overview unavailable.';}}
 async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)return;body.innerHTML='<tr><td colspan="5">Loading payment records…</td></tr>';try{const d=await api('/api/admin/payments');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.email)}<span class="subtext">${escapeHTML(p.phone||'')}</span></td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference)}<span class="subtext">${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'')}</span></td></tr>`).join(''):'<tr><td colspan="5">No payment records found.</td></tr>';$('paymentsNotice').textContent=`${ps.length} recent payment record(s).`;}catch(e){body.innerHTML=`<tr><td colspan="5">${escapeHTML(e.message)}</td></tr>`;}}
+
+// Homepage advertisement management. The server must enforce admin permissions
+// for /api/admin/advertisements and expose the currently published ad publicly.
+let adminAdvertisementsCache=[];
+function safeAdUrl(value){
+  const raw=String(value||'').trim(); if(!raw)return '';
+  try{const u=new URL(raw,window.location.origin);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch(_){return '';}
+}
+function clearAdminAdForm(){
+  const f=$('adminAdForm'); if(f)f.reset(); $('adminAdId').value=''; $('adminAdStatus').value='draft'; $('adminAdPosition').value='home_vip'; $('adminAdButton').value='Learn more'; $('adminAdFormHeading').textContent='Create advertisement'; $('adminAdSave').innerHTML='<i class="fa-solid fa-floppy-disk"></i> Save advertisement'; hideMessage('adminAdMessage');
+}
+function renderAdminAdvertisements(){
+  const body=$('adminAdsRows'); if(!body)return;
+  if(!adminAdvertisementsCache.length){body.innerHTML='<tr><td colspan="3">No advertisements have been created yet.</td></tr>';return;}
+  body.innerHTML=adminAdvertisementsCache.map(ad=>{
+    const id=String(ad.id??ad._id??''); const status=String(ad.status||'draft').toLowerCase();
+    const img=safeAdUrl(ad.imageUrl||ad.image||'');
+    return `<tr><td><div class="admin-ad-preview">${img?`<img class="admin-ad-thumb" src="${escapeHTML(img)}" alt="">`:'<span class="admin-ad-thumb" aria-hidden="true" style="display:grid;place-items:center;color:#0879b9"><i class="fa-solid fa-bullhorn"></i></span>'}<div><div class="admin-ad-name">${escapeHTML(ad.title||'Untitled advertisement')}</div><div class="admin-ad-meta">${escapeHTML(ad.description||'')}</div></div></div></td><td><span class="admin-ad-status ${escapeHTML(status)}">${escapeHTML(status)}</span></td><td><div class="admin-ad-actions"><button class="btn secondary small" type="button" data-ad-action="edit" data-ad-id="${escapeHTML(id)}">Edit</button><button class="btn ghost small" type="button" data-ad-action="${status==='active'?'pause':'publish'}" data-ad-id="${escapeHTML(id)}">${status==='active'?'Pause':'Publish'}</button><button class="btn ghost small" type="button" data-ad-action="delete" data-ad-id="${escapeHTML(id)}">Delete</button></div></td></tr>`;
+  }).join('');
+}
+async function loadAdminAdvertisements(){
+  const body=$('adminAdsRows'); if(!body)return; body.innerHTML='<tr><td colspan="3">Loading advertisements…</td></tr>';
+  try{const data=await api('/api/admin/advertisements');adminAdvertisementsCache=Array.isArray(data.advertisements)?data.advertisements:(Array.isArray(data.ads)?data.ads:[]);renderAdminAdvertisements();$('adminAdsNotice').textContent=`${adminAdvertisementsCache.length} advertisement(s) loaded. Published ads appear on the homepage.`;}
+  catch(e){body.innerHTML=`<tr><td colspan="3">${escapeHTML(e.message||'Could not load advertisements.')}</td></tr>`;$('adminAdsNotice').textContent='Advertisement management requires the admin advertisement API on your server.';}
+}
+async function loadHomeAdvertisement(){
+  const panel=$('homeAdvertisement'),content=$('homeAdvertisementContent');if(!panel||!content)return;
+  try{
+    const data=await api('/api/advertisements/active');
+    const ad=data.advertisement||data.ad||null;
+    if(!ad||String(ad.status||'active').toLowerCase()!=='active'){panel.hidden=true;return;}
+    const target=safeAdUrl(ad.targetUrl||ad.url||''); if(!target){panel.hidden=true;return;}
+    const image=safeAdUrl(ad.imageUrl||ad.image||'');
+    content.innerHTML=`<div class="advert-copy"><span class="advert-kicker">SPONSORED PARTNER</span><h2>${escapeHTML(ad.title||'Featured partner')}</h2><p>${escapeHTML(ad.description||'Discover more from our advertising partner.')}</p><a class="advert-cta" href="${escapeHTML(target)}" target="_blank" rel="noopener noreferrer">${escapeHTML(ad.buttonText||'Learn more')} <i class="fa-solid fa-arrow-up-right-from-square"></i></a></div>${image?`<div class="advert-art" style="flex:0 1 42%;min-height:120px;padding:8px"><img class="advert-image" src="${escapeHTML(image)}" alt="${escapeHTML(ad.title||'Sponsored advertisement')}"></div>`:'<div class="advert-art" aria-hidden="true"><span class="advert-orbit"></span><i class="fa-solid fa-bullhorn"></i><small>SPONSORED</small></div>'}`;
+    panel.hidden=false;
+  }catch(e){panel.hidden=true;console.info('Homepage advertisement unavailable:',e.message);}
+}
+async function saveAdminAdvertisement(event){
+  event.preventDefault();
+  const id=$('adminAdId').value.trim();
+  const payload={title:$('adminAdTitle').value.trim(),description:$('adminAdDescription').value.trim(),imageUrl:$('adminAdImage').value.trim(),buttonText:$('adminAdButton').value.trim()||'Learn more',targetUrl:$('adminAdTarget').value.trim(),status:$('adminAdStatus').value,position:$('adminAdPosition').value};
+  if(!safeAdUrl(payload.targetUrl)){showMessage('adminAdMessage','Enter a valid http:// or https:// destination URL.','error');return;}
+  if(payload.imageUrl&&!safeAdUrl(payload.imageUrl)){showMessage('adminAdMessage','Image URL must be a valid http:// or https:// URL.','error');return;}
+  const save=$('adminAdSave');save.disabled=true;
+  try{await api(id?`/api/admin/advertisements/${encodeURIComponent(id)}`:'/api/admin/advertisements',{method:id?'PUT':'POST',body:JSON.stringify(payload)});showMessage('adminAdMessage',id?'Advertisement updated successfully.':'Advertisement created successfully.','ok');clearAdminAdForm();await loadAdminAdvertisements();await loadHomeAdvertisement();}
+  catch(e){showMessage('adminAdMessage',e.message||'Could not save advertisement.','error');}
+  finally{save.disabled=false;}
+}
+async function handleAdminAdAction(event){
+  const button=event.target.closest('[data-ad-action]');if(!button)return;
+  const id=button.dataset.adId,action=button.dataset.adAction,ad=adminAdvertisementsCache.find(x=>String(x.id??x._id??'')===id);if(!ad)return;
+  if(action==='edit'){$('adminAdId').value=id;$('adminAdTitle').value=ad.title||'';$('adminAdDescription').value=ad.description||'';$('adminAdImage').value=ad.imageUrl||ad.image||'';$('adminAdButton').value=ad.buttonText||'Learn more';$('adminAdTarget').value=ad.targetUrl||ad.url||'';$('adminAdStatus').value=String(ad.status||'draft').toLowerCase();$('adminAdPosition').value=ad.position||'home_vip';$('adminAdFormHeading').textContent='Edit advertisement';$('adminAdSave').innerHTML='<i class="fa-solid fa-floppy-disk"></i> Update advertisement';hideMessage('adminAdMessage');$('adminAdForm').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(action==='delete'&&!confirm('Delete this advertisement permanently?'))return;
+  const nextStatus=action==='publish'?'active':'paused';
+  try{if(action==='delete')await api(`/api/admin/advertisements/${encodeURIComponent(id)}`,{method:'DELETE'});else await api(`/api/admin/advertisements/${encodeURIComponent(id)}`,{method:'PUT',body:JSON.stringify({...ad,status:nextStatus})});await loadAdminAdvertisements();await loadHomeAdvertisement();}
+  catch(e){$('adminAdsNotice').textContent=e.message||'Could not update advertisement.';}
+}
+$('adminAdForm')?.addEventListener('submit',saveAdminAdvertisement);
+$('adminAdClear')?.addEventListener('click',clearAdminAdForm);
+$('adminAdsReload')?.addEventListener('click',loadAdminAdvertisements);
+$('adminAdsRows')?.addEventListener('click',handleAdminAdAction);
+
 let adminTipsCache=[];
 let installPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('installAppButton').style.display='inline-grid';});$('installAppButton').addEventListener('click',async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('installAppButton').style.display='none';});
 $('notifyButton').addEventListener('click',async()=>{if(!('Notification'in window)){alert('Notifications are not supported by this browser.');return;}const permission=await Notification.requestPermission();if(permission==='granted'){new Notification('Banker Tips notifications enabled',{body:'You can receive reminders while using this device.'});$('notifyButton').innerHTML='<i class="fa-solid fa-bell"></i>';}else alert('Notifications were not enabled. You can change this in browser settings.');});
 if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/service-worker.js').catch(e=>console.warn('PWA service worker registration failed',e)));}
 $('adminOverviewReload')?.addEventListener('click',loadAdminOverview);$('paymentsReload')?.addEventListener('click',loadAdminPayments);$('paymentHistoryReload')?.addEventListener('click',loadCustomerPayments);
-checkSession().then(()=>{renderUserProfile();loadFreeTips();checkExpiryReminder();});
+checkSession().then(()=>{renderUserProfile();loadFreeTips();loadHomeAdvertisement();checkExpiryReminder();});
 loadPerformanceStats();
 </script>
 
