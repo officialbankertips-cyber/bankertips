@@ -768,6 +768,23 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
  .advert-foot{gap:8px 13px;font-size:.65rem}.advert-tag{font-size:.53rem}
 }
 @media(max-width:390px){.advert-content{align-items:flex-start}.advert-art{flex-basis:74px;min-height:82px}.advert-art small{font-size:.48rem}.advert-topline{font-size:.61rem}}
+/* Professional Premier League standings embed */
+.premier-standings-section{margin-top:28px}
+.premier-standings-card{overflow:hidden;border:1px solid #d8e8f5;border-radius:20px;background:linear-gradient(145deg,#fff,#f5faff);box-shadow:0 10px 28px rgba(20,68,105,.07)}
+.premier-standings-heading{display:flex;align-items:center;gap:13px;padding:18px 20px;background:linear-gradient(120deg,#073d66,#087fc0);color:#fff}
+.premier-standings-mark{width:44px;height:44px;display:grid;place-items:center;flex:0 0 44px;border-radius:13px;background:#ffffff1a;border:1px solid #ffffff30;font-size:1.25rem}
+.premier-standings-heading h2{margin:0;font:800 1.18rem Outfit,sans-serif;letter-spacing:-.025em}
+.premier-standings-heading p{margin:4px 0 0;color:#d7efff;font-size:.78rem}
+.premier-standings-body{padding:15px;overflow-x:auto}
+#fs-standings{width:100%;min-height:180px;color:var(--muted);font-size:.86rem}
+#fs-standings iframe,#fs-standings table{max-width:100%}
+.visitor-counter-widget{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0 auto 15px;padding:13px 16px;max-width:560px;border:1px solid #d8e8f5;border-radius:15px;background:linear-gradient(135deg,#f4faff,#fff);box-shadow:0 5px 18px rgba(20,68,105,.05)}
+.visitor-counter-widget[hidden]{display:none!important}
+.visitor-counter-label{display:flex;align-items:center;gap:8px;color:#315d7c;font-weight:800;font-size:.8rem}
+.visitor-counter-label i{color:#0879c9}
+.visitor-counter-widget a{font-size:.7rem;color:#7890a5;text-decoration:none}
+.visitor-counter-widget a:hover{text-decoration:underline}
+@media(max-width:600px){.premier-standings-heading{padding:15px}.premier-standings-body{padding:9px}.visitor-counter-widget{margin-left:10px;margin-right:10px}}
 </style>
 
 
@@ -840,6 +857,25 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
    <div class="advert-content" id="homeAdvertisementContent" aria-live="polite"></div>
    <div class="advert-foot" id="homeAdvertisementFoot"><span><i class="fa-solid fa-circle-check"></i> Sponsored partner</span><span><i class="fa-solid fa-mobile-screen"></i> Mobile-friendly placement</span></div>
   </section>
+  <section class="section premier-standings-section" aria-labelledby="premierStandingsTitle">
+   <div class="premier-standings-card">
+    <div class="premier-standings-heading">
+     <span class="premier-standings-mark"><i class="fa-solid fa-trophy" aria-hidden="true"></i></span>
+     <div><h2 id="premierStandingsTitle">Premier League Table</h2><p>Latest league standings · Powered by FootyStats</p></div>
+    </div>
+    <div class="premier-standings-body">
+     <div id="fs-standings" aria-label="Premier League standings">Loading Premier League standings…</div>
+    </div>
+   </div>
+  </section>
+  <script>
+   (function (w,d,s,o,f,js,fjs) {
+    w['fsStandingsEmbed']=o;w[o] = w[o] || function () { (w[o].q = w[o].q || []).push(arguments) };
+    js = d.createElement(s); fjs = d.getElementsByTagName(s)[0]; js.id = o; js.src = f; js.async = 1;
+    fjs.parentNode.insertBefore(js, fjs);
+   }(window, document, 'script', 'mw', 'https://cdn.footystats.org/embeds/standings.js'));
+   mw('params', { leagueID: 17146 });
+  </script>
   <div class="banner"><div><h2>Join VIP Premium</h2><p>Sign in to access today's premium tips.</p></div><button class="btn" data-open="loginModal"><i class="fa-solid fa-crown"></i> Member login</button></div>
  </section>
 
@@ -946,6 +982,12 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
  </section>
 </main>
 <footer>
+  <div class="visitor-counter-widget" id="adminVisitorCounter" aria-label="Website visitor counter" hidden>
+   <span class="visitor-counter-label"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Website Visitors</span>
+   <a href="https://www.acadoo.de/leistungen/ghostwriter-bachelorarbeit/" target="_blank" rel="noopener noreferrer">Bachelorarbeit Ghostwriting</a>
+   <script type="text/javascript" src="https://www.freevisitorcounters.com/auth.php?id=6524374bcbe135cf421f46b2e8a0104c6d971239"></script>
+   <script type="text/javascript" src="https://www.freevisitorcounters.com/en/home/counter/1691330/t/1"></script>
+  </div>
   © Copyright <span id="year"></span> | Banker Tips - Rights reserved.
 </footer>
 <a class="whatsapp-float" href="https://wa.me/254101047400?text=Hello%20Banker%20Tips%20Support%2C%20I%20need%20assistance." target="_blank" rel="noopener noreferrer" aria-label="Chat with Banker Tips support on WhatsApp" title="WhatsApp Support"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i><span class="whatsapp-label">WhatsApp Support</span></a>
@@ -1267,6 +1309,7 @@ function updateAccountUI() {
   if(authButton){ authButton.innerHTML=currentUser?'<i class="fa-solid fa-right-from-bracket"></i> Logout':'<i class="fa-solid fa-right-to-bracket"></i> Login'; authButton.dataset.action=currentUser?'logout':'login'; authButton.removeAttribute('data-open'); if(!currentUser) authButton.dataset.open='loginModal'; }
   const registerButton=$('registerNavButton'); if(registerButton) registerButton.classList.toggle('hidden',!!currentUser);
   const admin=!!currentUser && String(currentUser.role||'').toLowerCase()==='admin';
+  const visitorCounter=$('adminVisitorCounter'); if(visitorCounter) visitorCounter.hidden=!admin;
   $('adminPanel').dataset.allowed=admin?'true':'false';
   // Only administrator accounts can use these management tools.
   const adminNav=$('adminNavButton');
