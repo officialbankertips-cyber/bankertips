@@ -497,9 +497,11 @@ function publicTip(tip) {
 const FOOTBALL_API_BASE = String(process.env.FOOTBALL_API_BASE_URL || "https://v3.football.api-sports.io").replace(/\/+$/, "");
 const footballDateCache = new Map();
 const FOOTBALL_TIME_ZONE = String(process.env.FOOTBALL_API_TIMEZONE || "Africa/Nairobi");
-const configuredFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 10 * 60 * 1000);
+const configuredFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 60 * 1000);
+// Keep live score/status refresh responsive while allowing deployments to increase this
+// interval to stay within their API-Football plan allowance. Never poll more often than 60s.
 const FOOTBALL_SYNC_INTERVAL_MS = Number.isFinite(configuredFootballInterval)
-  ? Math.max(2 * 60 * 1000, configuredFootballInterval) : 10 * 60 * 1000;
+  ? Math.max(60 * 1000, configuredFootballInterval) : 60 * 1000;
 
 function footballDateISO(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -624,7 +626,11 @@ async function fetchFootballFixturesForDate(date, forceRefresh = false) {
   if (!apiKey) throw new Error("FOOTBALL_API_KEY is not configured.");
   const now = Date.now();
   const today = footballDateISO();
-  const ttl = date === today ? Math.min(FOOTBALL_SYNC_INTERVAL_MS - 5000, 9 * 60 * 1000) : (date < today ? 24 * 60 * 60 * 1000 : 6 * 60 * 60 * 1000);
+  const ttl = date === today
+    ? Math.max(15 * 1000, Math.min(FOOTBALL_SYNC_INTERVAL_MS - 5000, 55 * 1000))
+    // Yesterday can still contain a match that crossed midnight or was delayed.
+    // Do not retain a pre-final live status for a full day.
+    : (date < today ? 60 * 1000 : 6 * 60 * 60 * 1000);
   const cached = footballDateCache.get(date);
   if (!forceRefresh && cached && cached.expiresAt > now) {
     if (cached.error) throw new Error(cached.error);
