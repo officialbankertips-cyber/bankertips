@@ -141,6 +141,22 @@ const auditLogSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, index: true }
 }, { versionKey: false });
 const AuditLog = mongoose.model("AuditLog", auditLogSchema);
+
+const advertisementSchema = new mongoose.Schema({
+  title: { type: String, required: true, trim: true, maxlength: 100 },
+  description: { type: String, required: true, trim: true, maxlength: 240 },
+  imageUrl: { type: String, trim: true, maxlength: 1000, default: "" },
+  buttonText: { type: String, trim: true, maxlength: 35, default: "Learn more" },
+  targetUrl: { type: String, required: true, trim: true, maxlength: 1000 },
+  status: { type: String, enum: ["draft", "active", "paused"], default: "draft", index: true },
+  position: { type: String, enum: ["home_vip"], default: "home_vip", index: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { versionKey: false });
+advertisementSchema.index({ position: 1, status: 1, updatedAt: -1 });
+const Advertisement = mongoose.model("Advertisement", advertisementSchema);
+
 async function recordAudit(req, action, entityType, entityId, summary) {
   try { await AuditLog.create({ actor: req.user?._id || null, actorEmail: req.user?.email || "system", action, entityType, entityId: String(entityId || ""), summary }); }
   catch (err) { console.error("Audit log write failed:", err.message); }
@@ -314,6 +330,55 @@ function cleanTipInput(body) {
     type, date, homeTeam, awayTeam, match, time, tip, odds, result,
     league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
   };
+}
+
+
+function cleanAdvertisementInput(body = {}) {
+  const title = String(body.title || "").trim();
+  const description = String(body.description || "").trim();
+  const imageUrl = String(body.imageUrl || body.image || "").trim();
+  const buttonText = String(body.buttonText || "Learn more").trim();
+  const targetUrl = String(body.targetUrl || body.url || "").trim();
+  const status = String(body.status || "draft").toLowerCase();
+  const position = String(body.position || "home_vip").toLowerCase();
+
+  const validWebUrl = value => {
+    if (!value) return false;
+    try {
+      const parsed = new URL(value);
+      return ["http:", "https:"].includes(parsed.protocol) && Boolean(parsed.hostname);
+    } catch { return false; }
+  };
+
+  if (!title || title.length > 100) throw new Error("Advertisement title is required (maximum 100 characters).");
+  if (!description || description.length > 240) throw new Error("Advertisement description is required (maximum 240 characters).");
+  if (!validWebUrl(targetUrl) || targetUrl.length > 1000) throw new Error("Enter a valid HTTP or HTTPS destination URL (maximum 1000 characters).");
+  if (imageUrl && (!validWebUrl(imageUrl) || imageUrl.length > 1000)) throw new Error("Image URL must be a valid HTTP or HTTPS URL (maximum 1000 characters).");
+  if (!buttonText || buttonText.length > 35) throw new Error("Button text is required (maximum 35 characters).");
+  if (!["draft", "active", "paused"].includes(status)) throw new Error("Choose draft, active or paused as the publication status.");
+  if (position !== "home_vip") throw new Error("Unsupported advertisement placement.");
+
+  return { title, description, imageUrl, buttonText, targetUrl, status, position };
+}
+function publicAdvertisement(ad) {
+  return {
+    id: String(ad._id || ad.id),
+    title: ad.title,
+    description: ad.description,
+    imageUrl: ad.imageUrl || "",
+    buttonText: ad.buttonText || "Learn more",
+    targetUrl: ad.targetUrl,
+    status: ad.status,
+    position: ad.position || "home_vip",
+    createdAt: ad.createdAt,
+    updatedAt: ad.updatedAt
+  };
+}
+async function publishSingleHomepageAdvertisement(advertisementId) {
+  await Advertisement.updateMany(
+    { position: "home_vip", status: "active", _id: { $ne: advertisementId } },
+    { $set: { status: "paused", updatedAt: new Date() } }
+  );
 }
 
 function normalizeKenyanPhone(value) {
@@ -622,6 +687,72 @@ app.get("/api/tips/history", async (req, res) => {
   } catch (err) {
     console.error("History error:", err.message);
     return res.status(500).json({ success: false, authorized: false, message: "Could not load history." });
+  }
+});
+
+
+// Public homepage advertisement: only the currently published homepage ad is returned.
+app.get("/api/advertisements/active", async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store, max-age=0");
+    const ad = await Advertisement.findOne({ position: "home_vip", status: "active" })
+      .sort({ updatedAt: -1, createdAt: -1 }).lean();
+    res.json({ success: true, advertisement: ad ? publicAdvertisement(ad) : null });
+  } catch (err) {
+    console.error("Public advertisement lookup error:", err.message);
+    res.status(500).json({ success: false, message: "Could not load homepage advertisement." });
+  }
+});
+
+// Advertisement management is restricted to authenticated administrators.
+app.get("/api/admin/advertisements", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const ads = await Advertisement.find({}).sort({ updatedAt: -1, createdAt: -1 }).limit(500).lean();
+    res.set("Cache-Control", "private, no-store, max-age=0");
+    res.json({ success: true, advertisements: ads.map(publicAdvertisement) });
+  } catch (err) {
+    console.error("Admin advertisement list error:", err.message);
+    res.status(500).json({ success: false, message: "Could not load advertisements." });
+  }
+});
+
+app.post("/api/admin/advertisements", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const data = cleanAdvertisementInput(req.body);
+    const ad = await Advertisement.create({ ...data, createdBy: req.user._id });
+    if (ad.status === "active") await publishSingleHomepageAdvertisement(ad._id);
+    await recordAudit(req, "advertisement.created", "advertisement", ad._id, `Created homepage advertisement: ${ad.title} (${ad.status})`);
+    res.status(201).json({ success: true, message: "Advertisement created.", advertisement: publicAdvertisement(ad) });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || "Could not create advertisement." });
+  }
+});
+
+app.put("/api/admin/advertisements/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const data = cleanAdvertisementInput(req.body);
+    const ad = await Advertisement.findByIdAndUpdate(
+      req.params.id,
+      { ...data, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
+    if (!ad) return res.status(404).json({ success: false, message: "Advertisement not found." });
+    if (ad.status === "active") await publishSingleHomepageAdvertisement(ad._id);
+    await recordAudit(req, "advertisement.updated", "advertisement", ad._id, `Updated homepage advertisement: ${ad.title} (${ad.status})`);
+    res.json({ success: true, message: "Advertisement updated.", advertisement: publicAdvertisement(ad) });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || "Could not update advertisement." });
+  }
+});
+
+app.delete("/api/admin/advertisements/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const ad = await Advertisement.findByIdAndDelete(req.params.id);
+    if (!ad) return res.status(404).json({ success: false, message: "Advertisement not found." });
+    await recordAudit(req, "advertisement.deleted", "advertisement", ad._id, `Deleted homepage advertisement: ${ad.title}`);
+    res.json({ success: true, message: "Advertisement deleted." });
+  } catch (err) {
+    res.status(400).json({ success: false, message: "Could not delete advertisement." });
   }
 });
 
