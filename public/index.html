@@ -608,6 +608,14 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
  #premiumPanel .tips-table .total-odds-row td{display:block;text-align:right;padding:10px 0!important;font-weight:800}
 }
 
+
+/* Banker Tips typography: Comfortaa throughout the complete interface */
+html, body,
+body :not(i):not(svg):not(path):not([class*="fa-"]),
+button, input, select, textarea {
+  font-family: "Comfortaa", "Trebuchet MS", Arial, sans-serif !important;
+}
+
 </style>
 
 <style id="membership-approval-redesign">
@@ -871,25 +879,6 @@ img{max-width:100%}
    <div class="advert-content" id="homeAdvertisementContent" aria-live="polite"></div>
    <div class="advert-foot" id="homeAdvertisementFoot"><span><i class="fa-solid fa-circle-check"></i> Sponsored partner</span><span><i class="fa-solid fa-mobile-screen"></i> Mobile-friendly placement</span></div>
   </section>
-  <section class="section premier-standings-section" aria-labelledby="premierStandingsTitle">
-   <div class="premier-standings-card">
-    <div class="premier-standings-heading">
-     <span class="premier-standings-mark"><i class="fa-solid fa-trophy" aria-hidden="true"></i></span>
-     <div><h2 id="premierStandingsTitle">Premier League Table</h2><p>Latest league standings · Powered by FootyStats</p></div>
-    </div>
-    <div class="premier-standings-body">
-     <div id="fs-standings" aria-label="Premier League standings">Loading Premier League standings…</div>
-    </div>
-   </div>
-  </section>
-  <script>
-   (function (w,d,s,o,f,js,fjs) {
-    w['fsStandingsEmbed']=o;w[o] = w[o] || function () { (w[o].q = w[o].q || []).push(arguments) };
-    js = d.createElement(s); fjs = d.getElementsByTagName(s)[0]; js.id = o; js.src = f; js.async = 1;
-    fjs.parentNode.insertBefore(js, fjs);
-   }(window, document, 'script', 'mw', 'https://cdn.footystats.org/embeds/standings.js'));
-   mw('params', { leagueID: 17146 });
-  </script>
   <div class="banner"><div><h2>Join VIP Premium</h2><p>Sign in to access today's premium tips.</p></div><button class="btn" data-open="loginModal"><i class="fa-solid fa-crown"></i> Member login</button></div>
  </section>
 
