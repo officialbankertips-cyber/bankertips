@@ -1020,6 +1020,8 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
 });
 
 app.get("/api/tips", async (req, res) => {
+  res.set("Cache-Control", "private, no-store, max-age=0");
+  res.set("Pragma", "no-cache");
   try {
     const type = String(req.query.type || "free");
     const date = String(req.query.date || new Date().toISOString().slice(0, 10));
