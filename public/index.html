@@ -903,7 +903,7 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
       <div class="form-grid">
        <div class="field full"><label for="adminAdTitle">Advertisement title</label><input id="adminAdTitle" maxlength="100" placeholder="e.g. Your brand, seen by football fans" required></div>
        <div class="field full"><label for="adminAdDescription">Description</label><input id="adminAdDescription" maxlength="240" placeholder="Short promotional message" required></div>
-       <div class="field full"><label for="adminAdImage">Image URL (optional)</label><input id="adminAdImage" type="url" maxlength="1000" placeholder="https://example.com/banner.jpg"><small class="subtext">Use a publicly accessible HTTPS image URL. Leave blank for the professional built-in design.</small></div>
+       <div class="field full"><label for="adminAdImage">Banner image path or URL (optional)</label><input id="adminAdImage" type="text" maxlength="1000" placeholder="banners/helabet.jpg"><small class="subtext">For a local banner, upload the file to <strong>public/banners/</strong> and enter its path, e.g. <code>banners/helabet.jpg</code>. External HTTPS image URLs are also supported.</small></div>
        <div class="field"><label for="adminAdButton">Button text</label><input id="adminAdButton" maxlength="35" value="Learn more" placeholder="Learn more"></div>
        <div class="field"><label for="adminAdTarget">Destination URL</label><input id="adminAdTarget" type="url" maxlength="1000" placeholder="https://example.com" required></div>
        <div class="field"><label for="adminAdStatus">Publication status</label><select id="adminAdStatus"><option value="draft">Draft</option><option value="active">Published</option><option value="paused">Paused</option></select></div>
@@ -1660,6 +1660,12 @@ async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)re
 let adminAdvertisementsCache=[];
 function safeAdUrl(value){
   const raw=String(value||'').trim(); if(!raw)return '';
+  // Local banner files are served from Express's public/ directory.
+  // Example: public/banners/helabet.jpg -> /banners/helabet.jpg
+  const localPath=raw.replace(/^\/+/, '');
+  if(/^banners\/[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(localPath) && !localPath.split('/').includes('..')){
+    return new URL('/'+localPath,window.location.origin).href;
+  }
   try{const u=new URL(raw,window.location.origin);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch(_){return '';}
 }
 function clearAdminAdForm(){
@@ -1696,7 +1702,7 @@ async function saveAdminAdvertisement(event){
   const id=$('adminAdId').value.trim();
   const payload={title:$('adminAdTitle').value.trim(),description:$('adminAdDescription').value.trim(),imageUrl:$('adminAdImage').value.trim(),buttonText:$('adminAdButton').value.trim()||'Learn more',targetUrl:$('adminAdTarget').value.trim(),status:$('adminAdStatus').value,position:$('adminAdPosition').value};
   if(!safeAdUrl(payload.targetUrl)){showMessage('adminAdMessage','Enter a valid http:// or https:// destination URL.','error');return;}
-  if(payload.imageUrl&&!safeAdUrl(payload.imageUrl)){showMessage('adminAdMessage','Image URL must be a valid http:// or https:// URL.','error');return;}
+  if(payload.imageUrl&&!safeAdUrl(payload.imageUrl)){showMessage('adminAdMessage','Enter a valid banner path such as banners/helabet.jpg, or a valid HTTP/HTTPS image URL.','error');return;}
   const save=$('adminAdSave');save.disabled=true;
   try{await api(id?`/api/admin/advertisements/${encodeURIComponent(id)}`:'/api/admin/advertisements',{method:id?'PUT':'POST',body:JSON.stringify(payload)});showMessage('adminAdMessage',id?'Advertisement updated successfully.':'Advertisement created successfully.','ok');clearAdminAdForm();await loadAdminAdvertisements();await loadHomeAdvertisement();}
   catch(e){showMessage('adminAdMessage',e.message||'Could not save advertisement.','error');}
