@@ -935,7 +935,7 @@ img{max-width:100%}
  </section>
 
  <section class="panel" id="adminPanel">
-  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Admin Panel</h2><p>Manage tips, membership approvals and payment records from your administrator account. </p></div><div class="form-actions"><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
+  <div class="section-head"><div><h2><i class="fa-solid fa-shield-halved"></i> Admin Panel</h2><p>Manage tips, membership approvals and payment records. </p></div><div class="form-actions"><button class="btn secondary small" id="adminReload"><i class="fa-solid fa-rotate"></i> Reload tips</button></div></div>
   <div class="admin-layout">
    <div class="card pad"><h3 style="margin-top:0">Add / update tip</h3><form id="tipForm">
     <input type="hidden" id="tipId">
@@ -1585,7 +1585,7 @@ async function loadAdminUsers() {
     $('membersPendingCount').textContent=pending; $('membersActiveCount').textContent=active; $('membersExpiredCount').textContent=other;
     if($('membersTotalCount')) $('membersTotalCount').textContent=users.length;
     renderAdminMembershipRows();
-    $('membersNotice').textContent='Sorted by payment date/time where supplied, with newest records first. Payment timestamps not supplied by the account API are clearly marked as unavailable. Verify external payments before approving.';
+    $('membersNotice').textContent='N/B Verify external payments before approving.';
   } catch(e) { showEmpty('adminUsersRows',7,e.message); $('membersNotice').textContent='Membership data could not be loaded.'; }
 }
 function downloadMembershipPdf() {
