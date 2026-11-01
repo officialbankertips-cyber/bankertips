@@ -104,17 +104,6 @@ const tipSchema = new mongoose.Schema({
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
-  market: { type: String, trim: true, maxlength: 40, default: "auto" },
-  fixtureId: { type: Number, default: null, index: true },
-  homeScore: { type: Number, default: null },
-  awayScore: { type: Number, default: null },
-  fixtureStatus: { type: String, trim: true, maxlength: 40, default: "" },
-  fixtureStatusShort: { type: String, trim: true, maxlength: 12, default: "" },
-  elapsedMinute: { type: Number, default: null },
-  lastSyncedAt: { type: Date, default: null },
-  lastSyncAttemptAt: { type: Date, default: null },
-  settlementNote: { type: String, trim: true, maxlength: 240, default: "" },
-  settlementSource: { type: String, enum: ["manual", "automatic", "pending"], default: "pending" },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -339,27 +328,12 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
-  const market = String(body.market || "auto").trim().toLowerCase();
-  const allowedMarkets = new Set([
-    "auto", "home_win", "draw", "away_win", "home_or_draw", "draw_or_away", "home_or_away",
-    "btts_yes", "btts_no", "over_0_5", "under_0_5", "over_1_5", "under_1_5",
-    "over_2_5", "under_2_5", "over_3_5", "under_3_5", "over_4_5", "under_4_5",
-    "over_5_5", "under_5_5", "home_dnb", "away_dnb"
-  ]);
-  if (!allowedMarkets.has(market)) throw new Error("Choose a supported prediction market.");
-  const fixtureIdValue = body.fixtureId == null || body.fixtureId === "" ? null : Number(body.fixtureId);
-  if (fixtureIdValue !== null && (!Number.isSafeInteger(fixtureIdValue) || fixtureIdValue <= 0)) {
-    throw new Error("Fixture ID must be a positive whole number.");
-  }
   const publicationStatus = String(body.publicationStatus || (date > footballDateISO() ? "scheduled" : "published")).toLowerCase();
   if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Invalid publication status.");
   const publishAt = publicationStatus === "scheduled"
-    ? new Date(zonedDateTimeToEpoch(date, "00:00", FOOTBALL_TIME_ZONE)) : null;
+    ? new Date(zonedDateTimeToEpoch(date, "00:00", APP_TIME_ZONE)) : null;
   return {
-    type, date, publicationStatus, publishAt, homeTeam, awayTeam, match, time, tip, odds, result, market,
-    fixtureId: fixtureIdValue,
-    settlementSource: result === "Pending" ? "pending" : "manual",
-    settlementNote: "",
+    type, date, publicationStatus, publishAt, homeTeam, awayTeam, match, time, tip, odds, result,
     league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
   };
 }
@@ -496,64 +470,19 @@ function publicTip(tip) {
     status: resultToStatus[obj.result] || obj.status || "Pending",
     publicationStatus: obj.publicationStatus || "published",
     publishAt: obj.publishAt || null,
-    fixtureStatusLabel: fixtureStatusLabel(obj.fixtureStatusShort, obj.elapsedMinute),
   };
 }
 
 
-// API-Football result synchronization. The API key stays server-side in .env.
-const FOOTBALL_API_BASE = String(process.env.FOOTBALL_API_BASE_URL || "https://v3.football.api-sports.io").replace(/\/+$/, "");
-const footballDateCache = new Map();
-const FOOTBALL_TIME_ZONE = String(process.env.FOOTBALL_API_TIMEZONE || "Africa/Nairobi");
-const configuredFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 60 * 1000);
-// Keep live score/status refresh responsive while allowing deployments to increase this
-// interval to stay within their API-Football plan allowance. Never poll more often than 60s.
-const FOOTBALL_SYNC_INTERVAL_MS = Number.isFinite(configuredFootballInterval)
-  ? Math.max(60 * 1000, configuredFootballInterval) : 60 * 1000;
-
+// Application timezone used for date-based tip scheduling. No live football provider is configured.
+const APP_TIME_ZONE = String(process.env.APP_TIME_ZONE || "Africa/Nairobi");
 function footballDateISO(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: FOOTBALL_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+    timeZone: APP_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
   }).formatToParts(date);
   const values = Object.fromEntries(parts.map(p => [p.type, p.value]));
   return `${values.year}-${values.month}-${values.day}`;
 }
-function shiftISODate(iso, days) {
-  const d = new Date(`${iso}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-function normalizeTeamName(value) {
-  let name = String(value || "").replace(/[ıİşŞğĞüÜöÖçÇæÆøØłŁđĐ]/g, ch => ({
-    "ı":"i","İ":"i","ş":"s","Ş":"s","ğ":"g","Ğ":"g","ü":"u","Ü":"u","ö":"o","Ö":"o",
-    "ç":"c","Ç":"c","æ":"ae","Æ":"ae","ø":"o","Ø":"o","ł":"l","Ł":"l","đ":"d","Đ":"d"
-  }[ch] || ch)).normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase().replace(/&/g, " and ").replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, " ").trim();
-  name = name.replace(/\b(football club|association football club|fc|afc|cf|sc|club|sk|jk|fk|ks|as|ac|bk|nk|fk|cd|ud|ss|sv|tsv|vfb|vfl|the)\b/g, " ")
-    .replace(/\s+/g, " ").trim();
-  const aliases = {
-    "man utd": "manchester united", "man united": "manchester united",
-    "man city": "manchester city", "spurs": "tottenham hotspur",
-    "psg": "paris saint germain", "paris sg": "paris saint germain",
-    "inter": "internazionale", "inter milan": "internazionale",
-    "ath madrid": "atletico madrid", "atletico": "atletico madrid",
-    "besiktas": "besiktas", "kasimpasa": "kasimpasa",
-    "bayern": "bayern munich", "bayern munchen": "bayern munich",
-    "real": "real madrid", "barca": "barcelona",
-    "sporting lisbon": "sporting cp", "sporting clube de portugal": "sporting cp",
-    "red bull salzburg": "salzburg", "rb salzburg": "salzburg",
-    "a villa": "aston villa", "bvb": "borussia dortmund", "b dortmund": "borussia dortmund",
-    "ath bilbao": "athletic bilbao", "athletic club": "athletic bilbao",
-    "nottm forest": "nottingham forest", "wolves": "wolverhampton wanderers",
-    "west ham": "west ham united", "newcastle": "newcastle united",
-    "leverkusen": "bayer leverkusen", "gladbach": "borussia monchengladbach",
-    "m gladbach": "borussia monchengladbach", "sporting lisbon": "sporting cp",
-    "olympiakos": "olympiacos"
-  };
-  return aliases[name] || name;
-}
-
 function zonedDateTimeToEpoch(date, time, timeZone) {
   const [year, month, day] = String(date).split("-").map(Number);
   const [hour, minute] = String(time).split(":").map(Number);
@@ -573,289 +502,6 @@ function zonedDateTimeToEpoch(date, time, timeZone) {
   return guess;
 }
 
-function teamNameSimilarity(left, right) {
-  const a = normalizeTeamName(left), b = normalizeTeamName(right);
-  if (!a || !b) return 0;
-  if (a === b) return 1;
-  const at = new Set(a.split(" ")), bt = new Set(b.split(" "));
-  const intersection = [...at].filter(token => bt.has(token)).length;
-  const dice = (2 * intersection) / (at.size + bt.size);
-  // Prefix tolerance handles provider variants such as "Besiktas JK" after suffix cleanup.
-  const compactA = a.replace(/\s/g, ""), compactB = b.replace(/\s/g, "");
-  const prefix = compactA.startsWith(compactB) || compactB.startsWith(compactA);
-  return Math.max(dice, prefix ? Math.min(compactA.length, compactB.length) / Math.max(compactA.length, compactB.length) : 0);
-}
-function resolveTipMarket(tip) {
-  const explicit = String(tip.market || "auto").toLowerCase();
-  if (explicit && explicit !== "auto") return { code: explicit };
-  const raw = String(tip.tip || "").toLowerCase().replace(/[–—]/g, "-").trim();
-  const compact = raw.replace(/[\s_-]+/g, "");
-  if (/^(1|home|homewin|1x2\s*1)$/.test(compact)) return { code: "home_win" };
-  if (/^(x|draw|tie|1x2x)$/.test(compact)) return { code: "draw" };
-  if (/^(2|away|awaywin|1x22)$/.test(compact)) return { code: "away_win" };
-  if (/^(1x|hom or draw|homeordraw)$/.test(compact)) return { code: "home_or_draw" };
-  if (/^(x2|draworaway)$/.test(compact)) return { code: "draw_or_away" };
-  if (/^(12|homeoraway)$/.test(compact)) return { code: "home_or_away" };
-  if (/^(gg|bttyes|bothteamstoscoreyes|yesbtts)$/.test(compact) || /both teams to score\s*[:\-]?\s*yes|btts\s*[:\-]?\s*yes/i.test(raw)) return { code: "btts_yes" };
-  if (/^(ng|bttsno|bothteamstoscoreno|nobtts)$/.test(compact) || /both teams to score\s*[:\-]?\s*no|btts\s*[:\-]?\s*no/i.test(raw)) return { code: "btts_no" };
-  const total = raw.match(/\b(over|under)\s*(0\.5|1\.5|2\.5|3\.5|4\.5|5\.5)\b/);
-  if (total) return { code: `${total[1]}_${total[2].replace(".", "_")}` };
-  if (/\b(home|1)\s*(draw no bet|dnb)\b|\bhome dnb\b/i.test(raw)) return { code: "home_dnb" };
-  if (/\b(away|2)\s*(draw no bet|dnb)\b|\baway dnb\b/i.test(raw)) return { code: "away_dnb" };
-  return null;
-}
-function evaluateTipResult(tip, homeGoals, awayGoals) {
-  const market = resolveTipMarket(tip);
-  if (!market) return null;
-  const total = homeGoals + awayGoals;
-  let won;
-  switch (market.code) {
-    case "home_win": won = homeGoals > awayGoals; break;
-    case "draw": won = homeGoals === awayGoals; break;
-    case "away_win": won = awayGoals > homeGoals; break;
-    case "home_or_draw": won = homeGoals >= awayGoals; break;
-    case "draw_or_away": won = awayGoals >= homeGoals; break;
-    case "home_or_away": won = homeGoals !== awayGoals; break;
-    case "btts_yes": won = homeGoals > 0 && awayGoals > 0; break;
-    case "btts_no": won = homeGoals === 0 || awayGoals === 0; break;
-    case "home_dnb": if (homeGoals === awayGoals) return "Void"; won = homeGoals > awayGoals; break;
-    case "away_dnb": if (homeGoals === awayGoals) return "Void"; won = awayGoals > homeGoals; break;
-    default: {
-      const totalMarket = market.code.match(/^(over|under)_(\d)_(\d)$/);
-      if (!totalMarket) return null;
-      const line = Number(`${totalMarket[2]}.${totalMarket[3]}`);
-      won = totalMarket[1] === "over" ? total > line : total < line;
-    }
-  }
-  return won ? "Win" : "Lose";
-}
-async function fetchFootballFixturesForDate(date, forceRefresh = false) {
-  const apiKey = String(process.env.FOOTBALL_API_KEY || "").trim();
-  if (!apiKey) throw new Error("FOOTBALL_API_KEY is not configured.");
-  const now = Date.now();
-  const today = footballDateISO();
-  const ttl = date === today
-    ? Math.max(15 * 1000, Math.min(FOOTBALL_SYNC_INTERVAL_MS - 5000, 55 * 1000))
-    // Yesterday can still contain a match that crossed midnight or was delayed.
-    // Do not retain a pre-final live status for a full day.
-    : (date < today ? 60 * 1000 : 6 * 60 * 60 * 1000);
-  const cached = footballDateCache.get(date);
-  if (!forceRefresh && cached && cached.expiresAt > now) {
-    if (cached.error) throw new Error(cached.error);
-    return cached.fixtures;
-  }
-  const url = `${FOOTBALL_API_BASE}/fixtures?date=${encodeURIComponent(date)}&timezone=${encodeURIComponent(FOOTBALL_TIME_ZONE)}`;
-  try {
-    const response = await fetch(url, {
-      headers: { "x-apisports-key": apiKey, "Accept": "application/json" },
-      signal: AbortSignal.timeout(15000)
-    });
-    let payload;
-    try { payload = await response.json(); } catch { payload = null; }
-    if (!response.ok || !payload || (payload.errors && Object.keys(payload.errors).length)) {
-      const detail = payload?.message || (payload?.errors ? JSON.stringify(payload.errors) : `HTTP ${response.status}`);
-      throw new Error(`API-Football request failed: ${String(detail).slice(0, 240)}`);
-    }
-    const fixtures = Array.isArray(payload.response) ? payload.response : [];
-    fixtures.forEach(fixture => { fixture._bankerFetchedAt = now; });
-    footballDateCache.set(date, { fixtures, fetchedAt: now, expiresAt: now + ttl });
-    return fixtures;
-  } catch (err) {
-    const message = String(err.message || "Football provider request failed.").slice(0, 300);
-    // Back off on provider/auth errors so a bad key cannot burn the free request allowance.
-    footballDateCache.set(date, { error: message, expiresAt: now + 30 * 60 * 1000 });
-    throw err;
-  }
-}
-const footballFixtureIdCache = new Map();
-async function fetchFootballFixtureById(fixtureId, forceRefresh = false) {
-  const id = Number(fixtureId);
-  if (!Number.isSafeInteger(id) || id <= 0) return null;
-  const cached = footballFixtureIdCache.get(id);
-  if (!forceRefresh && cached && cached.expiresAt > Date.now()) return cached.fixture;
-  const apiKey = String(process.env.FOOTBALL_API_KEY || "").trim();
-  if (!apiKey) throw new Error("FOOTBALL_API_KEY is not configured.");
-  const response = await fetch(`${FOOTBALL_API_BASE}/fixtures?id=${encodeURIComponent(id)}&timezone=${encodeURIComponent(FOOTBALL_TIME_ZONE)}`, {
-    headers: { "x-apisports-key": apiKey, "Accept": "application/json" },
-    signal: AbortSignal.timeout(15000)
-  });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok || !payload || (payload.errors && Object.keys(payload.errors).length)) {
-    throw new Error(`API-Football fixture lookup failed (HTTP ${response.status}).`);
-  }
-  const fixture = Array.isArray(payload.response) ? payload.response[0] || null : null;
-  if (fixture) fixture._bankerFetchedAt = Date.now();
-  footballFixtureIdCache.set(id, { fixture, expiresAt: Date.now() + 2 * 60 * 1000 });
-  return fixture;
-}
-
-function findMatchingFixture(tip, fixtures) {
-  const list = Array.isArray(fixtures) ? fixtures : [];
-  if (tip.fixtureId) {
-    const byId = list.find(f => Number(f.fixture?.id) === Number(tip.fixtureId));
-    if (byId && teamNameSimilarity(tip.homeTeam, byId.teams?.home?.name) >= 0.88 &&
-        teamNameSimilarity(tip.awayTeam, byId.teams?.away?.name) >= 0.88) return byId;
-  }
-  const targetHome = normalizeTeamName(tip.homeTeam);
-  const targetAway = normalizeTeamName(tip.awayTeam);
-  if (!targetHome || !targetAway) return null;
-  const candidates = list.map(f => {
-    const home = teamNameSimilarity(tip.homeTeam, f.teams?.home?.name);
-    const away = teamNameSimilarity(tip.awayTeam, f.teams?.away?.name);
-    // Home/away orientation is mandatory; reversed fixtures are never accepted.
-    const orientation = home >= 0.88 && away >= 0.88;
-    const exact = home === 1 && away === 1;
-    const targetTime = tip.time && /^\d{1,2}:\d{2}$/.test(tip.time)
-      ? zonedDateTimeToEpoch(tip.date, tip.time, FOOTBALL_TIME_ZONE) : null;
-    const fixtureTime = Number.isFinite(Number(f.fixture?.timestamp))
-      ? Number(f.fixture.timestamp) * 1000 : new Date(f.fixture?.date || 0).getTime();
-    const timeDistance = targetTime && Number.isFinite(fixtureTime) ? Math.abs(fixtureTime - targetTime) : null;
-    return { fixture: f, home, away, score: (home + away) / 2, orientation, exact, timeDistance };
-  }).filter(x => x.orientation);
-  if (!candidates.length) return null;
-  candidates.sort((a, b) => {
-    if (a.exact !== b.exact) return a.exact ? -1 : 1;
-    if (b.score !== a.score) return b.score - a.score;
-    return (a.timeDistance ?? Infinity) - (b.timeDistance ?? Infinity);
-  });
-  const best = candidates[0], second = candidates[1];
-  if (second && best.score - second.score < 0.035 && best.timeDistance === second.timeDistance) return null;
-  if (best.timeDistance != null && best.timeDistance > 12 * 60 * 60 * 1000) return null;
-  return best.fixture;
-}
-
-function fixtureStatusLabel(short, elapsed) {
-  const code = String(short || "").toUpperCase();
-  const minute = Number.isFinite(Number(elapsed)) ? `${Number(elapsed)}'` : "";
-  if (code === "P") return "PEN";
-  if (code === "1H") return minute ? `${minute} · 1st Half` : "1st Half";
-  if (code === "2H") return minute ? `${minute} · 2nd Half` : "2nd Half";
-  if (["ET", "1ET", "2ET"].includes(code)) return minute ? `${minute} · Extra Time` : "Extra Time";
-  return ({ HT: "HT", FT: "FT", AET: "AET", PEN: "PEN", PST: "PST", CANC: "CANC",
-    SUSP: "Suspended", INT: "Interrupted", ABD: "Abandoned", AWD: "Awarded", WO: "Walkover",
-    TBD: "Time to be determined", NS: "Not started", BT: "Break", LIVE: "Live" })[code] || code || "";
-}
-async function syncTipResultsForDate(date, { forceRefresh = false } = {}) {
-  const fixtures = await fetchFootballFixturesForDate(date, forceRefresh);
-  const tips = await Tip.find({ date, result: "Pending", publicationStatus: { $ne: "draft" } });
-  const summary = { date, checked: 0, linked: 0, settled: 0, needsReview: 0, unmatched: 0 };
-  for (const tip of tips) {
-    summary.checked++;
-    let fixture = findMatchingFixture(tip, fixtures);
-    if (!fixture && !tip.fixtureId) {
-      // Retry adjacent provider-local dates only for unresolved matches (timezone/date-boundary protection).
-      for (const offset of [-1, 1]) {
-        if (fixture) break;
-        try {
-          const adjacent = await fetchFootballFixturesForDate(shiftISODate(date, offset), forceRefresh);
-          fixture = findMatchingFixture(tip, adjacent);
-        } catch (adjacentError) {
-          console.warn(`Adjacent fixture lookup failed for ${tip.match} (${offset} day):`, adjacentError.message);
-        }
-      }
-    }
-    if (!fixture && tip.fixtureId) {
-      try {
-        const byId = await fetchFootballFixtureById(tip.fixtureId, forceRefresh);
-        if (byId && teamNameSimilarity(tip.homeTeam, byId.teams?.home?.name) >= 0.88 &&
-            teamNameSimilarity(tip.awayTeam, byId.teams?.away?.name) >= 0.88) fixture = byId;
-        else if (byId) tip.settlementNote = "Supplied fixture ID does not match the saved home/away teams; no settlement performed.";
-      } catch (lookupError) { tip.settlementNote = `Fixture ID lookup failed: ${lookupError.message}`; }
-    }
-    if (!fixture) {
-      tip.lastSyncAttemptAt = new Date();
-      if (!tip.settlementNote) tip.settlementNote = "Fixture not matched. Check team names, date or API fixture ID.";
-      await tip.save();
-      summary.unmatched++;
-      continue;
-    }
-    const fixtureStatus = String(fixture.fixture?.status?.long || "").slice(0, 40);
-    const fixtureStatusShort = String(fixture.fixture?.status?.short || "").slice(0, 12).toUpperCase();
-    const isFinished = ["FT", "AET", "PEN"].includes(fixtureStatusShort);
-    // For standard football markets, use the 90-minute full-time score even if extra time/penalties were played.
-    const scoreHome = isFinished
-      ? (fixture.score?.fulltime?.home != null ? fixture.score.fulltime.home : (fixtureStatusShort === "FT" ? fixture.goals?.home : null))
-      : fixture.goals?.home;
-    const scoreAway = isFinished
-      ? (fixture.score?.fulltime?.away != null ? fixture.score.fulltime.away : (fixtureStatusShort === "FT" ? fixture.goals?.away : null))
-      : fixture.goals?.away;
-    const homeScore = scoreHome == null ? null : Number(scoreHome);
-    const awayScore = scoreAway == null ? null : Number(scoreAway);
-    tip.fixtureId = Number(fixture.fixture?.id) || tip.fixtureId || null;
-    tip.homeScore = Number.isFinite(homeScore) ? homeScore : null;
-    tip.awayScore = Number.isFinite(awayScore) ? awayScore : null;
-    tip.fixtureStatus = fixtureStatus;
-    tip.fixtureStatusShort = fixtureStatusShort;
-    const elapsed = fixture.fixture?.status?.elapsed;
-    tip.elapsedMinute = elapsed == null || !Number.isFinite(Number(elapsed)) ? null : Number(elapsed);
-    tip.lastSyncedAt = new Date(Number(fixture._bankerFetchedAt) || Date.now());
-    tip.lastSyncAttemptAt = new Date();
-    tip.settlementNote = "";
-    summary.linked++;
-
-    if (fixtureStatusShort === "CANC") {
-      tip.result = "Void";
-      tip.settlementSource = "automatic";
-      tip.settlementNote = "Automatically voided: fixture cancelled by the provider.";
-      summary.settled++;
-    } else if (fixtureStatusShort === "ABD") {
-      tip.settlementNote = "Match abandoned. Administrator review is required before settlement.";
-      summary.needsReview++;
-    } else if (["FT", "AET", "PEN"].includes(fixtureStatusShort)) {
-      if (tip.homeScore == null || tip.awayScore == null) {
-        tip.settlementNote = "Fixture is marked finished but the final score is unavailable; manual review required.";
-        summary.needsReview++;
-      } else {
-        const outcome = evaluateTipResult(tip, tip.homeScore, tip.awayScore);
-        if (!outcome) {
-          tip.settlementNote = "Match finished; prediction market could not be identified safely. Settle this tip manually.";
-          summary.needsReview++;
-        } else {
-          tip.result = outcome;
-          tip.settlementSource = "automatic";
-          tip.settlementNote = `Automatically settled from full-time score ${tip.homeScore}-${tip.awayScore}.`;
-          summary.settled++;
-          await AuditLog.create({
-            actor: null, actorEmail: "system", action: "tip.auto_settled", entityType: "tip",
-            entityId: String(tip._id), summary: `${tip.type} tip ${tip.match} automatically settled as ${outcome} (${tip.homeScore}-${tip.awayScore}).`
-          }).catch(err => console.error("Automatic settlement audit failed:", err.message));
-        }
-      }
-    } else if (fixtureStatusShort === "PST") {
-      tip.settlementNote = "Match postponed; result remains pending.";
-    } else if (fixtureStatusShort === "SUSP" || fixtureStatusShort === "INT") {
-      tip.settlementNote = "Match interrupted or suspended; result remains pending.";
-    }
-    await tip.save();
-  }
-  return summary;
-}
-let footballSyncInProgress = false;
-async function syncPendingTipResults({ forceRefresh = false } = {}) {
-  if (footballSyncInProgress) return { configured: true, skipped: true, message: "A synchronization is already running." };
-  footballSyncInProgress = true;
-  try {
-  if (!String(process.env.FOOTBALL_API_KEY || "").trim()) {
-    return { configured: false, message: "Add FOOTBALL_API_KEY to the server .env file to enable automatic settlement." };
-  }
-  const today = footballDateISO();
-  const dates = [shiftISODate(today, -1), today, shiftISODate(today, 1)];
-  const pendingDates = await Tip.distinct("date", { result: "Pending", publicationStatus: { $ne: "draft" }, date: { $in: dates } });
-  const summaries = [];
-  for (const date of dates.filter(d => pendingDates.includes(d))) {
-    try { summaries.push(await syncTipResultsForDate(date, { forceRefresh })); }
-    catch (err) { console.error(`Automatic tip-result sync failed for ${date}:`, err.message); summaries.push({ date, error: err.message }); }
-  }
-  return {
-    configured: true, datesChecked: summaries.length,
-    checked: summaries.reduce((n, x) => n + (x.checked || 0), 0),
-    linked: summaries.reduce((n, x) => n + (x.linked || 0), 0),
-    settled: summaries.reduce((n, x) => n + (x.settled || 0), 0),
-    needsReview: summaries.reduce((n, x) => n + (x.needsReview || 0), 0),
-    unmatched: summaries.reduce((n, x) => n + (x.unmatched || 0), 0), summaries
-  };
-  } finally { footballSyncInProgress = false; }
-}
 
 app.use("/api", apiLimiter);
 
@@ -1258,18 +904,6 @@ app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   res.json({ success: true, tips: tips.map(publicTip) });
 });
 
-app.post("/api/admin/tips/sync-results", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
-  try {
-    const summary = await syncPendingTipResults({ forceRefresh: true });
-    if (!summary.configured) return res.status(503).json({ success: false, message: summary.message, summary });
-    await recordAudit(req, "tips.results_sync", "tip", "", `Manual result sync: ${summary.settled} settled, ${summary.needsReview} need review, ${summary.unmatched} unmatched.`);
-    res.json({ success: true, message: `Checked ${summary.checked} pending tip(s): ${summary.settled} settled, ${summary.needsReview} need review, ${summary.unmatched} unmatched.`, summary });
-  } catch (err) {
-    console.error("Manual tip-result sync error:", err.message);
-    res.status(502).json({ success: false, message: "Could not synchronize tip results. Check the API key and server logs." });
-  }
-});
-
 app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
     const data = cleanTipInput(req.body);
@@ -1371,17 +1005,6 @@ mongoose.connect(process.env.MONGODB_URI)
     }
     await expireMemberships().catch(err => console.error("Initial membership expiry sweep failed:", err.message));
     await publishScheduledTips().catch(err => console.error("Initial scheduled-tip publication sweep failed:", err.message));
-    if (String(process.env.FOOTBALL_API_KEY || "").trim()) {
-      syncPendingTipResults().then(result => console.log("Initial automatic tip-result sync:", result)).catch(err => console.error("Initial automatic tip-result sync failed:", err.message));
-      const footballSyncTimer = setInterval(() => {
-        syncPendingTipResults().then(result => {
-          if (result.settled || result.needsReview || result.unmatched) console.log("Automatic tip-result sync:", result);
-        }).catch(err => console.error("Automatic tip-result sync failed:", err.message));
-      }, FOOTBALL_SYNC_INTERVAL_MS);
-      if (typeof footballSyncTimer.unref === "function") footballSyncTimer.unref();
-    } else {
-      console.warn("FOOTBALL_API_KEY not set; automatic tip-result settlement is disabled.");
-    }
     const expirySweep = setInterval(() => {
       expireMemberships().catch(err => console.error("Membership expiry sweep failed:", err.message));
     }, MEMBERSHIP_SWEEP_INTERVAL_MS);
