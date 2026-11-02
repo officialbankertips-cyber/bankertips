@@ -102,7 +102,7 @@ const tipSchema = new mongoose.Schema({
   tip: { type: String, required: true, trim: true, maxlength: 120 },
   odds: { type: Number, required: true, min: 1, max: 1000 },
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
-  fixtureId: { type: Number, default: null, index: true },
+  fixtureId: { type: String, default: null, index: true },
   liveStatus: { type: String, default: "" },
   liveScore: { type: String, default: "" },
   settlementNote: { type: String, default: "" },
@@ -333,9 +333,10 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
+  // GOAL API fixture IDs can be alphanumeric strings, not only numbers.
   const fixtureId = body.fixtureId === undefined || body.fixtureId === null || String(body.fixtureId).trim() === ""
-    ? null : Number(body.fixtureId);
-  if (fixtureId !== null && (!Number.isInteger(fixtureId) || fixtureId <= 0)) throw new Error("Fixture ID must be a positive whole number.");
+    ? null : String(body.fixtureId).trim();
+  if (fixtureId !== null && fixtureId.length > 120) throw new Error("Fixture ID is too long.");
   const publicationStatus = String(body.publicationStatus || (date > footballDateISO() ? "scheduled" : "published")).toLowerCase();
   if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Invalid publication status.");
   const publishAt = publicationStatus === "scheduled"
