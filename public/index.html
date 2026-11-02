@@ -1,8 +1,3 @@
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1072,7 +1067,7 @@ img{max-width:100%}
      <div class="field"><label for="tipDate">Match date / publication day</label><input type="date" id="tipDate" required><small class="subtext scheduled-hint">Choose a future date to schedule this tip. </small></div>
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
-     <div class="field full"><label for="tipFixtureId">API-Football fixture ID (optional)</label><input id="tipFixtureId" type="number" min="1" step="1" placeholder="Leave blank to match by team names and date"><small class="subtext">Use this if the provider lists a different spelling or the match cannot be matched automatically.</small></div>
+     <div class="field full"><label for="tipFixtureId">GOAL API fixture ID (optional)</label><input id="tipFixtureId" type="number" min="1" step="1" placeholder="Leave blank to match by team names and date"><small class="subtext">Use this if the provider lists a different spelling or the match cannot be matched automatically.</small></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
      <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
@@ -1083,8 +1078,8 @@ img{max-width:100%}
    <div class="card"><div class="pad"><div class="field"><label for="adminTipSearch">Search tips</label><input id="adminTipSearch" type="search" placeholder="Search by match, category or date"></div></div><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Changes are available to authorized administrators only.</div></div>
   </div>
   <section class="section card pad" id="footballSyncSection">
-   <div class="section-head"><div><h2><i class="fa-solid fa-futbol"></i> Automatic football results</h2><p>API-Sports live scores and automatic settlement for Free and Premium tips.</p></div><button class="btn secondary small" type="button" id="footballSyncNow"><i class="fa-solid fa-rotate"></i> Sync now</button></div>
-   <div class="notice" id="footballSyncNotice">Checking API-Football connection…</div>
+   <div class="section-head"><div><h2><i class="fa-solid fa-futbol"></i> Automatic football results</h2><p>GOAL API live scores and automatic settlement for Free and Premium tips.</p></div><button class="btn secondary small" type="button" id="footballSyncNow"><i class="fa-solid fa-rotate"></i> Sync now</button></div>
+   <div class="notice" id="footballSyncNotice">Checking GOAL API connection…</div>
    <small class="subtext">Supported automatic markets: Home Win, Draw, Away Win, 1X, X2, 12, Over/Under goals and BTTS Yes/No. Other tip formats remain Pending for manual settlement.</small>
   </section>
   <section class="section" id="adminAdvertisementsSection">
@@ -1756,8 +1751,8 @@ async function loadFootballSyncStatus() {
   try {
     const data=await api('/api/admin/football/status');
     notice.textContent=data.configured
-      ? `API-Football connected · automatic checks every ${data.intervalMinutes} minutes · last sync: ${data.lastSync?new Date(data.lastSync).toLocaleString('en-KE',{timeZone:'Africa/Nairobi'}):'not yet'} · requests remaining today: ${data.quotaRemaining??'not reported'}${data.lastError?` · Last error: ${data.lastError}`:''}`
-      : 'API key not configured. Add API_FOOTBALL_KEY to your backend environment to enable synchronization.';
+      ? `GOAL API connected · automatic checks every ${data.intervalMinutes} minutes · last sync: ${data.lastSync?new Date(data.lastSync).toLocaleString('en-KE',{timeZone:'Africa/Nairobi'}):'not yet'} · requests remaining today: ${data.quotaRemaining??'not reported'}${data.lastError?` · Last error: ${data.lastError}`:''}`
+      : 'GOAL API key not configured. Add GOAL_API_KEY to your backend environment to enable synchronization.';
   } catch(e) { notice.textContent=`Football sync status unavailable: ${e.message}`; }
 }
 async function syncFootballNow() {
