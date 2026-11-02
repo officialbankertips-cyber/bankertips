@@ -1,3 +1,8 @@
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1067,6 +1072,7 @@ img{max-width:100%}
      <div class="field"><label for="tipDate">Match date / publication day</label><input type="date" id="tipDate" required><small class="subtext scheduled-hint">Choose a future date to schedule this tip. </small></div>
      <div class="field"><label for="tipTime">Kick-off</label><input type="time" id="tipTime" required></div>
      <div class="field full"><label for="tipMatch">Match</label><input id="tipMatch" maxlength="120" placeholder="Home team - Away team" required></div>
+     <div class="field full"><label for="tipFixtureId">API-Football fixture ID (optional)</label><input id="tipFixtureId" type="number" min="1" step="1" placeholder="Leave blank to match by team names and date"><small class="subtext">Use this if the provider lists a different spelling or the match cannot be matched automatically.</small></div>
      <div class="field"><label for="tipPick">Tip</label><input id="tipPick" maxlength="60" placeholder="e.g. Over 2.5" required></div>
      <div class="field"><label for="tipOdds">Odds</label><input id="tipOdds" type="number" min="1" max="1000" step=".01" required></div>
      <div class="field"><label for="tipType">Category</label><select id="tipType"><option value="free">Free</option><option value="premium">Premium</option></select></div>
@@ -1076,6 +1082,11 @@ img{max-width:100%}
    </form></div>
    <div class="card"><div class="pad"><div class="field"><label for="adminTipSearch">Search tips</label><input id="adminTipSearch" type="search" placeholder="Search by match, category or date"></div></div><div class="table-scroll"><table><thead><tr><th>Date / Match</th><th>Category</th><th>Result</th><th>Action</th></tr></thead><tbody id="adminRows"><tr><td colspan="4">Load tips after admin authentication.</td></tr></tbody></table></div><div class="notice" id="adminNotice">Changes are available to authorized administrators only.</div></div>
   </div>
+  <section class="section card pad" id="footballSyncSection">
+   <div class="section-head"><div><h2><i class="fa-solid fa-futbol"></i> Automatic football results</h2><p>API-Sports live scores and automatic settlement for Free and Premium tips.</p></div><button class="btn secondary small" type="button" id="footballSyncNow"><i class="fa-solid fa-rotate"></i> Sync now</button></div>
+   <div class="notice" id="footballSyncNotice">Checking API-Football connection…</div>
+   <small class="subtext">Supported automatic markets: Home Win, Draw, Away Win, 1X, X2, 12, Over/Under goals and BTTS Yes/No. Other tip formats remain Pending for manual settlement.</small>
+  </section>
   <section class="section" id="adminAdvertisementsSection">
    <div class="section-head"><div><h2><i class="fa-solid fa-rectangle-ad"></i> Advertisement management</h2><p>Create, publish, pause and remove the advertisement shown on the homepage above Join VIP Premium.</p></div><button class="btn secondary small" type="button" id="adminAdsReload"><i class="fa-solid fa-rotate"></i> Refresh ads</button></div>
    <div class="admin-layout">
@@ -1231,7 +1242,7 @@ function setPanel(panelId) {
   if(panelId==='subscriptionPanel') window.scrollTo({top:0,behavior:'smooth'});
   if(panelId==='paymentPanel' && typeof loadCustomerPayments==='function') loadCustomerPayments();
   if(panelId==='premiumPanel') loadPremium();
-  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); loadAdminAdvertisements(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
+  if(panelId==='adminPanel') { loadAdminTips(); loadAdminUsers(); loadAdminAudit(); loadAdminAdvertisements(); loadFootballSyncStatus(); if(typeof loadAdminOverview==='function'){loadAdminOverview();loadAdminPayments();} }
 }
 function showEmpty(tbodyId, columns, message) {
   $(tbodyId).innerHTML = `<tr><td colspan="${columns}">${escapeHTML(message)}</td></tr>`;
@@ -1268,7 +1279,7 @@ function renderTipRows(tips, target, withDate=false) {
     return;
   }
   const rows=tips.map(t => {
-    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
+    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}${t.liveScore?`<span class="subtext">Live score: ${escapeHTML(t.liveScore)} · ${escapeHTML(t.liveStatus||'')}</span>`:''}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
   }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
@@ -1622,7 +1633,7 @@ async function handleLogin(event) {
     }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
-function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; }
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipFixtureId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; }
 function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
@@ -1739,11 +1750,33 @@ async function handleMembershipAction(event) {
   } catch(e) { $('membersNotice').textContent=e.message; button.disabled=false; }
 }
 
+async function loadFootballSyncStatus() {
+  const notice=$('footballSyncNotice');
+  if(!notice) return;
+  try {
+    const data=await api('/api/admin/football/status');
+    notice.textContent=data.configured
+      ? `API-Football connected · automatic checks every ${data.intervalMinutes} minutes · last sync: ${data.lastSync?new Date(data.lastSync).toLocaleString('en-KE',{timeZone:'Africa/Nairobi'}):'not yet'} · requests remaining today: ${data.quotaRemaining??'not reported'}${data.lastError?` · Last error: ${data.lastError}`:''}`
+      : 'API key not configured. Add API_FOOTBALL_KEY to your backend environment to enable synchronization.';
+  } catch(e) { notice.textContent=`Football sync status unavailable: ${e.message}`; }
+}
+async function syncFootballNow() {
+  const button=$('footballSyncNow'), notice=$('footballSyncNotice');
+  if(button) button.disabled=true;
+  if(notice) notice.textContent='Fetching fixtures and checking pending Free and Premium tips…';
+  try {
+    const data=await api('/api/admin/football/sync',{method:'POST',body:JSON.stringify({date:todayISO()})});
+    if(notice) notice.textContent=`Sync complete for ${data.date}: checked ${data.checked||0} pending tips, settled ${data.updated||0}, fixtures returned ${data.fixtures||0}. Requests remaining today: ${data.quotaRemaining??'not reported'}.`;
+    await loadAdminTips(); await loadFreeTips(); if(currentUser) await loadPremium({silent:true});
+  } catch(e) { if(notice) notice.textContent=`Sync failed: ${e.message}`; }
+  finally { if(button) button.disabled=false; }
+}
+
 async function saveTip(event) {
   event.preventDefault(); hideMessage('adminMessage');
   const id=$('tipId').value;
   const tipDate=$('tipDate').value;
-  const payload={date:tipDate,publicationStatus:tipDate>todayISO()?'scheduled':'published',time:$('tipTime').value,match:$('tipMatch').value.trim(),tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
+  const payload={date:tipDate,publicationStatus:tipDate>todayISO()?'scheduled':'published',time:$('tipTime').value,match:$('tipMatch').value.trim(),fixtureId:$('tipFixtureId').value.trim()||null,tip:$('tipPick').value.trim(),odds:Number($('tipOdds').value),type:$('tipType').value,status:$('tipStatus').value};
   if(!payload.date||!payload.time||!payload.match||!payload.tip||!Number.isFinite(payload.odds)||payload.odds<1) return showAdminMessage('Please complete all fields with valid odds.','error');
   try {
     const user=await checkSession();
@@ -1768,7 +1801,7 @@ async function adminRowAction(event) {
     const data=await api('/api/admin/tips');
     const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
     if(!tip) throw new Error('Tip not found. Reload the list and try again.');
-    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipFixtureId').value=tip.fixtureId||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
     $('tipMatch').focus();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
@@ -1842,6 +1875,7 @@ $('backToday').addEventListener('click',()=>setPanel('freePanel'));
 $('registerForm').addEventListener('submit',handleRegister);
 $('loginForm').addEventListener('submit',handleLogin);
 $('tipForm').addEventListener('submit',saveTip);
+$('footballSyncNow')?.addEventListener('click',syncFootballNow);
 $('adminTipSearch')?.addEventListener('input',renderAdminTipRows);
 $('copyVipTicket')?.addEventListener('click',copyVipTicket);
 
