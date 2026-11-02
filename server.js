@@ -468,8 +468,8 @@ async function activatePaidMembership(payment, providerStatus) {
   return true;
 }
 
-// API-Sports / API-Football integration. The key is server-side only.
-const API_FOOTBALL_BASE_URL = "https://v3.football.api-sports.io";
+// GOAL API football integration. The API key is server-side only.
+const GOAL_API_BASE_URL = "https://api.goal-api.com/v1";
 const requestedFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 30 * 60 * 1000);
 const FOOTBALL_SYNC_INTERVAL_MS = Number.isFinite(requestedFootballInterval) && requestedFootballInterval >= 5 * 60 * 1000 ? requestedFootballInterval : 30 * 60 * 1000;
 let footballSyncInProgress = false;
@@ -519,21 +519,70 @@ function evaluateTipSelection(tipText, homeGoals, awayGoals) {
   return { result: won ? "Win" : "Lose", note: description };
 }
 
+function goalTeamName(value) {
+  if (value && typeof value === "object") {
+    return value.name || value.teamName || value.title || value.shortName || "";
+  }
+  return value || "";
+}
+
+function normalizeGoalFixture(item) {
+  const fixture = item?.fixture || item?.match || item || {};
+  const homeTeam = goalTeamName(
+    item?.homeTeam ?? item?.home_team ?? item?.teams?.home ?? item?.match_hometeam_name ?? fixture?.homeTeam
+  );
+  const awayTeam = goalTeamName(
+    item?.awayTeam ?? item?.away_team ?? item?.teams?.away ?? item?.match_awayteam_name ?? fixture?.awayTeam
+  );
+  const homeRaw = item?.homeScore ?? item?.home_score ?? item?.match_hometeam_score
+    ?? item?.score?.home ?? item?.scores?.home ?? item?.goals?.home ?? item?.match_hometeam_score;
+  const awayRaw = item?.awayScore ?? item?.away_score ?? item?.match_awayteam_score
+    ?? item?.score?.away ?? item?.scores?.away ?? item?.goals?.away ?? item?.match_awayteam_score;
+  const statusValue = item?.matchPeriod ?? item?.status?.period ?? item?.status?.short
+    ?? item?.status ?? item?.match_status ?? item?.matchStatus ?? "";
+  const status = typeof statusValue === "object"
+    ? (statusValue.period || statusValue.short || statusValue.name || statusValue.long || "")
+    : statusValue;
+  const id = item?.id ?? item?.match_id ?? item?.fixtureId ?? fixture?.id ?? null;
+  const homeScoreValid = homeRaw !== null && homeRaw !== undefined && Number.isFinite(Number(homeRaw));
+  const awayScoreValid = awayRaw !== null && awayRaw !== undefined && Number.isFinite(Number(awayRaw));
+  return {
+    id,
+    homeTeam: String(homeTeam || ""),
+    awayTeam: String(awayTeam || ""),
+    homeGoals: homeScoreValid ? Number(homeRaw) : null,
+    awayGoals: awayScoreValid ? Number(awayRaw) : null,
+    status: String(status || "").trim().toUpperCase(),
+    rawStatus: String(status || item?.match_status || "").slice(0, 80)
+  };
+}
+
 async function fetchFootballFixtures(date) {
-  const apiKey = String(process.env.API_FOOTBALL_KEY || "").trim();
-  if (!apiKey) throw new Error("API_FOOTBALL_KEY is not configured. Add your API-Sports key to the server environment.");
-  const url = new URL(`${API_FOOTBALL_BASE_URL}/fixtures`);
-  url.searchParams.set("date", date);
-  url.searchParams.set("timezone", APP_TIME_ZONE);
+  const apiKey = String(process.env.GOAL_API_KEY || "").trim();
+  if (!apiKey) throw new Error("GOAL_API_KEY is not configured. Add your GOAL API key to the server environment.");
+  const url = `${GOAL_API_BASE_URL}/fixtures/date/${encodeURIComponent(date)}`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
-    const response = await fetch(url, { method: "GET", headers: { "x-apisports-key": apiKey }, signal: controller.signal });
-    footballQuotaRemaining = response.headers.get("x-ratelimit-requests-remaining") || footballQuotaRemaining;
-    if (!response.ok) throw new Error(`API-Football returned HTTP ${response.status}.`);
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+      signal: controller.signal
+    });
+    footballQuotaRemaining = response.headers.get("x-ratelimit-remaining") || footballQuotaRemaining;
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(`GOAL API returned HTTP ${response.status}${detail ? `: ${detail.slice(0, 250)}` : ""}.`);
+    }
     const payload = await response.json();
-    if (payload.errors && Object.keys(payload.errors).length) throw new Error(`API-Football: ${JSON.stringify(payload.errors).slice(0, 300)}`);
-    return Array.isArray(payload.response) ? payload.response : [];
+    if (payload?.success === false) throw new Error(`GOAL API: ${JSON.stringify(payload.error || payload.message || payload).slice(0, 300)}`);
+    const data = payload?.data;
+    const rows = Array.isArray(data) ? data
+      : Array.isArray(data?.fixtures) ? data.fixtures
+      : Array.isArray(data?.matches) ? data.matches
+      : Array.isArray(payload?.fixtures) ? payload.fixtures
+      : [];
+    return rows.map(normalizeGoalFixture);
   } finally { clearTimeout(timeout); }
 }
 
@@ -555,27 +604,23 @@ async function syncFootballTips(date = footballDateISO()) {
       const homeKey = normalizeTeamName(tip.homeTeam);
       const awayKey = normalizeTeamName(tip.awayTeam);
       const fixture = fixtures.find(item => {
-        if (tip.fixtureId && Number(item.fixture?.id) === Number(tip.fixtureId)) return true;
-        return normalizeTeamName(item.teams?.home?.name) === homeKey && normalizeTeamName(item.teams?.away?.name) === awayKey;
+        if (tip.fixtureId && String(item.id) === String(tip.fixtureId)) return true;
+        return item.homeTeam && item.awayTeam
+          && normalizeTeamName(item.homeTeam) === homeKey
+          && normalizeTeamName(item.awayTeam) === awayKey;
       });
       if (!fixture) continue;
-      const fixtureId = Number(fixture.fixture?.id) || null;
-      const statusShort = String(fixture.fixture?.status?.short || "");
-      const rawHomeGoals = fixture.goals?.home;
-      const rawAwayGoals = fixture.goals?.away;
-      const scoreAvailable = rawHomeGoals !== null && rawHomeGoals !== undefined
-        && rawAwayGoals !== null && rawAwayGoals !== undefined
-        && Number.isFinite(Number(rawHomeGoals)) && Number.isFinite(Number(rawAwayGoals));
-      const homeGoals = scoreAvailable ? Number(rawHomeGoals) : null;
-      const awayGoals = scoreAvailable ? Number(rawAwayGoals) : null;
-      tip.fixtureId = fixtureId;
-      tip.liveStatus = String(fixture.fixture?.status?.long || statusShort || "").slice(0, 80);
-      tip.liveScore = scoreAvailable ? `${homeGoals}-${awayGoals}` : "";
+      tip.fixtureId = fixture.id === null ? tip.fixtureId : fixture.id;
+      tip.liveStatus = fixture.rawStatus || fixture.status || "Status unavailable";
+      const scoreAvailable = fixture.homeGoals !== null && fixture.awayGoals !== null;
+      tip.liveScore = scoreAvailable ? `${fixture.homeGoals}-${fixture.awayGoals}` : "";
       tip.lastSyncedAt = new Date();
-      const finished = ["FT", "AET", "PEN"].includes(statusShort);
-      const voided = ["CANC", "ABD", "AWD", "WO"].includes(statusShort);
+
+      // Only settle a result when GOAL API explicitly reports a finished match.
+      // Do not infer completion from a legacy live flag or a populated score.
+      const finished = ["FINISHED", "FT", "AET", "PEN", "FULL_TIME", "FULL TIME"].includes(fixture.status);
       if (finished && scoreAvailable) {
-        const settlement = evaluateTipSelection(tip.tip, homeGoals, awayGoals);
+        const settlement = evaluateTipSelection(tip.tip, fixture.homeGoals, fixture.awayGoals);
         if (settlement.result) {
           tip.result = settlement.result;
           tip.settlementNote = settlement.note;
@@ -584,11 +629,6 @@ async function syncFootballTips(date = footballDateISO()) {
         } else {
           tip.settlementNote = settlement.note;
         }
-      } else if (voided) {
-        tip.result = "Void";
-        tip.settlementNote = `Fixture status: ${statusShort}`;
-        tip.completedAt = new Date();
-        updated++;
       }
       await tip.save();
     }
@@ -1040,7 +1080,7 @@ app.get("/api/admin/audit-logs", requireAuth, requireAdmin, async (req, res) => 
 });
 
 app.get("/api/admin/football/status", requireAuth, requireAdmin, async (req, res) => {
-  res.json({ success: true, configured: Boolean(String(process.env.API_FOOTBALL_KEY || "").trim()),
+  res.json({ success: true, configured: Boolean(String(process.env.GOAL_API_KEY || "").trim()),
     lastSync: footballLastSync, lastError: footballLastError, quotaRemaining: footballQuotaRemaining,
     intervalMinutes: Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000) });
 });
@@ -1173,15 +1213,15 @@ mongoose.connect(process.env.MONGODB_URI)
       publishScheduledTips().catch(err => console.error("Scheduled-tip publication sweep failed:", err.message));
     }, 30 * 1000);
     if (typeof scheduledTipSweep.unref === "function") scheduledTipSweep.unref();
-    if (String(process.env.API_FOOTBALL_KEY || "").trim()) {
+    if (String(process.env.GOAL_API_KEY || "").trim()) {
       await syncFootballTips().catch(err => console.error("Initial football sync failed:", err.message));
       const footballSweep = setInterval(() => {
         syncFootballTips().catch(err => console.error("Automatic football sync failed:", err.message));
       }, FOOTBALL_SYNC_INTERVAL_MS);
       if (typeof footballSweep.unref === "function") footballSweep.unref();
-      console.log(`API-Football sync enabled every ${Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000)} minute(s).`);
+      console.log(`GOAL API sync enabled every ${Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000)} minute(s).`);
     } else {
-      console.log("API-Football sync disabled: set API_FOOTBALL_KEY to enable live tracking and automatic settlement.");
+      console.log("GOAL API sync disabled: set GOAL_API_KEY to enable football result synchronization and automatic settlement.");
     }
     app.listen(PORT, () => console.log(`Banker Tips server listening on port ${PORT}`));
   })
