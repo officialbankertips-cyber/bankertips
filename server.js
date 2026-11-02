@@ -102,6 +102,11 @@ const tipSchema = new mongoose.Schema({
   tip: { type: String, required: true, trim: true, maxlength: 120 },
   odds: { type: Number, required: true, min: 1, max: 1000 },
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
+  fixtureId: { type: Number, default: null, index: true },
+  liveStatus: { type: String, default: "" },
+  liveScore: { type: String, default: "" },
+  settlementNote: { type: String, default: "" },
+  lastSyncedAt: { type: Date, default: null },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -328,12 +333,15 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
+  const fixtureId = body.fixtureId === undefined || body.fixtureId === null || String(body.fixtureId).trim() === ""
+    ? null : Number(body.fixtureId);
+  if (fixtureId !== null && (!Number.isInteger(fixtureId) || fixtureId <= 0)) throw new Error("Fixture ID must be a positive whole number.");
   const publicationStatus = String(body.publicationStatus || (date > footballDateISO() ? "scheduled" : "published")).toLowerCase();
   if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Invalid publication status.");
   const publishAt = publicationStatus === "scheduled"
     ? new Date(zonedDateTimeToEpoch(date, "00:00", APP_TIME_ZONE)) : null;
   return {
-    type, date, publicationStatus, publishAt, homeTeam, awayTeam, match, time, tip, odds, result,
+    type, date, publicationStatus, publishAt, homeTeam, awayTeam, match, time, tip, odds, result, fixtureId,
     league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
   };
 }
@@ -458,6 +466,138 @@ async function activatePaidMembership(payment, providerStatus) {
     await payment.save();
   }
   return true;
+}
+
+// API-Sports / API-Football integration. The key is server-side only.
+const API_FOOTBALL_BASE_URL = "https://v3.football.api-sports.io";
+const requestedFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 30 * 60 * 1000);
+const FOOTBALL_SYNC_INTERVAL_MS = Number.isFinite(requestedFootballInterval) && requestedFootballInterval >= 5 * 60 * 1000 ? requestedFootballInterval : 30 * 60 * 1000;
+let footballSyncInProgress = false;
+let footballLastSync = null;
+let footballLastError = "";
+let footballQuotaRemaining = null;
+
+function normalizeTeamName(value) {
+  return String(value || "").toLowerCase()
+    .replace(/\b(fc|cf|afc|sc|ac|club|football|soccer)\b/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function evaluateTipSelection(tipText, homeGoals, awayGoals) {
+  const pick = String(tipText || "").trim().toLowerCase()
+    .replace(/[–—]/g, "-").replace(/\s+/g, " ");
+  const total = homeGoals + awayGoals;
+  let won;
+  let description;
+  let match = pick.match(/^(over|under)\s+(\d+(?:\.\d+)?)\s*(?:goals?)?$/i);
+  if (match) {
+    const line = Number(match[2]);
+    if (Number.isInteger(line) && total === line) {
+      return { result: "Void", note: `Push at ${total} goals (${match[1]} ${line})` };
+    }
+    won = match[1].toLowerCase() === "over" ? total > line : total < line;
+    description = `${total} total goals (${match[1]} ${line})`;
+  } else if (/^(1|home win|home)$/i.test(pick)) {
+    won = homeGoals > awayGoals; description = `Home ${homeGoals}-${awayGoals} Away`;
+  } else if (/^(2|away win|away)$/i.test(pick)) {
+    won = awayGoals > homeGoals; description = `Home ${homeGoals}-${awayGoals} Away`;
+  } else if (/^(x|draw)$/i.test(pick)) {
+    won = homeGoals === awayGoals; description = `Home ${homeGoals}-${awayGoals} Away`;
+  } else if (/^(1x|home or draw|double chance 1x)$/i.test(pick)) {
+    won = homeGoals >= awayGoals; description = `1X · ${homeGoals}-${awayGoals}`;
+  } else if (/^(x2|draw or away|double chance x2)$/i.test(pick)) {
+    won = awayGoals >= homeGoals; description = `X2 · ${homeGoals}-${awayGoals}`;
+  } else if (/^(12|home or away|no draw)$/i.test(pick)) {
+    won = homeGoals !== awayGoals; description = `12 · ${homeGoals}-${awayGoals}`;
+  } else if (/^(btts|both teams to score|gg)\s*(yes|no)?$/i.test(pick) || /^both teams to score (yes|no)$/i.test(pick)) {
+    const yes = homeGoals > 0 && awayGoals > 0;
+    const asksYes = !/\bno\b/i.test(pick);
+    won = asksYes ? yes : !yes; description = `BTTS ${yes ? "Yes" : "No"} · ${homeGoals}-${awayGoals}`;
+  } else {
+    return { result: null, note: "Unsupported tip market. Supported: Home Win, Draw, Away Win, 1X, X2, 12, Over/Under X.5, BTTS Yes/No." };
+  }
+  return { result: won ? "Win" : "Lose", note: description };
+}
+
+async function fetchFootballFixtures(date) {
+  const apiKey = String(process.env.API_FOOTBALL_KEY || "").trim();
+  if (!apiKey) throw new Error("API_FOOTBALL_KEY is not configured. Add your API-Sports key to the server environment.");
+  const url = new URL(`${API_FOOTBALL_BASE_URL}/fixtures`);
+  url.searchParams.set("date", date);
+  url.searchParams.set("timezone", APP_TIME_ZONE);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { method: "GET", headers: { "x-apisports-key": apiKey }, signal: controller.signal });
+    footballQuotaRemaining = response.headers.get("x-ratelimit-requests-remaining") || footballQuotaRemaining;
+    if (!response.ok) throw new Error(`API-Football returned HTTP ${response.status}.`);
+    const payload = await response.json();
+    if (payload.errors && Object.keys(payload.errors).length) throw new Error(`API-Football: ${JSON.stringify(payload.errors).slice(0, 300)}`);
+    return Array.isArray(payload.response) ? payload.response : [];
+  } finally { clearTimeout(timeout); }
+}
+
+async function syncFootballTips(date = footballDateISO()) {
+  if (footballSyncInProgress) return { skipped: true, reason: "A sync is already running." };
+  footballSyncInProgress = true;
+  try {
+    const pendingTips = await Tip.find({ date, result: "Pending", $or: [
+      { publicationStatus: { $exists: false } }, { publicationStatus: "published" },
+      { publicationStatus: "scheduled", publishAt: { $lte: new Date() } }
+    ] });
+    if (!pendingTips.length) {
+      footballLastSync = new Date(); footballLastError = "";
+      return { date, checked: 0, updated: 0, fixtures: 0, message: "No pending tips for this date." };
+    }
+    const fixtures = await fetchFootballFixtures(date);
+    let updated = 0;
+    for (const tip of pendingTips) {
+      const homeKey = normalizeTeamName(tip.homeTeam);
+      const awayKey = normalizeTeamName(tip.awayTeam);
+      const fixture = fixtures.find(item => {
+        if (tip.fixtureId && Number(item.fixture?.id) === Number(tip.fixtureId)) return true;
+        return normalizeTeamName(item.teams?.home?.name) === homeKey && normalizeTeamName(item.teams?.away?.name) === awayKey;
+      });
+      if (!fixture) continue;
+      const fixtureId = Number(fixture.fixture?.id) || null;
+      const statusShort = String(fixture.fixture?.status?.short || "");
+      const rawHomeGoals = fixture.goals?.home;
+      const rawAwayGoals = fixture.goals?.away;
+      const scoreAvailable = rawHomeGoals !== null && rawHomeGoals !== undefined
+        && rawAwayGoals !== null && rawAwayGoals !== undefined
+        && Number.isFinite(Number(rawHomeGoals)) && Number.isFinite(Number(rawAwayGoals));
+      const homeGoals = scoreAvailable ? Number(rawHomeGoals) : null;
+      const awayGoals = scoreAvailable ? Number(rawAwayGoals) : null;
+      tip.fixtureId = fixtureId;
+      tip.liveStatus = String(fixture.fixture?.status?.long || statusShort || "").slice(0, 80);
+      tip.liveScore = scoreAvailable ? `${homeGoals}-${awayGoals}` : "";
+      tip.lastSyncedAt = new Date();
+      const finished = ["FT", "AET", "PEN"].includes(statusShort);
+      const voided = ["CANC", "ABD", "AWD", "WO"].includes(statusShort);
+      if (finished && scoreAvailable) {
+        const settlement = evaluateTipSelection(tip.tip, homeGoals, awayGoals);
+        if (settlement.result) {
+          tip.result = settlement.result;
+          tip.settlementNote = settlement.note;
+          tip.completedAt = new Date();
+          updated++;
+        } else {
+          tip.settlementNote = settlement.note;
+        }
+      } else if (voided) {
+        tip.result = "Void";
+        tip.settlementNote = `Fixture status: ${statusShort}`;
+        tip.completedAt = new Date();
+        updated++;
+      }
+      await tip.save();
+    }
+    footballLastSync = new Date(); footballLastError = "";
+    return { date, checked: pendingTips.length, updated, fixtures: fixtures.length, quotaRemaining: footballQuotaRemaining };
+  } catch (error) {
+    footballLastError = error.message || "Football synchronization failed.";
+    throw error;
+  } finally { footballSyncInProgress = false; }
 }
 
 function publicTip(tip) {
@@ -899,6 +1039,26 @@ app.get("/api/admin/audit-logs", requireAuth, requireAdmin, async (req, res) => 
   } catch (err) { res.status(500).json({ success: false, message: "Could not load administrator activity." }); }
 });
 
+app.get("/api/admin/football/status", requireAuth, requireAdmin, async (req, res) => {
+  res.json({ success: true, configured: Boolean(String(process.env.API_FOOTBALL_KEY || "").trim()),
+    lastSync: footballLastSync, lastError: footballLastError, quotaRemaining: footballQuotaRemaining,
+    intervalMinutes: Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000) });
+});
+
+app.post("/api/admin/football/sync", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const date = String(req.body.date || footballDateISO());
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) {
+      return res.status(400).json({ success: false, message: "Date must be YYYY-MM-DD." });
+    }
+    const result = await syncFootballTips(date);
+    await recordAudit(req, "football.sync", "football", null, `Synced football fixtures for ${date}: ${result.updated || 0} settled.`);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(502).json({ success: false, message: error.message || "Football sync failed." });
+  }
+});
+
 app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   const tips = await Tip.find({}).sort({ date: -1, createdAt: 1 }).limit(2000).lean();
   res.json({ success: true, tips: tips.map(publicTip) });
@@ -1013,6 +1173,16 @@ mongoose.connect(process.env.MONGODB_URI)
       publishScheduledTips().catch(err => console.error("Scheduled-tip publication sweep failed:", err.message));
     }, 30 * 1000);
     if (typeof scheduledTipSweep.unref === "function") scheduledTipSweep.unref();
+    if (String(process.env.API_FOOTBALL_KEY || "").trim()) {
+      await syncFootballTips().catch(err => console.error("Initial football sync failed:", err.message));
+      const footballSweep = setInterval(() => {
+        syncFootballTips().catch(err => console.error("Automatic football sync failed:", err.message));
+      }, FOOTBALL_SYNC_INTERVAL_MS);
+      if (typeof footballSweep.unref === "function") footballSweep.unref();
+      console.log(`API-Football sync enabled every ${Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000)} minute(s).`);
+    } else {
+      console.log("API-Football sync disabled: set API_FOOTBALL_KEY to enable live tracking and automatic settlement.");
+    }
     app.listen(PORT, () => console.log(`Banker Tips server listening on port ${PORT}`));
   })
   .catch(err => {
