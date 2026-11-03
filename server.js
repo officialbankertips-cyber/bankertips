@@ -102,11 +102,6 @@ const tipSchema = new mongoose.Schema({
   tip: { type: String, required: true, trim: true, maxlength: 120 },
   odds: { type: Number, required: true, min: 1, max: 1000 },
   result: { type: String, enum: ["Pending", "Win", "Lose", "Void"], default: "Pending" },
-  fixtureId: { type: String, default: null, index: true },
-  liveStatus: { type: String, default: "" },
-  liveScore: { type: String, default: "" },
-  settlementNote: { type: String, default: "" },
-  lastSyncedAt: { type: Date, default: null },
   league: { type: String, trim: true, maxlength: 120, default: "" },
   notes: { type: String, trim: true, maxlength: 500, default: "" },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -333,16 +328,12 @@ function cleanTipInput(body) {
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && time.length > 20) throw new Error("Invalid match time.");
-  // GOAL API fixture IDs can be alphanumeric strings, not only numbers.
-  const fixtureId = body.fixtureId === undefined || body.fixtureId === null || String(body.fixtureId).trim() === ""
-    ? null : String(body.fixtureId).trim();
-  if (fixtureId !== null && fixtureId.length > 120) throw new Error("Fixture ID is too long.");
   const publicationStatus = String(body.publicationStatus || (date > footballDateISO() ? "scheduled" : "published")).toLowerCase();
   if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Invalid publication status.");
   const publishAt = publicationStatus === "scheduled"
     ? new Date(zonedDateTimeToEpoch(date, "00:00", APP_TIME_ZONE)) : null;
   return {
-    type, date, publicationStatus, publishAt, homeTeam, awayTeam, match, time, tip, odds, result, fixtureId,
+    type, date, publicationStatus, publishAt, homeTeam, awayTeam, match, time, tip, odds, result,
     league: String(body.league || "").trim(), notes: String(body.notes || "").trim()
   };
 }
@@ -467,178 +458,6 @@ async function activatePaidMembership(payment, providerStatus) {
     await payment.save();
   }
   return true;
-}
-
-// GOAL API football integration. The API key is server-side only.
-const GOAL_API_BASE_URL = "https://api.goal-api.com/v1";
-const requestedFootballInterval = Number(process.env.FOOTBALL_SYNC_INTERVAL_MS || 30 * 60 * 1000);
-const FOOTBALL_SYNC_INTERVAL_MS = Number.isFinite(requestedFootballInterval) && requestedFootballInterval >= 5 * 60 * 1000 ? requestedFootballInterval : 30 * 60 * 1000;
-let footballSyncInProgress = false;
-let footballLastSync = null;
-let footballLastError = "";
-let footballQuotaRemaining = null;
-
-function normalizeTeamName(value) {
-  return String(value || "").toLowerCase()
-    .replace(/\b(fc|cf|afc|sc|ac|club|football|soccer)\b/g, "")
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function evaluateTipSelection(tipText, homeGoals, awayGoals) {
-  const pick = String(tipText || "").trim().toLowerCase()
-    .replace(/[–—]/g, "-").replace(/\s+/g, " ");
-  const total = homeGoals + awayGoals;
-  let won;
-  let description;
-  let match = pick.match(/^(over|under)\s+(\d+(?:\.\d+)?)\s*(?:goals?)?$/i);
-  if (match) {
-    const line = Number(match[2]);
-    if (Number.isInteger(line) && total === line) {
-      return { result: "Void", note: `Push at ${total} goals (${match[1]} ${line})` };
-    }
-    won = match[1].toLowerCase() === "over" ? total > line : total < line;
-    description = `${total} total goals (${match[1]} ${line})`;
-  } else if (/^(1|home win|home)$/i.test(pick)) {
-    won = homeGoals > awayGoals; description = `Home ${homeGoals}-${awayGoals} Away`;
-  } else if (/^(2|away win|away)$/i.test(pick)) {
-    won = awayGoals > homeGoals; description = `Home ${homeGoals}-${awayGoals} Away`;
-  } else if (/^(x|draw)$/i.test(pick)) {
-    won = homeGoals === awayGoals; description = `Home ${homeGoals}-${awayGoals} Away`;
-  } else if (/^(1x|home or draw|double chance 1x)$/i.test(pick)) {
-    won = homeGoals >= awayGoals; description = `1X · ${homeGoals}-${awayGoals}`;
-  } else if (/^(x2|draw or away|double chance x2)$/i.test(pick)) {
-    won = awayGoals >= homeGoals; description = `X2 · ${homeGoals}-${awayGoals}`;
-  } else if (/^(12|home or away|no draw)$/i.test(pick)) {
-    won = homeGoals !== awayGoals; description = `12 · ${homeGoals}-${awayGoals}`;
-  } else if (/^(btts|both teams to score|gg)\s*(yes|no)?$/i.test(pick) || /^both teams to score (yes|no)$/i.test(pick)) {
-    const yes = homeGoals > 0 && awayGoals > 0;
-    const asksYes = !/\bno\b/i.test(pick);
-    won = asksYes ? yes : !yes; description = `BTTS ${yes ? "Yes" : "No"} · ${homeGoals}-${awayGoals}`;
-  } else {
-    return { result: null, note: "Unsupported tip market. Supported: Home Win, Draw, Away Win, 1X, X2, 12, Over/Under X.5, BTTS Yes/No." };
-  }
-  return { result: won ? "Win" : "Lose", note: description };
-}
-
-function goalTeamName(value) {
-  if (value && typeof value === "object") {
-    return value.name || value.teamName || value.title || value.shortName || "";
-  }
-  return value || "";
-}
-
-function normalizeGoalFixture(item) {
-  const fixture = item?.fixture || item?.match || item || {};
-  const homeTeam = goalTeamName(
-    item?.homeTeam ?? item?.home_team ?? item?.teams?.home ?? item?.match_hometeam_name ?? fixture?.homeTeam
-  );
-  const awayTeam = goalTeamName(
-    item?.awayTeam ?? item?.away_team ?? item?.teams?.away ?? item?.match_awayteam_name ?? fixture?.awayTeam
-  );
-  const homeRaw = item?.homeScore ?? item?.home_score ?? item?.match_hometeam_score
-    ?? item?.score?.home ?? item?.scores?.home ?? item?.goals?.home ?? item?.match_hometeam_score;
-  const awayRaw = item?.awayScore ?? item?.away_score ?? item?.match_awayteam_score
-    ?? item?.score?.away ?? item?.scores?.away ?? item?.goals?.away ?? item?.match_awayteam_score;
-  const statusValue = item?.matchPeriod ?? item?.status?.period ?? item?.status?.short
-    ?? item?.status ?? item?.match_status ?? item?.matchStatus ?? "";
-  const status = typeof statusValue === "object"
-    ? (statusValue.period || statusValue.short || statusValue.name || statusValue.long || "")
-    : statusValue;
-  const id = item?.id ?? item?.match_id ?? item?.fixtureId ?? fixture?.id ?? null;
-  const homeScoreValid = homeRaw !== null && homeRaw !== undefined && Number.isFinite(Number(homeRaw));
-  const awayScoreValid = awayRaw !== null && awayRaw !== undefined && Number.isFinite(Number(awayRaw));
-  return {
-    id,
-    homeTeam: String(homeTeam || ""),
-    awayTeam: String(awayTeam || ""),
-    homeGoals: homeScoreValid ? Number(homeRaw) : null,
-    awayGoals: awayScoreValid ? Number(awayRaw) : null,
-    status: String(status || "").trim().toUpperCase(),
-    rawStatus: String(status || item?.match_status || "").slice(0, 80)
-  };
-}
-
-async function fetchFootballFixtures(date) {
-  const apiKey = String(process.env.GOAL_API_KEY || "").trim();
-  if (!apiKey) throw new Error("GOAL_API_KEY is not configured. Add your GOAL API key to the server environment.");
-  const url = `${GOAL_API_BASE_URL}/fixtures/date/${encodeURIComponent(date)}`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
-      signal: controller.signal
-    });
-    footballQuotaRemaining = response.headers.get("x-ratelimit-remaining") || footballQuotaRemaining;
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      throw new Error(`GOAL API returned HTTP ${response.status}${detail ? `: ${detail.slice(0, 250)}` : ""}.`);
-    }
-    const payload = await response.json();
-    if (payload?.success === false) throw new Error(`GOAL API: ${JSON.stringify(payload.error || payload.message || payload).slice(0, 300)}`);
-    const data = payload?.data;
-    const rows = Array.isArray(data) ? data
-      : Array.isArray(data?.fixtures) ? data.fixtures
-      : Array.isArray(data?.matches) ? data.matches
-      : Array.isArray(payload?.fixtures) ? payload.fixtures
-      : [];
-    return rows.map(normalizeGoalFixture);
-  } finally { clearTimeout(timeout); }
-}
-
-async function syncFootballTips(date = footballDateISO()) {
-  if (footballSyncInProgress) return { skipped: true, reason: "A sync is already running." };
-  footballSyncInProgress = true;
-  try {
-    const pendingTips = await Tip.find({ date, result: "Pending", $or: [
-      { publicationStatus: { $exists: false } }, { publicationStatus: "published" },
-      { publicationStatus: "scheduled", publishAt: { $lte: new Date() } }
-    ] });
-    if (!pendingTips.length) {
-      footballLastSync = new Date(); footballLastError = "";
-      return { date, checked: 0, updated: 0, fixtures: 0, message: "No pending tips for this date." };
-    }
-    const fixtures = await fetchFootballFixtures(date);
-    let updated = 0;
-    for (const tip of pendingTips) {
-      const homeKey = normalizeTeamName(tip.homeTeam);
-      const awayKey = normalizeTeamName(tip.awayTeam);
-      const fixture = fixtures.find(item => {
-        if (tip.fixtureId && String(item.id) === String(tip.fixtureId)) return true;
-        return item.homeTeam && item.awayTeam
-          && normalizeTeamName(item.homeTeam) === homeKey
-          && normalizeTeamName(item.awayTeam) === awayKey;
-      });
-      if (!fixture) continue;
-      tip.fixtureId = fixture.id === null ? tip.fixtureId : fixture.id;
-      tip.liveStatus = fixture.rawStatus || fixture.status || "Status unavailable";
-      const scoreAvailable = fixture.homeGoals !== null && fixture.awayGoals !== null;
-      tip.liveScore = scoreAvailable ? `${fixture.homeGoals}-${fixture.awayGoals}` : "";
-      tip.lastSyncedAt = new Date();
-
-      // Only settle a result when GOAL API explicitly reports a finished match.
-      // Do not infer completion from a legacy live flag or a populated score.
-      const finished = ["FINISHED", "FT", "AET", "PEN", "FULL_TIME", "FULL TIME"].includes(fixture.status);
-      if (finished && scoreAvailable) {
-        const settlement = evaluateTipSelection(tip.tip, fixture.homeGoals, fixture.awayGoals);
-        if (settlement.result) {
-          tip.result = settlement.result;
-          tip.settlementNote = settlement.note;
-          tip.completedAt = new Date();
-          updated++;
-        } else {
-          tip.settlementNote = settlement.note;
-        }
-      }
-      await tip.save();
-    }
-    footballLastSync = new Date(); footballLastError = "";
-    return { date, checked: pendingTips.length, updated, fixtures: fixtures.length, quotaRemaining: footballQuotaRemaining };
-  } catch (error) {
-    footballLastError = error.message || "Football synchronization failed.";
-    throw error;
-  } finally { footballSyncInProgress = false; }
 }
 
 function publicTip(tip) {
@@ -1080,26 +899,6 @@ app.get("/api/admin/audit-logs", requireAuth, requireAdmin, async (req, res) => 
   } catch (err) { res.status(500).json({ success: false, message: "Could not load administrator activity." }); }
 });
 
-app.get("/api/admin/football/status", requireAuth, requireAdmin, async (req, res) => {
-  res.json({ success: true, configured: Boolean(String(process.env.GOAL_API_KEY || "").trim()),
-    lastSync: footballLastSync, lastError: footballLastError, quotaRemaining: footballQuotaRemaining,
-    intervalMinutes: Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000) });
-});
-
-app.post("/api/admin/football/sync", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
-  try {
-    const date = String(req.body.date || footballDateISO());
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) {
-      return res.status(400).json({ success: false, message: "Date must be YYYY-MM-DD." });
-    }
-    const result = await syncFootballTips(date);
-    await recordAudit(req, "football.sync", "football", null, `Synced football fixtures for ${date}: ${result.updated || 0} settled.`);
-    res.json({ success: true, ...result });
-  } catch (error) {
-    res.status(502).json({ success: false, message: error.message || "Football sync failed." });
-  }
-});
-
 app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   const tips = await Tip.find({}).sort({ date: -1, createdAt: 1 }).limit(2000).lean();
   res.json({ success: true, tips: tips.map(publicTip) });
@@ -1214,16 +1013,6 @@ mongoose.connect(process.env.MONGODB_URI)
       publishScheduledTips().catch(err => console.error("Scheduled-tip publication sweep failed:", err.message));
     }, 30 * 1000);
     if (typeof scheduledTipSweep.unref === "function") scheduledTipSweep.unref();
-    if (String(process.env.GOAL_API_KEY || "").trim()) {
-      await syncFootballTips().catch(err => console.error("Initial football sync failed:", err.message));
-      const footballSweep = setInterval(() => {
-        syncFootballTips().catch(err => console.error("Automatic football sync failed:", err.message));
-      }, FOOTBALL_SYNC_INTERVAL_MS);
-      if (typeof footballSweep.unref === "function") footballSweep.unref();
-      console.log(`GOAL API sync enabled every ${Math.round(FOOTBALL_SYNC_INTERVAL_MS / 60000)} minute(s).`);
-    } else {
-      console.log("GOAL API sync disabled: set GOAL_API_KEY to enable football result synchronization and automatic settlement.");
-    }
     app.listen(PORT, () => console.log(`Banker Tips server listening on port ${PORT}`));
   })
   .catch(err => {
