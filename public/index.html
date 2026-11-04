@@ -1639,7 +1639,7 @@ async function handleLogin(event) {
     }
   } catch(e) { showMessage('loginMessage',e.message,'error'); }
 }
-function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; }
+function clearTipForm() { $('tipForm').reset(); $('tipId').value=''; $('tipDate').value=todayISO(); $('tipDate').min=todayISO(); $('tipStatus').value='Pending'; if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-calendar-check"></i> Save / schedule tip'; }
 function showAdminMessage(message,kind='info') { showMessage('adminMessage',message,kind); }
 function renderAdminTipRows() {
   const q=String($('adminTipSearch')?.value||'').trim().toLowerCase();
@@ -1785,7 +1785,10 @@ async function adminRowAction(event) {
     const data=await api('/api/admin/tips');
     const tip=(data.tips||[]).find(t=>String(t.id||t._id)===String(id));
     if(!tip) throw new Error('Tip not found. Reload the list and try again.');
+    // Historical records must remain editable: remove the future-only minimum while editing.
+    $('tipDate').removeAttribute('min');
     $('tipId').value=tip.id||tip._id; $('tipDate').value=tip.date||todayISO(); $('tipTime').value=tip.time||'12:00'; $('tipMatch').value=tip.match||''; $('tipPick').value=tip.tip||''; $('tipOdds').value=tip.odds||''; $('tipType').value=tip.type||'free'; $('tipStatus').value=tip.status||'Pending';
+    if($('saveTipButton')) $('saveTipButton').innerHTML='<i class="fa-solid fa-floppy-disk"></i> Update match result';
     $('tipMatch').focus();
   } catch(e) { showAdminMessage(e.message,'error'); }
 }
@@ -1881,6 +1884,7 @@ setInterval(()=>{
   if($('vipHistoryPanel')?.classList.contains('active')&&currentUser) loadVipHistory();
 },60000);
 $('tipDate').value=todayISO();
+// New tips cannot be scheduled in the past; edit mode clears this restriction.
 if($('tipDate')) $('tipDate').min=todayISO();
 if($('freeTipDate')) $('freeTipDate').value=todayISO();
 if($('vipTipDate')) $('vipTipDate').value=todayISO();
