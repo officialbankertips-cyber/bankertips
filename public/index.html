@@ -1721,7 +1721,10 @@ function membershipDateLabel(date) {
 function renderAdminMembershipRows() {
   const body=$('adminUsersRows'); if(!body) return;
   const query=($('membershipSearch')?.value||'').trim().toLowerCase();
-  const users=adminMembershipCache.filter(u=>[u.email,u.phoneNumber,u.selectedPackage,u.membershipStatus].some(v=>String(v||'').toLowerCase().includes(query)));
+  const users=adminMembershipCache.filter(u=>[
+    u.name,u.fullName,u.displayName,u.email,u.phoneNumber,
+    u.selectedPackage,u.membershipStatus,u.country
+  ].some(v=>String(v||'').toLowerCase().includes(query)));
   body.innerHTML=users.length?users.map((u,index)=>{
     const status=u.membershipStatus|| (u.isActivated?'active':'pending_approval');
     const expiry=u.vipExpiresAt?membershipDateLabel(new Date(u.vipExpiresAt)):'—';
@@ -2415,6 +2418,330 @@ body[data-theme="dark"] {
 }
 @media(prefers-reduced-motion:reduce){.hero-secondary{transition:none}}
 
+
+
+/* ================================================================
+   BUSINESS OVERVIEW + SUBSCRIBER SEARCH
+   Theme-aware finish: uses the existing bankerTipsThemeSystem tokens.
+   Scoped styles only; no dashboard data flow or payment logic changed.
+================================================================ */
+.business-overview-section{
+  --overview-card:var(--surface);
+  --overview-border:var(--line);
+  --overview-copy:var(--ink);
+  --overview-muted:var(--muted);
+  margin-top:26px;
+}
+.business-overview-section>.section-head{
+  align-items:center;
+  margin-bottom:15px;
+}
+.business-overview-section>.section-head h2{
+  color:var(--ink);
+  font-size:clamp(1.2rem,2.6vw,1.48rem);
+  letter-spacing:-.035em;
+}
+.business-overview-section>.section-head p{
+  color:var(--muted);
+  line-height:1.55;
+}
+.country-overview-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:15px;
+  margin:16px 0;
+}
+.country-overview-card{
+  position:relative;
+  isolation:isolate;
+  min-width:0;
+  padding:19px;
+  overflow:hidden;
+  color:var(--overview-copy);
+  background:linear-gradient(155deg,var(--surface),color-mix(in srgb,var(--soft) 38%,var(--surface)));
+  border:1px solid var(--overview-border);
+  border-top:3px solid var(--overview-accent,#168fc9);
+  border-radius:18px;
+  box-shadow:0 7px 22px rgba(18,45,75,.055);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.country-overview-card:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:115px;
+  height:115px;
+  right:-55px;
+  top:-58px;
+  border:1px solid color-mix(in srgb,var(--overview-accent) 28%,transparent);
+  border-radius:50%;
+  box-shadow:0 0 0 14px color-mix(in srgb,var(--overview-accent) 5%,transparent);
+  pointer-events:none;
+}
+.country-overview-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 13px 28px rgba(18,45,75,.09);
+}
+.country-ke{--overview-accent:#15945a}
+.country-tz{--overview-accent:#c59628}
+.country-ug{--overview-accent:#c43b3b}
+.country-overview-top{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding-bottom:15px;
+  border-bottom:1px solid var(--overview-border);
+}
+.country-flag{
+  width:45px;
+  height:45px;
+  flex:0 0 45px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--overview-border);
+  border-radius:14px;
+  background:var(--soft);
+  font-size:25px;
+}
+.country-overview-top h3{
+  margin:0 0 4px;
+  color:var(--overview-copy);
+  font-size:1.04rem;
+  font-weight:800;
+  letter-spacing:-.025em;
+}
+.country-overview-top span:not(.country-flag){
+  color:var(--overview-muted);
+  font-size:.75rem;
+}
+.country-overview-stats{
+  gap:10px;
+  padding:17px 0;
+}
+.country-overview-stats>div{
+  min-width:0;
+  gap:6px;
+  padding:10px 11px;
+  border:1px solid var(--overview-border);
+  border-radius:12px;
+  background:var(--surface-2);
+}
+.country-overview-stats strong{
+  color:var(--overview-copy);
+  font-size:clamp(1.2rem,2.2vw,1.48rem);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.country-overview-stats span,
+.country-revenue>span{
+  color:var(--overview-muted);
+  font-size:.7rem;
+  font-weight:700;
+  line-height:1.4;
+}
+.country-revenue{
+  gap:6px;
+  padding:14px;
+  border:1px solid color-mix(in srgb,var(--overview-accent) 22%,var(--overview-border));
+  border-radius:13px;
+  background:color-mix(in srgb,var(--overview-accent) 7%,var(--surface));
+}
+.country-revenue strong{
+  color:var(--overview-copy);
+  font-size:clamp(1.08rem,2vw,1.38rem);
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.025em;
+}
+.country-revenue small{
+  color:var(--overview-muted);
+  font-size:.72rem;
+}
+.business-overview-section #overviewNotice{
+  margin-top:13px;
+  padding:12px 14px;
+  border:1px solid var(--overview-border);
+  border-radius:12px;
+  background:var(--surface-2);
+  color:var(--overview-muted);
+  line-height:1.55;
+}
+
+/* Subscriber search toolbar and input */
+.membership-approval-card{
+  background:var(--surface)!important;
+  border-color:var(--line)!important;
+}
+.membership-admin-heading h3{color:var(--ink)}
+.membership-admin-heading p{color:var(--muted)}
+.membership-toolbar{
+  gap:14px;
+  border-top-color:var(--line);
+  background:var(--surface-2);
+}
+.membership-search{
+  width:min(470px,100%);
+  min-height:46px;
+  gap:10px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--surface);
+  color:var(--muted);
+  box-shadow:0 2px 8px rgba(15,35,65,.025);
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.membership-search:focus-within{
+  border-color:var(--blue);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 13%,transparent);
+}
+.membership-search>i{color:var(--blue);font-size:.9rem}
+.membership-search input{
+  width:100%;
+  min-width:0;
+  min-height:42px;
+  padding:0;
+  border:0!important;
+  outline:0!important;
+  background:transparent!important;
+  color:var(--ink)!important;
+  box-shadow:none!important;
+  font:600 .83rem "Comfortaa","Trebuchet MS",sans-serif;
+}
+.membership-search input::placeholder{color:var(--muted-2);opacity:1}
+.membership-sort-note{
+  color:var(--muted);
+  font-size:.72rem;
+  font-weight:800;
+}
+.membership-table-scroll{
+  border-color:var(--line)!important;
+  background:var(--surface)!important;
+}
+.membership-table .member-package{
+  background:var(--soft);
+  color:var(--blue2);
+}
+.membership-table .payment-time{color:var(--ink)}
+.membership-approval-card>.notice{
+  background:var(--surface-2);
+  color:var(--muted);
+  border-color:var(--line);
+}
+
+/* Explicit dark palette for components whose older styles used fixed light colors. */
+[data-theme="dark"] .business-overview-section .section-head h2,
+[data-theme="dark"] .business-overview-section .section-head p{
+  color:var(--ink)!important;
+}
+[data-theme="dark"] .country-overview-card{
+  color:var(--ink)!important;
+  background:linear-gradient(155deg,#10283d,#0d2235)!important;
+  border-color:var(--line)!important;
+  border-top:3px solid var(--overview-accent)!important;
+  box-shadow:0 9px 25px rgba(0,0,0,.2)!important;
+}
+[data-theme="dark"] .country-overview-top{
+  border-bottom-color:var(--line)!important;
+}
+[data-theme="dark"] .country-flag,
+[data-theme="dark"] .country-overview-stats>div{
+  background:#17344b!important;
+  border-color:var(--line)!important;
+}
+[data-theme="dark"] .country-overview-top h3,
+[data-theme="dark"] .country-overview-stats strong,
+[data-theme="dark"] .country-revenue strong{
+  color:#f1f7fc!important;
+}
+[data-theme="dark"] .country-overview-top span:not(.country-flag),
+[data-theme="dark"] .country-overview-stats span,
+[data-theme="dark"] .country-revenue>span,
+[data-theme="dark"] .country-revenue small{
+  color:#b5c5d5!important;
+}
+[data-theme="dark"] .country-revenue{
+  background:color-mix(in srgb,var(--overview-accent) 12%,#0d2235)!important;
+  border-color:color-mix(in srgb,var(--overview-accent) 35%,var(--line))!important;
+}
+[data-theme="dark"] .business-overview-section #overviewNotice{
+  background:#10263b!important;
+  color:#b5c5d5!important;
+  border-color:var(--line)!important;
+}
+[data-theme="dark"] .membership-approval-card{
+  background:#0b2033!important;
+  border-color:#29435a!important;
+}
+[data-theme="dark"] .membership-admin-heading h3,
+[data-theme="dark"] .membership-admin-heading p{
+  color:var(--ink)!important;
+}
+[data-theme="dark"] .membership-toolbar{
+  background:#10263b!important;
+  border-top-color:#29435a!important;
+}
+[data-theme="dark"] .membership-search{
+  background:#0d263b!important;
+  border-color:#36536b!important;
+  color:#b5c5d5!important;
+}
+[data-theme="dark"] .membership-search>i{color:#72cfff!important}
+[data-theme="dark"] .membership-search input{
+  background:transparent!important;
+  color:#f1f7fc!important;
+  caret-color:#72cfff;
+}
+[data-theme="dark"] .membership-search input::placeholder{color:#9bb0c3!important}
+[data-theme="dark"] .membership-sort-note{color:#b5c5d5!important}
+[data-theme="dark"] .membership-table-scroll{
+  background:#0b2033!important;
+  border-color:#29435a!important;
+}
+[data-theme="dark"] .admin-members .membership-table thead th{
+  background:#17364c!important;
+  color:#c9dbea!important;
+  border-bottom-color:#29435a!important;
+}
+[data-theme="dark"] .admin-members .membership-table tbody td{
+  background:#0f293e!important;
+  color:#e5eef7!important;
+  border-bottom-color:#29435a!important;
+}
+[data-theme="dark"] .admin-members .membership-table tbody tr:nth-child(even) td{
+  background:#132f46!important;
+}
+[data-theme="dark"] .admin-members .membership-table tbody tr:hover td{
+  background:#1a3b54!important;
+}
+[data-theme="dark"] .membership-table .member-index,
+[data-theme="dark"] .membership-table .subtext{
+  color:#a9bdcf!important;
+}
+[data-theme="dark"] .membership-table .member-package{
+  background:#173b54!important;
+  color:#a9e1ff!important;
+}
+[data-theme="dark"] .membership-table .payment-time{color:#e5eef7!important}
+[data-theme="dark"] .membership-approval-card>.notice{
+  background:#10263b!important;
+  color:#b5c5d5!important;
+  border-color:#29435a!important;
+}
+@media(max-width:760px){
+  .country-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .country-overview-grid{grid-template-columns:1fr;gap:11px}
+  .country-overview-card{padding:16px}
+  .country-overview-stats{padding:13px 0}
+  .membership-toolbar{padding:13px!important}
+  .membership-search{min-height:48px}
+  .membership-sort-note{white-space:normal;line-height:1.45}
+}
+@media(prefers-reduced-motion:reduce){
+  .country-overview-card,.membership-search{transition:none}
+}
 
 </style>
 </body>
