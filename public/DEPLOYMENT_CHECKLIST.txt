@@ -1,0 +1,25 @@
+BANKER TIPS DEPLOYMENT CHECKLIST
+
+[ ] MongoDB database created and connection URI copied
+[ ] Unique JWT_SECRET configured in Render environment
+[ ] Unique ADMIN_EMAIL and strong ADMIN_PASSWORD configured
+[ ] NODE_ENV=production
+[ ] COOKIE_SECURE=true
+[ ] FRONTEND_ORIGIN set to exact HTTPS site origin
+[ ] public/index.html contains the Banker Tips frontend
+[ ] /api/health returns success and database connected
+[ ] Admin can log in through normal login form
+[ ] Admin API routes reject normal user accounts
+[ ] Premium API routes reject users without active VIP
+[ ] Test registration, login, logout, add/edit/delete tips, and VIP activation
+[ ] Never commit .env or put admin password in frontend HTML
+
+OPTIMAPAY CREDENTIAL SEPARATION
+[ ] Kenya: KE_OPTIMAPAY_API_KEY configured with Kenya-only API key
+[ ] Kenya: KE_OPTIMAPAY_API_SECRET configured with Kenya-only API secret
+[ ] Kenya: KE_OPTIMAPAY_PAYMENT_ACCOUNT_ID configured with Kenya-only collection account ID
+[ ] Tanzania + Uganda: TZUG_OPTIMAPAY_API_KEY configured with the shared Global API key
+[ ] Tanzania + Uganda: TZUG_OPTIMAPAY_API_SECRET configured with the shared Global API secret
+[ ] Tanzania + Uganda: TZUG_OPTIMAPAY_ACCOUNT_ID recorded as the shared merchant collection account ID
+[ ] Confirm all credential values belong to the correct OptimaPay merchant account; never reuse Kenya credentials for Tanzania/Uganda
+[ ] Test a low-value payment on each country/network before production
