@@ -1068,9 +1068,9 @@ img{max-width:100%}
    <div class="checkout-current"><span class="checkout-live-dot"></span><span>CURRENT CHECKOUT</span><strong>M-Pesa</strong></div>
    <div class="mpesa-panel">
     <div class="mpesa-brand"><span class="mpesa-logo"><i class="fa-solid fa-mobile-screen-button"></i></span><div><strong>M-Pesa</strong><small>Instant phone prompt</small></div><span class="recommended-label"><i class="fa-solid fa-star"></i> Recommended</span></div>
-    <h3>Pay securely with M-Pesa</h3><p>Enter your Safaricom number below. A payment prompt will be sent to your phone. Follow the instructions to complete your payment.</p>
+    <h3>Pay securely with mobile money</h3><p>Enter your registered mobile-money number. A payment prompt will be sent to your phone.</p>
    </div>
-   <form id="mpesaPaymentForm" class="mpesa-checkout-form"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><div class="phone-input-wrap"><span class="phone-prefix"><i class="fa-solid fa-phone"></i> KE</span><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20" aria-describedby="mpesaPhoneHelp"></div><small class="subtext" id="mpesaPhoneHelp">Use the Safaricom number that should receive the payment prompt.</small></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Continue with M-Pesa <i class="fa-solid fa-arrow-right"></i></button></div></div></form>
+   <form id="mpesaPaymentForm" class="mpesa-checkout-form"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><div class="phone-input-wrap"><span class="phone-prefix"><i class="fa-solid fa-phone"></i> KE</span><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20" aria-describedby="mpesaPhoneHelp"></div><small class="subtext" id="mpesaPhoneHelp">Use the mobile-money number that should receive the payment prompt.</small></div><div class="field full" id="checkoutProviderWrap" style="display:none"><label for="checkoutProvider">Tanzania mobile-money network</label><select id="checkoutProvider" class="form-control"><option value="">Select network</option><option value="VODACOM">Vodacom</option><option value="YAS">YAS</option><option value="AIRTEL">Airtel</option><option value="HALOTEL">Halotel</option></select></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Continue with M-Pesa <i class="fa-solid fa-arrow-right"></i></button></div></div></form>
    <div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div><p class="payment-safety-note"><i class="fa-solid fa-shield-halved"></i> Never share your M-Pesa PIN or one-time verification codes with anyone.</p>
   </div>
  </section>
@@ -1157,7 +1157,7 @@ img{max-width:100%}
  <button data-panel="adminPanel" id="adminNavButton" class="hidden"><i class="fa-solid fa-shield-halved"></i><span>Admin</span></button>
 </nav>
 
-<div class="modal registration-modal auth-modal" id="registerModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-register-layout"><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>VIP MEMBERSHIP</small></span></div><span class="auth-eyebrow">CREATE YOUR ACCOUNT</span><h2 id="registerTitle">Join Banker Tips</h2><p class="auth-intro">Create your account, choose your VIP plan and continue to secure M-Pesa checkout.</p><div class="reg-step" aria-hidden="true"><span class="active"></span><span class="active"></span><span></span></div><form id="registerForm"><input type="hidden" id="selectedPackage" value=""><input type="hidden" id="regCountry" value="KE"><div class="reg-price-note"><i class="fa-solid fa-shield-halved"></i> Kenya checkout · Secure M-Pesa payment</div><div class="field"><label for="regPhone">M-Pesa phone number</label><input type="tel" id="regPhone" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0712345678 or 254712345678" required><small class="subtext" id="regPhoneHelp">Enter a Kenyan Safaricom number, e.g. 0712345678.</small></div><div class="field" style="margin-top:15px"><label>Choose your VIP package</label></div><div class="reg-plan-grid"><button type="button" class="reg-plan" data-reg-package="daily"><strong>Daily VIP</strong><small data-ke-price="KSh 150">KSh 150</small><small>1 day</small></button><button type="button" class="reg-plan" data-reg-package="weekly"><strong>Weekly VIP</strong><small data-ke-price="KSh 1,500">KSh 1,500</small><small>7 days</small></button><button type="button" class="reg-plan" data-reg-package="monthly"><strong>Monthly VIP</strong><small data-ke-price="KSh 3,500">KSh 3,500</small><small>30 days</small></button></div><div class="reg-price-note" id="regPriceNote"><i class="fa-solid fa-circle-info"></i> Choose a package to see your subscription selection before checkout.</div><div class="field" style="margin-top:14px"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Create password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" placeholder="At least 10 characters" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn auth-submit" type="submit" id="registerSubmit"><i class="fa-solid fa-arrow-right"></i> Create account &amp; continue to payment</button><div class="msg" id="registerMessage" role="status"></div><div class="flow-footnote"><i class="fa-solid fa-lock"></i><span>Your VIP access stays locked until payment is verified. Never share your mobile-money PIN.</span></div></form><p class="auth-switch-mobile">Already have an account? <button type="button" data-switch-auth="login">Sign in</button></p></div><aside class="auth-side auth-side-register"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-trophy"></i></span><span class="auth-eyebrow">SMARTER FOOTBALL INSIGHTS</span><h2>Make every pick count.</h2><p>Unlock premium football predictions, membership updates and your VIP account in one place.</p><div class="auth-benefit"><i class="fa-solid fa-circle-check"></i> Exclusive VIP selections</div><div class="auth-benefit"><i class="fa-solid fa-shield-halved"></i> Secure M-Pesa checkout</div><div class="auth-benefit"><i class="fa-solid fa-clock"></i> Clear membership validity</div><div class="auth-side-bottom">Already a member? <button type="button" data-switch-auth="login">Sign in</button></div></div></aside></div></div></div>
+<div class="modal registration-modal auth-modal" id="registerModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="registerTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="registerModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-register-layout"><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>VIP MEMBERSHIP</small></span></div><span class="auth-eyebrow">CREATE YOUR ACCOUNT</span><h2 id="registerTitle">Join Banker Tips</h2><p class="auth-intro">Create your account, select your country and VIP plan, then continue to secure mobile-money checkout.</p><div class="reg-step" aria-hidden="true"><span class="active"></span><span class="active"></span><span></span></div><form id="registerForm"><input type="hidden" id="selectedPackage" value=""><input type="hidden" id="regCountry" value="KE"><div class="field"><label for="regCountrySelect">Select your country</label><select id="regCountrySelect" class="form-control" required><option value="KE">🇰🇪 Kenya · KES</option><option value="TZ">🇹🇿 Tanzania · TZS</option><option value="UG">🇺🇬 Uganda · UGX</option></select></div><div class="reg-price-note" id="regCountryNote"><i class="fa-solid fa-shield-halved"></i> Kenya checkout · Secure M-Pesa payment</div><div class="field"><label for="regPhone" id="regPhoneLabel">M-Pesa phone number</label><input type="tel" id="regPhone" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="0712345678 or 254712345678" required><small class="subtext" id="regPhoneHelp">Enter a Kenyan Safaricom number, e.g. 0712345678.</small></div><div class="field" id="regProviderWrap" style="display:none;margin-top:12px"><label for="regProvider">Tanzania mobile-money network</label><select id="regProvider" class="form-control"><option value="">Select network</option><option value="VODACOM">Vodacom</option><option value="YAS">YAS</option><option value="AIRTEL">Airtel</option><option value="HALOTEL">Halotel</option></select><small class="subtext">Choose the network registered to the mobile number.</small></div><div class="field" style="margin-top:15px"><label>Choose your VIP package</label></div><div class="reg-plan-grid"><button type="button" class="reg-plan" data-reg-package="daily"><strong>Daily VIP</strong><small data-package-price="daily">KSh 150</small><small>1 day</small></button><button type="button" class="reg-plan" data-reg-package="weekly"><strong>Weekly VIP</strong><small data-package-price="weekly">KSh 1,500</small><small>7 days</small></button><button type="button" class="reg-plan" data-reg-package="monthly"><strong>Monthly VIP</strong><small data-package-price="monthly">KSh 3,500</small><small>30 days</small></button></div><div class="reg-price-note" id="regPriceNote"><i class="fa-solid fa-circle-info"></i> Choose a package to see your subscription selection before checkout.</div><div class="field" style="margin-top:14px"><label for="regEmail">Email address</label><input type="email" id="regEmail" autocomplete="email" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:12px"><label for="regPassword">Create password</label><input type="password" id="regPassword" autocomplete="new-password" minlength="10" maxlength="128" placeholder="At least 10 characters" required><span class="subtext">Use at least 10 characters.</span></div><button class="btn auth-submit" type="submit" id="registerSubmit"><i class="fa-solid fa-arrow-right"></i> Create account &amp; continue to payment</button><div class="msg" id="registerMessage" role="status"></div><div class="flow-footnote"><i class="fa-solid fa-lock"></i><span>Your VIP access stays locked until payment is verified. Never share your mobile-money PIN.</span></div></form><p class="auth-switch-mobile">Already have an account? <button type="button" data-switch-auth="login">Sign in</button></p></div><aside class="auth-side auth-side-register"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-trophy"></i></span><span class="auth-eyebrow">SMARTER FOOTBALL INSIGHTS</span><h2>Make every pick count.</h2><p>Unlock premium football predictions, membership updates and your VIP account in one place.</p><div class="auth-benefit"><i class="fa-solid fa-circle-check"></i> Exclusive VIP selections</div><div class="auth-benefit"><i class="fa-solid fa-shield-halved"></i> Secure mobile-money checkout</div><div class="auth-benefit"><i class="fa-solid fa-clock"></i> Clear membership validity</div><div class="auth-side-bottom">Already a member? <button type="button" data-switch-auth="login">Sign in</button></div></div></aside></div></div></div>
 
 <div class="modal auth-modal" id="loginModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modal-box auth-modal-box"><button class="close" data-close="loginModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div class="auth-layout auth-login-layout"><aside class="auth-side auth-side-login"><div class="auth-side-content"><span class="auth-side-icon"><i class="fa-solid fa-futbol"></i></span><span class="auth-eyebrow">WELCOME BACK</span><h2>Your next winning insight starts here.</h2><p>Sign in to manage your membership and access premium tips when your VIP payment is verified.</p><div class="auth-benefit"><i class="fa-solid fa-bolt"></i> Daily football insights</div><div class="auth-benefit"><i class="fa-solid fa-user-shield"></i> Personal member dashboard</div><div class="auth-side-bottom">New to Banker Tips? <button type="button" data-switch-auth="register">Create account</button></div></div></aside><div class="auth-content"><div class="auth-mobile-brand"><span class="auth-mark"><i class="fa-solid fa-crown"></i></span><span>BANKER TIPS <small>MEMBER ACCESS</small></span></div><span class="auth-eyebrow">MEMBER SIGN IN</span><h2 id="loginTitle">Welcome back</h2><p class="auth-intro">Sign in to check your membership status and manage your VIP access.</p><form id="loginForm"><div class="field"><label for="loginEmail">Email address</label><input type="email" id="loginEmail" autocomplete="username" maxlength="254" placeholder="you@example.com" required></div><div class="field" style="margin-top:14px"><label for="loginPassword">Password</label><input type="password" id="loginPassword" autocomplete="current-password" maxlength="128" placeholder="Enter your password" required></div><button class="btn auth-submit" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Sign in securely</button><div class="msg" id="loginMessage" role="status"></div></form><p class="auth-switch-mobile">Don't have an account? <button type="button" data-switch-auth="register">Create one</button></p><div class="auth-security-note"><i class="fa-solid fa-lock"></i> Your account details are sent securely to the Banker Tips server.</div></div></div></div></div><div class="modal" id="renewModal" role="dialog" aria-modal="true" aria-labelledby="renewTitle"><div class="modal-box" style="max-width:520px"><button class="close" data-close="renewModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><div style="width:58px;height:58px;border-radius:18px;background:#fff7df;color:#b77908;display:grid;place-items:center;font-size:1.5rem;margin-bottom:16px"><i class="fa-solid fa-crown"></i></div><span class="eyebrow">BANKER TIPS VIP MEMBERSHIP</span><h2 id="renewTitle">Your VIP subscription needs renewal</h2><p>Your membership has expired or is awaiting approval, so premium tips are currently locked. Choose a plan below to continue to payment. Access returns after the payment is successfully verified.</p><div style="display:grid;gap:10px;margin:18px 0"><button class="btn choose-package" data-package="daily"><i class="fa-solid fa-bolt"></i> Renew Daily VIP · KSh 150</button><button class="btn choose-package" data-package="weekly"><i class="fa-solid fa-calendar-week"></i> Renew Weekly VIP · KSh 1,500</button><button class="btn choose-package" data-package="monthly"><i class="fa-solid fa-crown"></i> Renew Monthly VIP · KSh 3,500</button></div><div class="notice"><i class="fa-solid fa-lock"></i> Secure checkout · No access is granted from a pending payment.</div></div></div>
 <div class="modal" id="vipModal" role="dialog" aria-modal="true" aria-labelledby="vipTitle"><div class="modal-box"><button class="close" data-close="vipModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button><h2 id="vipTitle">Unlock VIP tips</h2><p>Sign in to access today's Premium Tips.</p><button class="btn" id="vipLoginButton"><i class="fa-solid fa-right-to-bracket"></i> Login to verify access</button><div class="msg" id="vipMessage" role="status"></div></div></div>
@@ -1513,51 +1513,59 @@ async function beginRegistration(packageKey){
   registrationPackage=packageKey; $('selectedPackage').value=packageKey; updateRegistrationFlow();
   setPanel('freePanel'); openModal('registerModal');
 }
-const packagePrices={daily:150,weekly:1500,monthly:3500};
+const countryPackagePrices={
+  KE:{currency:'KES',symbol:'KSh',locale:'en-KE',prices:{daily:150,weekly:1500,monthly:3500}},
+  TZ:{currency:'TZS',symbol:'TSh',locale:'sw-TZ',prices:{daily:5000,weekly:35000,monthly:75000}},
+  UG:{currency:'UGX',symbol:'USh',locale:'en-UG',prices:{daily:5000,weekly:50000,monthly:110000}}
+};
+const packagePrices=countryPackagePrices.KE.prices;
+function activeCountry(){return ['KE','TZ','UG'].includes(String(currentUser?.country||'KE').toUpperCase())?String(currentUser?.country||'KE').toUpperCase():'KE';}
+function formatCountryAmount(country,amount){const cfg=countryPackagePrices[country]||countryPackagePrices.KE;return `${cfg.symbol} ${Number(amount).toLocaleString(cfg.locale)}`;}
 function updatePaymentUI(){
-  const input=$('mpesaPhone');
-  if(input && currentUser && !input.value) input.value=currentUser.phoneNumber||'';
-  const notice=$('mpesaPaymentNotice');
-  if(!notice) return;
-  if(!currentUser){ notice.textContent='Sign in or register with a selected package before starting an M-Pesa payment.'; return; }
-  const amount=packagePrices[currentUser.selectedPackage];
-  notice.textContent=amount?`Selected package: ${packageLabel(currentUser.selectedPackage)} — KSh ${amount.toLocaleString('en-KE')}. Complete the STK prompt on your phone.`:'You haven’t selected a VIP Premium package.';
+  const country=activeCountry(),cfg=countryPackagePrices[country],input=$('mpesaPhone'),notice=$('mpesaPaymentNotice');
+  const prefix=document.querySelector('.phone-prefix'),label=document.querySelector('label[for="mpesaPhone"]'),help=$('mpesaPhoneHelp'),providerWrap=$('checkoutProviderWrap'),provider=$('checkoutProvider');
+  const title=document.querySelector('.mpesa-brand strong'),subtitle=document.querySelector('.mpesa-brand small'),heading=document.querySelector('.mpesa-panel h3'),description=document.querySelector('.mpesa-panel>p'),current=document.querySelector('.checkout-current strong'),payButton=$('mpesaPayButton');
+  const countryMeta={KE:{flag:'🇰🇪',name:'Kenya',method:'M-Pesa',prefix:'KE',placeholder:'0712345678 or 254712345678'},TZ:{flag:'🇹🇿',name:'Tanzania',method:'Mobile Money',prefix:'TZ',placeholder:'0712345678 or 255712345678'},UG:{flag:'🇺🇬',name:'Uganda',method:'Mobile Money',prefix:'UG',placeholder:'0772000000 or 256772000000'}}[country];
+  if(input){input.placeholder=countryMeta.placeholder;if(currentUser&&!input.value)input.value=currentUser.phoneNumber||'';}
+  if(prefix)prefix.innerHTML='<i class="fa-solid fa-phone"></i> '+countryMeta.prefix;
+  if(label)label.textContent=country==='KE'?'M-Pesa phone number':'Mobile-money phone number';
+  if(help)help.textContent=country==='KE'?'Use the Safaricom number that should receive the payment prompt.':country==='TZ'?'Enter your Tanzania mobile-money number and select its network.':'Enter your Uganda MTN or Airtel Money number.';
+  if(providerWrap)providerWrap.style.display=country==='TZ'?'':'none';
+  if(provider && currentUser?.mobileMoneyProvider)provider.value=currentUser.mobileMoneyProvider;
+  if(title)title.textContent=countryMeta.method;if(subtitle)subtitle.textContent='Secure phone payment prompt';if(heading)heading.textContent='Pay securely with '+countryMeta.method;if(current)current.textContent=countryMeta.method;
+  if(description)description.textContent=country==='TZ'?'Enter your Tanzania number and select Vodacom, YAS, Airtel or Halotel. A payment prompt will be sent to your phone.':country==='UG'?'Enter your Uganda MTN or Airtel Money number. A payment prompt will be sent to your phone.':'Enter your Safaricom number below. A payment prompt will be sent to your phone.';
+  if(payButton)payButton.innerHTML='<i class="fa-solid fa-lock"></i> Continue with '+countryMeta.method+' <i class="fa-solid fa-arrow-right"></i>';
+  if(!notice)return;
+  if(!currentUser){notice.textContent='Sign in or register with a selected package before starting payment.';return;}
+  const amount=cfg.prices[currentUser.selectedPackage];
+  notice.textContent=amount?`Selected package: ${packageLabel(currentUser.selectedPackage)} — ${formatCountryAmount(country,amount)}. Complete the payment prompt on your phone.`:'You have not selected a VIP package.';
 }
 async function handleMpesaPayment(event){
   event.preventDefault();
-  const notice=$('mpesaPaymentNotice'), button=$('mpesaPayButton');
-  if(!currentUser){ notice.textContent='Please log in first, then start your payment.'; openModal('loginModal'); return; }
-  if(!packagePrices[currentUser.selectedPackage]){ notice.textContent='No VIP package is selected for this account.'; return; }
-  const phone=$('mpesaPhone').value.trim();
-  if(!phone){ notice.textContent='Enter your M-Pesa phone number.'; return; }
-  button.disabled=true; notice.textContent='Sending STK Push request…';
+  const notice=$('mpesaPaymentNotice'),button=$('mpesaPayButton'),country=activeCountry();
+  if(!currentUser){notice.textContent='Please log in first, then start your payment.';openModal('loginModal');return;}
+  const cfg=countryPackagePrices[country];
+  if(!cfg.prices[currentUser.selectedPackage]){notice.textContent='No VIP package is selected for this account.';return;}
+  const phone=$('mpesaPhone').value.trim(),provider=country==='TZ'?$('checkoutProvider')?.value||'':'';
+  if(!phone){notice.textContent='Enter your mobile-money phone number.';return;}
+  if(country==='TZ'&&!provider){notice.textContent='Select your Tanzania mobile-money network.';return;}
+  button.disabled=true;notice.textContent='Sending secure payment request…';
   try{
-    const started=await api('/api/payments/optimapay/stkpush',{method:'POST',body:JSON.stringify({phone})});
-    if(!started.paymentId){
-      throw new Error(started.message || 'The payment service did not return a payment reference. Please try again shortly.');
-    }
-    const amount = Number(started.amount);
-    notice.textContent=`${started.message||'STK Push sent.'}${Number.isFinite(amount)&&amount>0?` Amount: KSh ${amount.toLocaleString('en-KE')}.`:''}`;
+    const endpoint=country==='KE'?'/api/payments/optimapay/stkpush':'/api/payments/optimapay/global';
+    const started=await api(endpoint,{method:'POST',body:JSON.stringify({phone,provider})});
+    if(!started.paymentId)throw new Error(started.message||'The payment service did not return a reference. Please try again.');
+    notice.textContent=`${started.message||'Payment prompt sent.'} Amount: ${formatCountryAmount(country,Number(started.amount))}.`;
     for(let attempt=0;attempt<24;attempt++){
-      await new Promise(resolve=>setTimeout(resolve,5000));
-      let result;
-      try{ result=await api(`/api/payments/${encodeURIComponent(started.paymentId)}/status`); }
-      catch(err){ notice.textContent=`Waiting for payment confirmation. ${err.message}`; continue; }
+      await new Promise(resolve=>setTimeout(resolve,5000));let result;
+      try{result=await api(`/api/payments/${encodeURIComponent(started.paymentId)}/status`);}catch(err){notice.textContent=`Waiting for payment confirmation. ${err.message}`;continue;}
       const payment=result.payment||{};
-      if(payment.status==='completed'){
-        currentUser=result.user||currentUser; updateAccountUI(); updatePaymentUI();
-        notice.textContent=`Payment confirmed${payment.transactionCode?` (receipt ${payment.transactionCode})`:''}. Your ${packageLabel(payment.package)} membership is now active.`;
-        
-        setPanel('premiumPanel'); await loadPremium(); return;
-      }
-      if(payment.status==='failed'||payment.status==='verification_error'){
-        notice.textContent=payment.message||'Payment could not be verified. If money was deducted, contact support with your M-Pesa receipt.'; return;
-      }
-      notice.textContent=`Payment status: ${payment.status==='verifying'?'checking with OptimaPay':'waiting for your M-Pesa PIN / confirmation'} (${attempt+1}/24).`;
+      if(payment.status==='completed'){currentUser=result.user||currentUser;updateAccountUI();updatePaymentUI();notice.textContent=`Payment confirmed${payment.transactionCode?` (reference ${payment.transactionCode})`:''}. Your ${packageLabel(payment.package)} membership is now active.`;setPanel('premiumPanel');await loadPremium();return;}
+      if(payment.status==='failed'||payment.status==='verification_error'){notice.textContent=payment.message||'Payment could not be verified. If money was deducted, contact support with your transaction reference.';return;}
+      notice.textContent=`Payment status: ${payment.status==='verifying'?'checking with OptimaPay':'waiting for your mobile-money PIN / confirmation'} (${attempt+1}/24).`;
     }
-    notice.textContent='We have not received a final confirmation yet. You can stay on this page and try checking again shortly; do not pay again if your M-Pesa prompt was accepted.';
-  }catch(err){ notice.textContent=err.message||'Could not start the M-Pesa payment.'; }
-  finally{ button.disabled=false; }
+    notice.textContent='Final confirmation has not arrived yet. Do not initiate another payment if you already approved the prompt; check again shortly.';
+  }catch(err){notice.textContent=err.message||'Could not start the mobile-money payment.';}
+  finally{button.disabled=false;}
 }
 
 async function handleAuthButton(){
@@ -1569,11 +1577,14 @@ async function handleRegister(event) {
   event.preventDefault(); hideMessage('registerMessage');
   const email=$('regEmail').value.trim(), rawPhone=$('regPhone').value.trim(), password=$('regPassword').value;
   const selectedPackage=String($('selectedPackage')?.value || registrationPackage || '').toLowerCase();
+  const country=String($('regCountrySelect')?.value||'KE').toUpperCase(),provider=country==='TZ'?String($('regProvider')?.value||'').toUpperCase():'';
   if(!['daily','weekly','monthly'].includes(selectedPackage)) return showMessage('registerMessage','Please select a VIP subscription package.','error');
   if(password.length<10) return showMessage('registerMessage','Use a password with at least 10 characters.','error');
-  const digits=rawPhone.replace(/[\s()+-]/g,'');
-  if(!/^(?:0[17]\d{8}|254[17]\d{8})$/.test(digits)) return showMessage('registerMessage','Enter a valid Kenyan mobile number, e.g. 0712345678 or 254712345678.','error');
-  const phoneNumber=digits.startsWith('0')?'+254'+digits.slice(1):'+'+digits;
+  if(country==='TZ'&&!['VODACOM','YAS','AIRTEL','HALOTEL'].includes(provider))return showMessage('registerMessage','Select your Tanzania mobile-money network.','error');
+  let digits=rawPhone.replace(/[\s()+-]/g,'');if(digits.startsWith('+'))digits=digits.slice(1);
+  const phonePatterns={KE:/^(?:0[17]\d{8}|254[17]\d{8})$/,TZ:/^(?:0[67]\d{8}|255[67]\d{8})$/,UG:/^(?:0[37]\d{8}|256[37]\d{8})$/};
+  if(!phonePatterns[country].test(digits))return showMessage('registerMessage',country==='KE'?'Enter a valid Kenyan mobile number.':country==='TZ'?'Enter a valid Tanzania mobile number.':'Enter a valid Uganda MTN or Airtel number.','error');
+  const prefix={KE:'254',TZ:'255',UG:'256'}[country];const phoneNumber='+'+(digits.startsWith('0')?prefix+digits.slice(1):digits);
 
 
 
@@ -1582,11 +1593,11 @@ async function handleRegister(event) {
 
   const submit=$('registerSubmit'); submit.disabled=true; submit.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Creating your account…';
   try {
-    const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email,phoneNumber,password,selectedPackage,country:'KE'})});
+    const data=await api('/api/auth/register',{method:'POST',body:JSON.stringify({email,phoneNumber,password,selectedPackage,country,provider})});
     currentUser=data.user||null; updateAccountUI(); $('registerForm').reset();
     closeModal('registerModal'); if(window.navigateBankerTips) window.navigateBankerTips('/checkout'); else setPanel('paymentPanel'); updatePaymentUI();
     const phone=$('mpesaPhone'); if(phone) phone.value=phoneNumber;
-    const note=$('mpesaPaymentNotice'); if(note) note.textContent='Account created. Your '+packageLabel(selectedPackage)+' is selected. Confirm the KSh amount and complete the M-Pesa prompt; VIP access activates only after verified payment.';
+    const note=$('mpesaPaymentNotice'); if(note) note.textContent='Account created. Your '+packageLabel(selectedPackage)+' is selected. Complete the '+(country==='KE'?'M-Pesa':country==='TZ'?'Tanzania mobile-money':'Uganda mobile-money')+' prompt; VIP access activates only after verified payment.';
 
 
 
@@ -1598,26 +1609,22 @@ async function handleRegister(event) {
   finally { submit.disabled=false; submit.innerHTML='<i class="fa-solid fa-arrow-right"></i> Create account & continue to payment'; }
 }
 function updateRegistrationFlow(){
-  const phone=$('regPhone');
-  if(phone) phone.placeholder='0712345678 or 254712345678';
-  const phoneHelp=$('regPhoneHelp');
-  if(phoneHelp) phoneHelp.textContent='Enter a Kenyan mobile number, e.g. 0712345678.';
-  const selectedField=$('selectedPackage');
-  if(selectedField) selectedField.value=registrationPackage;
+  const country=String($('regCountrySelect')?.value||'KE').toUpperCase(),cfg=countryPackagePrices[country]||countryPackagePrices.KE;
+  const countryField=$('regCountry');if(countryField)countryField.value=country;
+  const meta={KE:{note:'Kenya checkout · Secure M-Pesa payment',label:'M-Pesa phone number',placeholder:'0712345678 or 254712345678',help:'Enter a Kenyan Safaricom number, e.g. 0712345678.'},TZ:{note:'Tanzania checkout · TZS mobile-money payment',label:'Mobile-money phone number',placeholder:'0712345678 or 255712345678',help:'Enter a Tanzania mobile-money number in local or international format.'},UG:{note:'Uganda checkout · UGX mobile-money payment',label:'Mobile-money phone number',placeholder:'0772000000 or 256772000000',help:'Enter your Uganda MTN or Airtel Money number.'}}[country];
+  const noteCountry=$('regCountryNote');if(noteCountry)noteCountry.innerHTML='<i class="fa-solid fa-shield-halved"></i> '+meta.note;
+  const phone=$('regPhone');if(phone)phone.placeholder=meta.placeholder;
+  const label=$('regPhoneLabel');if(label)label.textContent=meta.label;
+  const help=$('regPhoneHelp');if(help)help.textContent=meta.help;
+  const providerWrap=$('regProviderWrap');if(providerWrap)providerWrap.style.display=country==='TZ'?'':'none';
   document.querySelectorAll('[data-reg-package]').forEach(button=>{
-    const selected=button.dataset.regPackage===registrationPackage;
-    button.classList.toggle('selected',selected);
-    button.setAttribute('aria-pressed',String(selected));
+    const selected=button.dataset.regPackage===registrationPackage;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));
+    const price=button.querySelector('[data-package-price]');if(price)price.textContent=formatCountryAmount(country,cfg.prices[button.dataset.regPackage]);
   });
-  const note=$('regPriceNote');
-  const amount=packagePrices[registrationPackage];
-  if(note){
-    note.innerHTML=amount
-      ? '<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Selected: <strong>'+packageLabel(registrationPackage)+'</strong> — KSh '+amount.toLocaleString('en-KE')+'. You can change your plan before creating your account.'
-      : '<i class="fa-solid fa-circle-info" aria-hidden="true"></i> Select a VIP package. The selected plan and exact amount will be confirmed before payment.';
-  }
-  const submit=$('registerSubmit');
-  if(submit) submit.disabled=!['daily','weekly','monthly'].includes(registrationPackage);
+  const selectedField=$('selectedPackage');if(selectedField)selectedField.value=registrationPackage;
+  const note=$('regPriceNote'),amount=cfg.prices[registrationPackage];
+  if(note)note.innerHTML=amount?'<i class="fa-solid fa-circle-check" aria-hidden="true"></i> Selected: <strong>'+packageLabel(registrationPackage)+'</strong> — '+formatCountryAmount(country,amount)+'. You can change your plan before creating your account.':'<i class="fa-solid fa-circle-info" aria-hidden="true"></i> Select a VIP package. The selected plan and exact amount will be confirmed before payment.';
+  const submit=$('registerSubmit');if(submit)submit.disabled=!['daily','weekly','monthly'].includes(registrationPackage);
 }
 
 async function handleLogin(event) {
@@ -1812,6 +1819,7 @@ document.querySelectorAll('[data-reg-package]').forEach(button=>button.addEventL
 $('authNavButton').addEventListener('click',handleAuthButton);
 document.querySelectorAll('.choose-package').forEach(b=>b.addEventListener('click',()=>beginRegistration(b.dataset.package)));
 $('mpesaPaymentForm').addEventListener('submit',handleMpesaPayment);
+$('regCountrySelect')?.addEventListener('change',()=>{registrationPackage='';updateRegistrationFlow();});
 
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
@@ -1889,11 +1897,11 @@ if($('tipDate')) $('tipDate').min=todayISO();
 if($('freeTipDate')) $('freeTipDate').value=todayISO();
 if($('vipTipDate')) $('vipTipDate').value=todayISO();
 function renderUserProfile(){const u=currentUser||{};const email=String(u.email||u.emailAddress||'').trim();const name=String(u.name||u.fullName||u.displayName||'').trim()||(email?email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Your Profile');const pkg=({daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'})[String(u.selectedPackage||u.package||'').toLowerCase()]||'No active plan';const active=u.isActivated===true||String(u.membershipStatus||'').toLowerCase()==='active';const expiry=u.vipExpiresAt?new Date(u.vipExpiresAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'Not set';const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'BT';const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};set('profileAvatar',initials);set('profileTitle',name);set('profileEmail',email||'Sign in to view your account details');set('profileEmailDetail',email||'—');set('profilePlan',active?pkg:(u.selectedPackage?pkg+' · Pending':'No active plan'));set('profileExpiry',expiry);const status=$('profileStatus');if(status){status.classList.toggle('is-active',active);status.innerHTML='<span class="status-dot"></span> '+(currentUser?(active?'Active':String(u.membershipStatus||'Pending').replace(/_/g,' ')):'Guest');}}
-async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
+async function loadCustomerPayments(){const body=$('customerPaymentsRows');if(!body||!currentUser){if(body)body.innerHTML='<tr><td colspan="5">Sign in to view your payment history.</td></tr>';return;}try{const d=await api('/api/payments/history');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'—')}</td><td>${escapeHTML(packageLabel(p.package))}</td><td>${escapeHTML(p.currency||'KES')} ${Number(p.amount).toLocaleString()}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference||'—')}</td></tr>`).join(''):'<tr><td colspan="5">No payment history yet.</td></tr>';$('customerPaymentsNotice').textContent='Keep your M-Pesa receipt for your records.';}catch(e){$('customerPaymentsNotice').textContent=e.message||'Could not load payment history.';}}
 function checkExpiryReminder(){try{if(!currentUser?.vipExpiresAt||!('Notification'in window)||Notification.permission!=='granted')return;const expiry=new Date(currentUser.vipExpiresAt);const remaining=expiry-Date.now();if(remaining>0&&remaining<=3*86400000){const key='bt-expiry-reminder-'+currentUser.id+'-'+expiry.toISOString().slice(0,10);if(!sessionStorage.getItem(key)){new Notification('Banker Tips VIP expiry reminder',{body:'Your VIP membership expires '+expiry.toLocaleDateString()+'. Review your subscription to avoid interruption.'});sessionStorage.setItem(key,'1');}}}catch(e){console.debug('Expiry reminder unavailable',e);}}
 async function loadPerformanceStats(){try{const d=await api('/api/stats/performance');$('statsSettled').textContent=d.settled;$('statsWins').textContent=d.wins;$('statsWinRate').textContent=d.winRate===null?'—':d.winRate+'%';$('statsMethod').textContent=d.methodology;}catch(e){$('statsMethod').textContent='Performance statistics are temporarily unavailable.';}}
 async function loadAdminOverview(){try{const d=await api('/api/admin/overview');$('overviewUsers').textContent=d.users.total||0;$('overviewVip').textContent=d.users.active||0;const paid=(d.payments||[]).filter(x=>String(x.status||'').toLowerCase()==='completed').reduce((a,x)=>a+(Number(x.amount)||0),0);$('overviewPaid').textContent='KES '+paid.toLocaleString('en-KE');$('overviewNotice').textContent='Revenue estimate sums completed payment records; reconcile with your provider statement.';}catch(e){$('overviewNotice').textContent=e.message||'Overview unavailable.';}}
-async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)return;body.innerHTML='<tr><td colspan="5">Loading payment records…</td></tr>';try{const d=await api('/api/admin/payments');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.email)}<span class="subtext">${escapeHTML(p.phone||'')}</span></td><td>${escapeHTML(packageLabel(p.package))}</td><td>KES ${Number(p.amount).toLocaleString('en-KE')}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference)}<span class="subtext">${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'')}</span></td></tr>`).join(''):'<tr><td colspan="5">No payment records found.</td></tr>';$('paymentsNotice').textContent=`${ps.length} recent payment record(s).`;}catch(e){body.innerHTML=`<tr><td colspan="5">${escapeHTML(e.message)}</td></tr>`;}}
+async function loadAdminPayments(){const body=$('adminPaymentsRows');if(!body)return;body.innerHTML='<tr><td colspan="5">Loading payment records…</td></tr>';try{const d=await api('/api/admin/payments');const ps=d.payments||[];body.innerHTML=ps.length?ps.map(p=>`<tr><td>${escapeHTML(p.email)}<span class="subtext">${escapeHTML(p.country||'KE')} · ${escapeHTML(p.phone||'')}</span></td><td>${escapeHTML(packageLabel(p.package))}</td><td>${escapeHTML(p.currency||'KES')} ${Number(p.amount).toLocaleString()}</td><td>${escapeHTML(p.status)}</td><td>${escapeHTML(p.transactionCode||p.reference)}<span class="subtext">${escapeHTML(p.provider||'kenya_mpesa')} · ${escapeHTML(p.createdAt?new Date(p.createdAt).toLocaleString():'')}</span></td></tr>`).join(''):'<tr><td colspan="5">No payment records found.</td></tr>';$('paymentsNotice').textContent=`${ps.length} recent payment record(s).`;}catch(e){body.innerHTML=`<tr><td colspan="5">${escapeHTML(e.message)}</td></tr>`;}}
 
 // Homepage advertisement management. The server must enforce admin permissions
 // for /api/admin/advertisements and expose the currently published ad publicly.
