@@ -90,8 +90,8 @@ Tip payload example:
 - The backend validates incoming tip data and never allows public registration to choose a role.
 - Before public production use, consider adding email verification, password reset, audit logs, backups, monitoring, and a dedicated CSRF-token implementation if the frontend and API are hosted on different sites.
 - This is a starter implementation; review and test in your environment before accepting real customer payments. OptimaPay M-Pesa STK Push and server-side status polling are integrated. PayPal, Skrill, Eversend, and Binance are display-only and are not integrated.
-- Configure `OPTIMA_BASE_URL=https://global.optimapaybridge.co.ke/api/v2` and country-specific credentials in Render: `KE_OPTIMAPAY_API_KEY`, `KE_OPTIMAPAY_API_SECRET`, `KE_OPTIMAPAY_ACCOUNT_ID`, `TZ_OPTIMAPAY_API_KEY`, `TZ_OPTIMAPAY_API_SECRET`, and `TZ_OPTIMAPAY_ACCOUNT_ID`. The server uses `POST /collecto/initiate` and `GET /collecto/status/{identifier}` for the selected country. Keep secrets out of frontend code and source control.
-- The current integration uses server-side status polling against the provided Collecto status endpoint; verify the exact Collecto request and response schema with OptimaPay before live transactions. Membership is activated only when OptimaPay reports `completed` and the reported amount and phone match the stored payment. Test with a low amount and a test account first; confirm current package prices and your payment account ID before production use.
+- Configure the separate Kenya credentials (`KE_OPTIMAPAY_API_KEY`, `KE_OPTIMAPAY_API_SECRET`, `KE_OPTIMAPAY_PAYMENT_ACCOUNT_ID`) and the shared Tanzania/Uganda Global API credentials (`TZUG_OPTIMAPAY_API_KEY`, `TZUG_OPTIMAPAY_API_SECRET`, `TZUG_OPTIMAPAY_ACCOUNT_ID`) in Render. Keep secrets out of frontend code and source control.
+- The current integration uses server-side status polling against the provided Collecto status endpoint; verify the exact Collecto request and response schema with OptimaPay before live transactions. Membership is activated only when OptimaPay reports `completed` and the reported amount and phone match the stored payment. Test with a low amount and a test account first; confirm current package prices and both the Kenya-only account ID and the shared Tanzania/Uganda merchant account ID before production use.
 
 
 ## Fix for admin tip validation
@@ -142,3 +142,41 @@ After deployment, verify with a test account: daily activation near midnight, ac
 - The browser sends the selected country, package and mobile number to the backend. The backend determines price/currency and selects that country's credentials. Never trust a client-supplied amount.
 - The integration sends account routing fields plus phone, amount, currency, country, reference and description. Confirm the exact accepted account field and status response schema with OptimaPay before production.
 - Membership is activated only after provider status is successful and the returned phone and amount match the stored payment. Provider responses must include the paid amount and payer phone (or equivalent documented fields) for this verification to succeed.
+
+## Multi-country OptimaPay mobile-money checkout
+
+The subscription checkout supports Kenya, Tanzania and Uganda while retaining the existing Kenya M-Pesa STK Push integration (`stkpush.php` and `status.php`). Tanzania and Uganda use the OptimaPay Global API from the server only; API credentials must never be placed in browser code.
+
+### Country pricing
+
+| Package | Kenya (KES) | Tanzania (TZS) | Uganda (UGX) |
+| --- | ---: | ---: | ---: |
+| Daily VIP | 150 | 5,000 | 5,000 |
+| Weekly VIP | 1,500 | 35,000 | 50,000 |
+| Monthly VIP | 3,500 | 75,000 | 110,000 |
+
+### Tanzania
+
+- Collection: `POST https://global.optimapaybridge.co.ke/api/v2/godigital/tz/collect`
+- Status: `GET https://global.optimapaybridge.co.ke/api/v2/godigital/tz/status/{identifier}`
+- Checkout requires explicit network selection: `VODACOM`, `YAS`, `AIRTEL`, or `HALOTEL`.
+- Phone numbers are normalized to `255` international format.
+- Currency: TZS.
+
+### Uganda
+
+- Collection: `POST https://global.optimapaybridge.co.ke/api/v2/collecto/initiate`
+- Status: `GET https://global.optimapaybridge.co.ke/api/v2/collecto/status/{identifier}`
+- Supported wallet rails documented by OptimaPay: MTN and Airtel Money.
+- Phone numbers are normalized to `256` international format.
+- Currency: UGX. The Global Wallet collection payload takes phone, amount and reference; the API documentation does not define a separate network selector field for this endpoint.
+
+### Configuration and payment confirmation
+
+Kenya uses its own `KE_OPTIMAPAY_API_KEY`, `KE_OPTIMAPAY_API_SECRET` and `KE_OPTIMAPAY_PAYMENT_ACCOUNT_ID`. Tanzania and Uganda share one separate pair (`TZUG_OPTIMAPAY_API_KEY` and `TZUG_OPTIMAPAY_API_SECRET`) and one shared merchant account (`TZUG_OPTIMAPAY_ACCOUNT_ID`). For backward compatibility, the Kenya integration still accepts the legacy `OPTIMAPAY_API_KEY`, `OPTIMAPAY_API_SECRET` and `OPTIMAPAY_PAYMENT_ACCOUNT_ID` names as fallbacks. Do not put Kenya credentials in the TZUG variables or vice versa.
+
+The published Global API request schema authenticates using the shared API key and secret headers and does not define an `account_id` property in the collection JSON body. The shared account ID is therefore kept as deployment/merchant configuration, not sent as an undocumented request field. If OptimaPay supplies a separate account-ID header or body-field requirement for this merchant, confirm its exact field name with them before adding it.
+
+A collection response (including HTTP 202) is treated as pending, not paid. The server stores the transaction reference and checks the country-specific status endpoint. VIP membership is activated only after a successful final status whose amount and phone match the saved payment. Status checks are idempotent at the payment-record level. If initiation times out or returns an ambiguous gateway error, the original merchant reference is retained for reconciliation; customers are told not to retry until its status is checked.
+
+Before production use, configure valid OptimaPay credentials and complete provider-side KYC/merchant activation. Test real low-value transactions on each supported rail, including pending, success, failed, cancelled and timeout cases. Confirm the Global Wallet status endpoint's final response fields and Uganda network eligibility with OptimaPay for the merchant account.
