@@ -1296,6 +1296,17 @@ function totalOddsRow(tips, columns=5){
   const total=calculateTotalOdds(tips);
   return `<tr class="total-odds-row"><td colspan="${columns}"><span class="total-odds-label">TOTAL ACCUMULATOR ODDS</span><strong class="total-odds-value">${total===null?'—':total.toFixed(2)}</strong></td></tr>`;
 }
+function footballStatusLabel(t) {
+  const rawStatus=String(t.matchStatus||'').toUpperCase();
+  const terminal={CANCELLED:'Cancelled',CANCELED:'Cancelled',CANC:'Cancelled',POSTPONED:'Postponed',PST:'Postponed',ABANDONED:'Abandoned',ABD:'Abandoned'};
+  if(terminal[rawStatus]) return terminal[rawStatus];
+  const period=String(t.matchPeriod||rawStatus||'').toUpperCase();
+  const labels={NOT_SYNCED:'',NOT_STARTED:'Upcoming',FIRST_HALF:'1st Half',HALF_TIME:'Half-Time',SECOND_HALF:'2nd Half',EXTRA_TIME:'Extra-Time',PENALTIES:'Penalties',FINISHED:'Full-Time',FT:'Full-Time',CANCELLED:'Cancelled',CANCELED:'Cancelled',POSTPONED:'Postponed',PST:'Postponed',ABANDONED:'Abandoned'};
+  let label=labels[period]||((period==='LIVE'||/^\d{1,3}(?:\+\d+)?$/.test(period))?'Live':'');
+  const minute=Number(t.matchElapsed);
+  if((period==='FIRST_HALF'||period==='SECOND_HALF'||period==='EXTRA_TIME'||period==='LIVE')&&Number.isFinite(minute)&&minute>0) label+=` · ${minute}'`;
+  return label;
+}
 function renderTipRows(tips, target, withDate=false) {
   if (!Array.isArray(tips) || tips.length===0) {
     showEmpty(target,withDate?6:5,'Tips are being updated. Please check back later.');
@@ -1303,7 +1314,11 @@ function renderTipRows(tips, target, withDate=false) {
     return;
   }
   const rows=tips.map(t => {
-    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
+    const hasScore=Number.isInteger(Number(t.homeScore))&&Number.isInteger(Number(t.awayScore))&&t.homeScore!==null&&t.awayScore!==null;
+    const score=hasScore?`${Number(t.homeScore)} - ${Number(t.awayScore)}`:'';
+    const matchStatus=footballStatusLabel(t);
+    const liveLine=(score||matchStatus)?`<span class="subtext football-scoreline">${score?`<strong>${escapeHTML(score)}</strong>`:''}${score&&matchStatus?' · ':''}${escapeHTML(matchStatus)}</span>`:'';
+    return `<tr>${withDate?`<td>${escapeHTML(prettyDate(t.date))}</td>`:''}<td>${escapeHTML(t.time || '—')}</td><td class="match">${escapeHTML(t.match || '—')}${liveLine}</td><td>${escapeHTML(t.tip || '—')}</td><td><span class="odds">${escapeHTML(t.odds ?? '—')}</span></td><td>${safeStatus(t.status)}</td></tr>`;
   }).join('');
   $(target).innerHTML = rows + totalOddsRow(tips,withDate?6:5);
 }
