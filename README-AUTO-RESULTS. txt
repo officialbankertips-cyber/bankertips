@@ -1,75 +1,38 @@
-# Banker Tips — Football results and live fixture synchronization
+BANKER TIPS — GOAL API LIVE SCORES AND AUTOMATIC SETTLEMENT
 
-This package updates the existing Banker Tips Node.js / Express / MongoDB application. It preserves the current authentication, VIP membership, payment, advertisement, tip-management and admin routes.
+Provider
+--------
+Banker Tips uses GOAL API (https://goal-api.com/) through its REST API.
+Documentation: https://goal-api.com/documentation
 
-## What is included
+Render environment variables
+-----------------------------
+GOAL_API_KEY=your_GOAL_API_key
+GOAL_SYNC_INTERVAL_MS=600000
+APP_TIME_ZONE=Africa/Nairobi
 
-- Backend-only API-Football integration. The API key is never sent to browser code.
-- Automatic fixture association using provider fixture IDs where supplied, team-name normalization (including Turkish and other accented characters), club suffix cleanup, common aliases, kickoff-time proximity and strict home/away orientation.
-- Conservative matching: uncertain or reversed team matches are not used to settle a tip. A manually supplied fixture ID is also checked against both saved team names before use.
-- Live score, provider status and provider-supplied elapsed minute are saved in MongoDB.
-- Correct display labels for first half, half-time, second half, extra time, penalties, finished, postponed and cancelled fixtures.
-- Stale score data is identified as last verified, with the timestamp. The app never locally increments a match minute.
-- Automatic settlement for Home Win, Draw, Away Win, Double Chance, BTTS Yes/No, Over/Under 0.5–5.5 and Draw No Bet.
-- Unsupported markets and abandoned/suspended matches remain pending for administrator review. Draw No Bet is void on a draw; cancelled fixtures are void; postponed fixtures remain pending.
-- Manual Sync Results button and manual fixture-ID association in the Admin Panel.
-- Existing public Free/Premium tips refresh from MongoDB while their panels are open.
+Keep GOAL_API_KEY in Render Environment Variables. Never put it in public/index.html, browser JavaScript, or a committed .env file.
 
-## Environment configuration
+How synchronization works
+-------------------------
+- The server polls GOAL API's /fixtures/live endpoint and date-specific fixture endpoints.
+- It matches pending Free Tips and Premium Tips by exact normalized home/away team order, and optionally league name. Ambiguous matches are left untouched.
+- Scores and provider match status are stored on each matched tip and returned by the existing tips APIs.
+- A tip is settled only after the provider reports a finished status and the market is one of the implemented, unambiguous markets: 1X2, Double Chance, Over/Under, or BTTS.
+- Cancelled matches are marked Void. Postponed matches remain Pending. Abandoned or unsupported markets are not automatically settled.
+- Correct Score, Asian Handicap, Draw No Bet, corners, cards, player markets and other unsupported markets require manual settlement.
+- Free and Premium tips use the same synchronization and settlement logic.
 
-Copy `.env.example` to `.env` for local development, or set the variables in Render's Environment settings. Never commit or publish the real `.env`.
+Admin endpoints
+---------------
+GET  /api/admin/football/status  — provider configuration and last sync status
+POST /api/admin/football/sync    — run a manual sync (admin session + CSRF protection required)
 
-Required existing application settings:
-
-```env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=replace_with_a_random_secret_at_least_32_characters
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=replace_with_a_strong_password_at_least_12_characters
-```
-
-Football provider settings:
-
-```env
-FOOTBALL_API_KEY=YOUR_API_KEY
-FOOTBALL_API_BASE_URL=https://v3.football.api-sports.io
-FOOTBALL_API_TIMEZONE=Africa/Nairobi
-FOOTBALL_SYNC_INTERVAL_MS=600000
-```
-
-`FOOTBALL_SYNC_INTERVAL_MS` is optional and defaults to 600000 ms (10 minutes). The minimum accepted interval is 120000 ms. Choose an interval that fits the request quota on your API-Football plan. Today's fixture response is cached for just under the configured interval; historical and future fixture dates use longer caches. Manual fixture-ID lookups are briefly cached. The process prevents overlapping automatic/manual sync runs.
-
-The application can start without `FOOTBALL_API_KEY`, but football synchronization and automatic settlement remain disabled until it is configured.
-
-## Install and deploy on Render
-
-1. Back up the currently deployed project and MongoDB database.
-2. Upload the contents of this ZIP to the existing repository, preserving `public/index.html` as the frontend path.
-3. Ensure the Render service uses the repository root as its Root Directory.
-4. Set the Build Command to `npm install`.
-5. Set the Start Command to `npm start`.
-6. Add the environment variables above in Render. Keep `MONGODB_URI`, `JWT_SECRET`, admin credentials and `FOOTBALL_API_KEY` private.
-7. Deploy and check the Render logs for `MongoDB connected` and `Banker Tips server listening`.
-8. Sign in as administrator, open Tips Admin, enter a provider fixture ID for any unresolved fixture if needed, and click **Sync results**.
-9. Verify a live match against API-Football's official response and check the API usage dashboard.
-
-## Admin workflow
-
-- Use the optional **API-Football Fixture ID** field when the provider fixture is known.
-- The supplied ID is not blindly trusted: the backend confirms that its home and away teams correspond to the tip before using it.
-- Unmatched fixture messages, unsupported market messages and last synchronization timestamps appear in the admin list.
-- Unsupported/ambiguous markets remain Pending for manual settlement.
-- Manual admin result edits remain supported.
-
-## Validation and limitations
-
-Run:
-
-```bash
-npm install
-npm run check
-```
-
-The check script runs Node syntax validation and focused football logic tests for Turkish team-name normalization, aliases, home/away orientation, settlement markets and fixture status labels.
-
-A real API-Football key and a reachable MongoDB database are required to verify live provider responses, actual account quota, automatic background operation and persisted updates. Those credentials are intentionally not included in this archive. Provider data can be delayed according to the configured synchronization interval and API plan.
+Important deployment notes
+---------------------------
+- Set GOAL_API_KEY in Render before deploying this version.
+- Set GOAL_SYNC_INTERVAL_MS to 600000 (10 minutes) initially; do not lower it without checking your GOAL API request allowance.
+- The API free plan has a finite request allowance. The service checks only dates associated with pending tips (up to four distinct tip dates per cycle) plus the live fixtures snapshot.
+- If multiple fixtures match the same teams, no automatic fixture assignment is made unless an existing GOAL fixture ID resolves the ambiguity.
+- Review unsupported prediction formats and team-name aliases in the admin panel. Manual settlement remains available.
+- Verify actual competition coverage and your plan quota in the GOAL API dashboard.

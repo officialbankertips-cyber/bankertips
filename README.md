@@ -180,3 +180,8 @@ The published Global API request schema authenticates using the shared API key a
 A collection response (including HTTP 202) is treated as pending, not paid. The server stores the transaction reference and checks the country-specific status endpoint. VIP membership is activated only after a successful final status whose amount and phone match the saved payment. Status checks are idempotent at the payment-record level. If initiation times out or returns an ambiguous gateway error, the original merchant reference is retained for reconciliation; customers are told not to retry until its status is checked.
 
 Before production use, configure valid OptimaPay credentials and complete provider-side KYC/merchant activation. Test real low-value transactions on each supported rail, including pending, success, failed, cancelled and timeout cases. Confirm the Global Wallet status endpoint's final response fields and Uganda network eligibility with OptimaPay for the merchant account.
+
+
+## GOAL API live scores and tip settlement
+
+Configure `GOAL_API_KEY`, `GOAL_SYNC_INTERVAL_MS=600000`, and `APP_TIME_ZONE=Africa/Nairobi` in Render Environment Variables. See `README-AUTO-RESULTS. txt` for the provider workflow, supported markets, safety rules, and admin sync endpoints. The API key must remain server-side.
