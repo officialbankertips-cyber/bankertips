@@ -140,7 +140,8 @@ const paymentSchema = new mongoose.Schema({
   transactionCode: { type: String, default: null },
   providerMessage: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
-  completedAt: { type: Date, default: null }
+  completedAt: { type: Date, default: null },
+  updatedAt: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 const User = mongoose.model("User", userSchema);
@@ -524,6 +525,7 @@ async function activatePaidMembership(payment, providerStatus) {
     payment.transactionCode = String(providerStatus.transaction_code || providerStatus.gateway_transaction_id || providerStatus.reference || "").slice(0, 100) || null;
     payment.providerMessage = `Payment verified with OptimaPay (${payment.currency || "KES"}).`;
     payment.completedAt = new Date();
+    payment.updatedAt = new Date();
     await payment.save();
   }
   return true;
@@ -764,9 +766,12 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
   try {
     let payment = await Payment.findOne({ _id: req.params.paymentId, user: req.user._id });
     if (!payment) return res.status(404).json({ success: false, message: "Payment not found." });
-    if (payment.status === "pending" && (payment.checkoutRequestId || payment.globalReference || payment.globalTransactionId)) {
+    const hasProviderIdentifier = Boolean(payment.checkoutRequestId || payment.globalReference || payment.globalTransactionId);
+    const staleVerification = payment.status === "verifying" && Date.now() - new Date(payment.updatedAt || payment.createdAt).getTime() > 2 * 60 * 1000;
+    if ((payment.status === "pending" || staleVerification) && hasProviderIdentifier) {
       if ((!payment.provider || payment.provider === "kenya_mpesa") && !paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
-      const claimed = await Payment.findOneAndUpdate({ _id: payment._id, status: "pending" }, { $set: { status: "verifying" } }, { new: true });
+      const claimFilter = { _id: payment._id, $or: [{ status: "pending" }, ...(staleVerification ? [{ status: "verifying" }] : [])] };
+      const claimed = await Payment.findOneAndUpdate(claimFilter, { $set: { status: "verifying", updatedAt: new Date() } }, { new: true });
       if (claimed) {
         payment = await Payment.findById(payment._id);
         try {
@@ -777,22 +782,27 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
             const identifier = payment.globalReference || payment.globalTransactionId;
             const statusEndpoint = payment.country === "TZ" ? `godigital/tz/status/${encodeURIComponent(identifier)}` : `collecto/status/${encodeURIComponent(identifier)}`;
             const response = await optimapayGlobalRequest("GET", statusEndpoint);
-            provider = response.data || response;
+            // Global API status responses wrap the transaction in `data`; tolerate
+            // both the documented wrapper and a direct transaction payload.
+            provider = response && response.data && typeof response.data === "object" ? response.data : response;
           }
-          const status = String(provider.status || "").toLowerCase();
+          const status = String(provider.status || provider.payment_status || "").trim().toLowerCase();
           if (["completed", "successful", "success", "paid"].includes(status)) {
             await activatePaidMembership(payment, provider);
           } else if (["failed", "cancelled", "canceled", "rejected"].includes(status)) {
             payment.status = "failed";
             payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment failed or was cancelled.").slice(0, 300);
+            payment.updatedAt = new Date();
             await payment.save();
           } else {
             payment.status = "pending";
             payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment is still pending.").slice(0, 300);
+            payment.updatedAt = new Date();
             await payment.save();
           }
         } catch (providerError) {
           payment.status = "pending";
+          payment.updatedAt = new Date();
           await payment.save().catch(() => {});
           console.error("OptimaPay status check error:", providerError.message);
         }
@@ -1087,6 +1097,67 @@ app.use((req, res, next) => {
   next();
 });
 
+async function verifyGlobalPaymentRecord(payment) {
+  const identifier = payment.globalReference || payment.globalTransactionId;
+  if (!identifier || !["TZ", "UG"].includes(payment.country)) return;
+  const statusEndpoint = payment.country === "TZ"
+    ? `godigital/tz/status/${encodeURIComponent(identifier)}`
+    : `collecto/status/${encodeURIComponent(identifier)}`;
+  const response = await optimapayGlobalRequest("GET", statusEndpoint);
+  const provider = response && response.data && typeof response.data === "object" ? response.data : response;
+  const status = String(provider.status || provider.payment_status || "").trim().toUpperCase();
+  if (["SUCCESSFUL", "COMPLETED", "SUCCESS", "PAID"].includes(status)) {
+    await activatePaidMembership(payment, provider);
+  } else if (["FAILED", "CANCELLED", "CANCELED", "REJECTED"].includes(status)) {
+    payment.status = "failed";
+    payment.providerMessage = String(provider.message || `Payment ${status.toLowerCase()}.`).slice(0, 300);
+    payment.updatedAt = new Date();
+    await payment.save();
+  } else {
+    payment.status = "pending";
+    payment.providerMessage = String(provider.message || "Payment is still pending confirmation.").slice(0, 300);
+    payment.updatedAt = new Date();
+    await payment.save();
+  }
+}
+
+async function sweepGlobalPayments() {
+  // The API documentation does not guarantee merchant webhook delivery, so the
+  // server independently polls pending Tanzania/Uganda transactions. This keeps
+  // activation working even if the customer closes the checkout page.
+  const staleBefore = new Date(Date.now() - 2 * 60 * 1000);
+  const candidates = await Payment.find({
+    country: { $in: ["TZ", "UG"] },
+    $and: [
+      { $or: [
+        { status: "pending" },
+        { status: "verifying", updatedAt: { $lte: staleBefore } }
+      ] },
+      { $or: [
+        { globalReference: { $ne: null } },
+        { globalTransactionId: { $ne: null } }
+      ] }
+    ]
+  }).sort({ createdAt: 1 }).limit(25);
+  for (const candidate of candidates) {
+    const claimed = await Payment.findOneAndUpdate(
+      { _id: candidate._id, $or: [{ status: "pending" }, { status: "verifying", updatedAt: { $lte: staleBefore } }] },
+      { $set: { status: "verifying", updatedAt: new Date() } },
+      { new: true }
+    );
+    if (!claimed) continue;
+    try {
+      await verifyGlobalPaymentRecord(claimed);
+    } catch (err) {
+      claimed.status = "pending";
+      claimed.updatedAt = new Date();
+      claimed.providerMessage = "Automatic verification will retry. " + String(err.message || "Gateway unavailable.").slice(0, 180);
+      await claimed.save().catch(() => {});
+      console.error(`Automatic ${claimed.country} payment verification failed:`, err.message);
+    }
+  }
+}
+
 async function publishScheduledTips() {
   const now = new Date();
   const result = await Tip.updateMany(
@@ -1148,6 +1219,11 @@ mongoose.connect(process.env.MONGODB_URI)
       publishScheduledTips().catch(err => console.error("Scheduled-tip publication sweep failed:", err.message));
     }, 30 * 1000);
     if (typeof scheduledTipSweep.unref === "function") scheduledTipSweep.unref();
+    await sweepGlobalPayments().catch(err => console.error("Initial Global API payment sweep failed:", err.message));
+    const globalPaymentSweep = setInterval(() => {
+      sweepGlobalPayments().catch(err => console.error("Global API payment sweep failed:", err.message));
+    }, 20 * 1000);
+    if (typeof globalPaymentSweep.unref === "function") globalPaymentSweep.unref();
     app.listen(PORT, () => console.log(`Banker Tips server listening on port ${PORT}`));
   })
   .catch(err => {
