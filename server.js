@@ -1015,20 +1015,57 @@ app.get("/api/stats/performance", async (req, res) => {
 
 app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const [users, payments, tips] = await Promise.all([
-      User.aggregate([{ $group: { _id: null, total: { $sum: 1 }, active: { $sum: { $cond: [{ $or: [
-        { $eq: ["$role", "admin"] },
-        { $and: [
-          { $eq: ["$isActivated", true] },
-          { $eq: ["$membershipStatus", "active"] },
-          { $gt: ["$vipExpiresAt", new Date()] }
-        ] }
-      ] }, 1, 0] } } } }]),
-      Payment.aggregate([{ $group: { _id: "$status", count: { $sum: 1 }, amount: { $sum: "$amount" } } }]),
+    const now = new Date();
+    const [userRows, paymentRows, tips] = await Promise.all([
+      User.aggregate([
+        { $match: { role: "user" } },
+        { $group: {
+          _id: "$country",
+          users: { $sum: 1 },
+          activeVip: { $sum: { $cond: [
+            { $and: [
+              { $eq: ["$isActivated", true] },
+              { $eq: ["$membershipStatus", "active"] },
+              { $gt: ["$vipExpiresAt", now] }
+            ] }, 1, 0
+          ] } }
+        } }
+      ]),
+      Payment.aggregate([
+        { $match: { status: "completed" } },
+        { $group: {
+          _id: { country: "$country", currency: "$currency" },
+          verifiedPayments: { $sum: 1 },
+          verifiedAmount: { $sum: "$amount" }
+        } }
+      ]),
       Tip.aggregate([{ $group: { _id: "$result", count: { $sum: 1 } } }])
     ]);
-    res.json({ success: true, users: users[0] || { total: 0, active: 0 }, payments: payments.map(p => ({ status: p._id, count: p.count, amount: p.amount })), tips: tips.map(t => ({ result: t._id, count: t.count })) });
-  } catch (err) { res.status(500).json({ success: false, message: "Admin overview unavailable." }); }
+    const countries = {
+      KE: { currency: "KES", users: 0, activeVip: 0, verifiedPayments: 0, verifiedAmount: 0 },
+      TZ: { currency: "TZS", users: 0, activeVip: 0, verifiedPayments: 0, verifiedAmount: 0 },
+      UG: { currency: "UGX", users: 0, activeVip: 0, verifiedPayments: 0, verifiedAmount: 0 }
+    };
+    for (const row of userRows) {
+      const code = String(row._id || "KE").toUpperCase();
+      if (countries[code]) {
+        countries[code].users = row.users || 0;
+        countries[code].activeVip = row.activeVip || 0;
+      }
+    }
+    for (const row of paymentRows) {
+      const code = String(row._id?.country || "KE").toUpperCase();
+      if (countries[code]) {
+        countries[code].currency = row._id?.currency || countries[code].currency;
+        countries[code].verifiedPayments += row.verifiedPayments || 0;
+        countries[code].verifiedAmount += row.verifiedAmount || 0;
+      }
+    }
+    res.json({ success: true, countries, tips: tips.map(t => ({ result: t._id, count: t.count })) });
+  } catch (err) {
+    console.error("Admin overview failed:", err.message);
+    res.status(500).json({ success: false, message: "Admin overview unavailable." });
+  }
 });
 app.get("/api/admin/payments", requireAuth, requireAdmin, async (req, res) => {
   try {
