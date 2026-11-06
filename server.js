@@ -17,7 +17,13 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const COOKIE_NAME = "banker_tips_session";
 const TOKEN_TTL = "12h";
 const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2";
+const OPTIMAPAY_GLOBAL_BASE_URL = "https://global.optimapaybridge.co.ke/api/v2";
 const PACKAGE_PRICES = Object.freeze({ daily: 150, weekly: 1500, monthly: 3500 });
+const COUNTRY_PACKAGE_PRICES = Object.freeze({
+  KE: PACKAGE_PRICES,
+  TZ: Object.freeze({ daily: 5000, weekly: 35000, monthly: 75000 }),
+  UG: Object.freeze({ daily: 5000, weekly: 50000, monthly: 110000 })
+});
 const PACKAGE_DAYS = Object.freeze({ daily: 1, weekly: 7, monthly: 30 });
 const MEMBERSHIP_TIME_ZONE = "Africa/Nairobi";
 const MEMBERSHIP_SWEEP_INTERVAL_MS = 60 * 1000;
@@ -81,6 +87,8 @@ const apiLimiter = rateLimit({
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
   phoneNumber: { type: String, trim: true, maxlength: 30, default: "" },
+  country: { type: String, enum: ["KE", "TZ", "UG"], default: "KE", index: true },
+  mobileMoneyProvider: { type: String, default: "" },
   passwordHash: { type: String, required: true, select: false },
   role: { type: String, enum: ["user", "admin"], default: "user", index: true },
   isActivated: { type: Boolean, default: false, index: true },
@@ -119,6 +127,12 @@ const paymentSchema = new mongoose.Schema({
   package: { type: String, enum: ["daily", "weekly", "monthly"], required: true },
   amount: { type: Number, required: true, min: 1 },
   phone: { type: String, required: true },
+  country: { type: String, enum: ["KE", "TZ", "UG"], default: "KE", index: true },
+  currency: { type: String, enum: ["KES", "TZS", "UGX"], default: "KES" },
+  provider: { type: String, default: "kenya_mpesa" },
+  providerCode: { type: String, default: null },
+  globalReference: { type: String, default: null },
+  globalTransactionId: { type: String, default: null },
   reference: { type: String, required: true, unique: true },
   checkoutRequestId: { type: String, unique: true, sparse: true },
   merchantRequestId: { type: String, default: null },
@@ -169,6 +183,8 @@ function safeUser(user) {
     id: String(user._id),
     email: user.email,
     phoneNumber: user.phoneNumber || "",
+    country: user.country || "KE",
+    mobileMoneyProvider: user.mobileMoneyProvider || "",
     role: user.role,
     isActivated: Boolean(user.isActivated),
     membershipStatus: user.membershipStatus || (user.isActivated ? "active" : "pending_approval"),
@@ -400,17 +416,68 @@ function normalizeKenyanPhone(value) {
   if (!/^254[17]\d{8}$/.test(phone)) return null;
   return phone;
 }
+function normalizePhoneForCountry(value, country) {
+  let phone = String(value || "").replace(/[\s()-]/g, "");
+  if (phone.startsWith("+")) phone = phone.slice(1);
+  if (country === "KE") return normalizeKenyanPhone(phone);
+  if (country === "TZ") {
+    if (/^0[67]\d{8}$/.test(phone)) phone = "255" + phone.slice(1);
+    return /^255[67]\d{8}$/.test(phone) ? phone : null;
+  }
+  if (country === "UG") {
+    if (/^0[37]\d{8}$/.test(phone)) phone = "256" + phone.slice(1);
+    return /^256[37]\d{8}$/.test(phone) ? phone : null;
+  }
+  return null;
+}
+function kenyaOptimaPayConfig() {
+  return {
+    key: process.env.KE_OPTIMAPAY_API_KEY || process.env.OPTIMAPAY_API_KEY,
+    secret: process.env.KE_OPTIMAPAY_API_SECRET || process.env.OPTIMAPAY_API_SECRET,
+    accountId: process.env.KE_OPTIMAPAY_PAYMENT_ACCOUNT_ID || process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID
+  };
+}
+
+function tanzaniaUgandaOptimaPayConfig() {
+  return {
+    key: process.env.TZUG_OPTIMAPAY_API_KEY,
+    secret: process.env.TZUG_OPTIMAPAY_API_SECRET,
+    accountId: process.env.TZUG_OPTIMAPAY_ACCOUNT_ID
+  };
+}
+
+async function optimapayGlobalRequest(method, endpoint, payload) {
+  // Tanzania and Uganda intentionally share one Global API credential pair and merchant account.
+  const config = tanzaniaUgandaOptimaPayConfig();
+  const { key, secret } = config;
+  if (!key || !secret) throw new Error("Shared Tanzania/Uganda OptimaPay Global API credentials are not configured.");
+  const response = await fetch(`${OPTIMAPAY_GLOBAL_BASE_URL}/${endpoint}`, {
+    method,
+    headers: { "X-API-KEY": key, "X-API-SECRET": secret, "Content-Type": "application/json", "Accept": "application/json" },
+    ...(payload ? { body: JSON.stringify(payload) } : {}),
+    signal: AbortSignal.timeout(20000)
+  });
+  let data; try { data = await response.json(); } catch { data = null; }
+  if (!response.ok || !data || data.success === false) {
+    const error = new Error(typeof data?.message === "string" ? data.message : `OptimaPay Global request failed (HTTP ${response.status}).`);
+    error.status = response.status; throw error;
+  }
+  return data;
+}
 
 function paymentConfigReady() {
-  const accountId = Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID);
-  return Boolean(process.env.OPTIMAPAY_API_KEY && process.env.OPTIMAPAY_API_SECRET && Number.isInteger(accountId) && accountId > 0);
+  const config = kenyaOptimaPayConfig();
+  const accountId = Number(config.accountId);
+  return Boolean(config.key && config.secret && Number.isInteger(accountId) && accountId > 0);
 }
 async function optimapayPost(endpoint, payload) {
+  // Kenya retains its own API key, API secret and payment account ID.
+  const config = kenyaOptimaPayConfig();
   const response = await fetch(`${OPTIMAPAY_BASE_URL}/${endpoint}`, {
     method: "POST",
     headers: {
-      "X-API-Key": process.env.OPTIMAPAY_API_KEY,
-      "X-API-Secret": process.env.OPTIMAPAY_API_SECRET,
+      "X-API-Key": config.key,
+      "X-API-Secret": config.secret,
       "Content-Type": "application/json",
       "Accept": "application/json"
     },
@@ -429,8 +496,10 @@ async function optimapayPost(endpoint, payload) {
 }
 async function activatePaidMembership(payment, providerStatus) {
   const reportedAmount = Number(providerStatus.amount);
-  const reportedPhone = normalizeKenyanPhone(providerStatus.phone);
-  if (String(providerStatus.status || "").toLowerCase() !== "completed") return false;
+  const reportedPhone = normalizePhoneForCountry(providerStatus.phone, payment.country || "KE");
+  const normalizedStatus = String(providerStatus.status || "").toLowerCase();
+  const successful = ["completed", "successful", "success", "paid"].includes(normalizedStatus);
+  if (!successful) return false;
   if (!Number.isFinite(reportedAmount) || reportedAmount !== payment.amount || !reportedPhone || reportedPhone !== payment.phone) {
     payment.status = "verification_error";
     payment.providerMessage = "Provider status did not match the expected amount and phone; membership was not activated.";
@@ -452,8 +521,8 @@ async function activatePaidMembership(payment, providerStatus) {
     user.membershipStatus = "active";
     await user.save();
     payment.status = "completed";
-    payment.transactionCode = String(providerStatus.transaction_code || "").slice(0, 100) || null;
-    payment.providerMessage = "Payment verified with OptimaPay.";
+    payment.transactionCode = String(providerStatus.transaction_code || providerStatus.gateway_transaction_id || providerStatus.reference || "").slice(0, 100) || null;
+    payment.providerMessage = `Payment verified with OptimaPay (${payment.currency || "KES"}).`;
     payment.completedAt = new Date();
     await payment.save();
   }
@@ -515,7 +584,11 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
     const phoneNumber = String(req.body.phoneNumber || "").trim();
     const password = req.body.password;
     const selectedPackage = String(req.body.selectedPackage || "").toLowerCase();
+    const country = String(req.body.country || "KE").toUpperCase();
+    const mobileMoneyProvider = String(req.body.provider || "").toUpperCase();
     
+    if (!["KE", "TZ", "UG"].includes(country)) return res.status(400).json({ success: false, message: "Choose Kenya, Tanzania or Uganda." });
+    if (country === "TZ" && !["VODACOM", "YAS", "AIRTEL", "HALOTEL"].includes(mobileMoneyProvider)) return res.status(400).json({ success: false, message: "Select your Tanzania mobile-money network." });
     if (!["daily", "weekly", "monthly"].includes(selectedPackage)) {
       return res.status(400).json({ success: false, message: "Choose a valid subscription package before registering." });
     }
@@ -529,8 +602,10 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
       return res.status(400).json({ success: false, message: "Phone number is too long." });
     }
 
-    // Prevent registration using the example mobile number (+254712345678 and its formatting variations)
-    if (normalizeKenyanPhone(phoneNumber) === "254712345678") {
+    const normalizedRegistrationPhone = normalizePhoneForCountry(phoneNumber, country);
+    if (!normalizedRegistrationPhone) return res.status(400).json({ success: false, message: `Enter a valid ${country === "KE" ? "Kenyan" : country === "TZ" ? "Tanzanian" : "Ugandan"} mobile number.` });
+    // Prevent registration using the example Kenyan mobile number.
+    if (country === "KE" && normalizedRegistrationPhone === "254712345678") {
       return res.status(400).json({ 
         success: false, 
         message: "The number +254712345678 serves as an example format and cannot be used to register. Please enter your actual mobile number." 
@@ -541,7 +616,7 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
     if (exists) return res.status(409).json({ success: false, message: "An account with that email already exists." });
     
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await User.create({ email, phoneNumber, passwordHash, role: "user", selectedPackage, isActivated: false, membershipStatus: "pending_approval", vipExpiresAt: null });
+    const user = await User.create({ email, phoneNumber: "+" + normalizedRegistrationPhone, country, mobileMoneyProvider: country === "TZ" ? mobileMoneyProvider : "", passwordHash, role: "user", selectedPackage, isActivated: false, membershipStatus: "pending_approval", vipExpiresAt: null });
     setSession(res, user);
     res.status(201).json({ success: true, message: "Account created. VIP access remains locked until an administrator activates it.", user: safeUser(user) });
   } catch (err) {
@@ -609,7 +684,7 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
     const reference = `BT${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString("hex").toUpperCase()}`.slice(0, 30);
     payment = await Payment.create({ user: req.user._id, package: packageKey, amount: PACKAGE_PRICES[packageKey], phone, reference, status: "initiating" });
     const provider = await optimapayPost("stkpush.php", {
-      payment_account_id: Number(process.env.OPTIMAPAY_PAYMENT_ACCOUNT_ID),
+      payment_account_id: Number(kenyaOptimaPayConfig().accountId),
       phone,
       amount: payment.amount,
       reference,
@@ -633,21 +708,81 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
   }
 });
 
+app.post("/api/payments/optimapay/global", requireAuth, csrfCheck, async (req, res) => {
+  let payment;
+  try {
+    if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP payment." });
+    const country = String(req.user.country || "KE").toUpperCase();
+    if (!["TZ", "UG"].includes(country)) return res.status(400).json({ success: false, message: "This checkout is for Tanzania and Uganda. Kenya payments continue through the existing M-Pesa checkout." });
+    const packageKey = req.user.selectedPackage;
+    const prices = COUNTRY_PACKAGE_PRICES[country];
+    if (!prices || !prices[packageKey]) return res.status(400).json({ success: false, message: "Choose a valid VIP package before paying." });
+    const phone = normalizePhoneForCountry(req.body.phone || req.user.phoneNumber, country);
+    if (!phone) return res.status(400).json({ success: false, message: `Enter a valid ${country === "TZ" ? "Tanzanian" : "Ugandan"} mobile number in local or international format.` });
+    const providerCode = country === "TZ" ? String(req.body.provider || req.user.mobileMoneyProvider || "").toUpperCase() : null;
+    if (country === "TZ" && !["VODACOM", "YAS", "AIRTEL", "HALOTEL"].includes(providerCode)) return res.status(400).json({ success: false, message: "Select Vodacom, YAS, Airtel or Halotel before continuing." });
+    const currency = country === "TZ" ? "TZS" : "UGX";
+    const amount = prices[packageKey];
+    const reference = `BT${country}${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(4).toString("hex").toUpperCase()}`.slice(0, 50);
+    payment = await Payment.create({ user: req.user._id, package: packageKey, amount, phone, country, currency, provider: country === "TZ" ? "optimapay_tanzania" : "optimapay_uganda", providerCode, reference, status: "initiating" });
+    const endpoint = country === "TZ" ? "godigital/tz/collect" : "collecto/initiate";
+    const payload = country === "TZ"
+      ? { providerCode, phone, amount, reference, description: `Banker Tips ${packageKey} VIP membership` }
+      : { phone, amount, reference, description: `Banker Tips ${packageKey} VIP membership` };
+    const result = await optimapayGlobalRequest("POST", endpoint, payload);
+    const data = result.data || {};
+    if (country === "TZ" && !["202", "200"].includes(String(result.http_status || result.status_code || "202"))) {
+      throw new Error(result.message || "Tanzania payment request was not accepted.");
+    }
+    const globalRef = String(data.reference || data.client_reference || reference).slice(0, 100);
+    payment.globalReference = globalRef;
+    payment.globalTransactionId = data.transaction_id != null ? String(data.transaction_id) : null;
+    payment.providerMessage = String(result.message || "Payment prompt submitted. Complete the prompt on your phone; final confirmation is still pending.").slice(0, 300);
+    const providerState = String(data.status || "PENDING").toUpperCase();
+    payment.status = ["FAILED", "REJECTED", "CANCELLED"].includes(providerState) ? "failed" : "pending";
+    await payment.save();
+    if (payment.status === "failed") return res.status(400).json({ success: false, message: payment.providerMessage });
+    return res.status(202).json({ success: true, message: payment.providerMessage, paymentId: String(payment._id), amount, currency, package: packageKey, status: payment.status });
+  } catch (err) {
+    console.error("OptimaPay Global initiation error:", err.message);
+    const ambiguous = Boolean(payment && (err.status === 502 || err.name === "AbortError" || err.name === "TimeoutError" || /timeout|network|fetch failed|socket/i.test(String(err.message || ""))));
+    if (payment && ambiguous) {
+      // A timeout does not prove the gateway rejected the collection. Keep the original merchant reference
+      // queryable so the next status check reconciles the first request instead of creating a duplicate.
+      payment.globalReference = payment.reference;
+      payment.status = "pending";
+      payment.providerMessage = "The gateway response is not yet confirmed. Checking the original transaction reference; please do not retry payment.";
+      await payment.save().catch(() => {});
+      return res.status(202).json({ success: true, message: payment.providerMessage, paymentId: String(payment._id), amount: payment.amount, currency: payment.currency, package: payment.package, status: payment.status });
+    }
+    if (payment) { payment.status = "failed"; payment.providerMessage = String(err.message || "Payment initiation failed.").slice(0, 300); await payment.save().catch(() => {}); }
+    return res.status(err.status || 502).json({ success: false, message: "Could not initiate mobile-money payment. " + String(err.message || "Please check the number and try again.") });
+  }
+});
+
 app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
   try {
     let payment = await Payment.findOne({ _id: req.params.paymentId, user: req.user._id });
     if (!payment) return res.status(404).json({ success: false, message: "Payment not found." });
-    if (payment.status === "pending" && payment.checkoutRequestId) {
-      if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
+    if (payment.status === "pending" && (payment.checkoutRequestId || payment.globalReference || payment.globalTransactionId)) {
+      if ((!payment.provider || payment.provider === "kenya_mpesa") && !paymentConfigReady()) return res.status(503).json({ success: false, message: "Payment verification is not configured." });
       const claimed = await Payment.findOneAndUpdate({ _id: payment._id, status: "pending" }, { $set: { status: "verifying" } }, { new: true });
       if (claimed) {
         payment = await Payment.findById(payment._id);
         try {
-          const provider = await optimapayPost("status.php", { checkout_request_id: payment.checkoutRequestId });
+          let provider;
+          if (!payment.provider || payment.provider === "kenya_mpesa") {
+            provider = await optimapayPost("status.php", { checkout_request_id: payment.checkoutRequestId });
+          } else {
+            const identifier = payment.globalReference || payment.globalTransactionId;
+            const statusEndpoint = payment.country === "TZ" ? `godigital/tz/status/${encodeURIComponent(identifier)}` : `collecto/status/${encodeURIComponent(identifier)}`;
+            const response = await optimapayGlobalRequest("GET", statusEndpoint);
+            provider = response.data || response;
+          }
           const status = String(provider.status || "").toLowerCase();
-          if (status === "completed") {
+          if (["completed", "successful", "success", "paid"].includes(status)) {
             await activatePaidMembership(payment, provider);
-          } else if (status === "failed") {
+          } else if (["failed", "cancelled", "canceled", "rejected"].includes(status)) {
             payment.status = "failed";
             payment.providerMessage = String(provider.message || provider.ResultDesc || "Payment failed or was cancelled.").slice(0, 300);
             await payment.save();
@@ -667,7 +802,7 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
       }
     }
     const user = payment.status === "completed" ? await User.findById(req.user._id) : null;
-    res.json({ success: true, payment: { id: String(payment._id), package: payment.package, amount: payment.amount, status: payment.status, message: payment.providerMessage, transactionCode: payment.transactionCode }, user: user ? safeUser(user) : undefined });
+    res.json({ success: true, payment: { id: String(payment._id), package: payment.package, amount: payment.amount, currency: payment.currency || "KES", country: payment.country || "KE", status: payment.status, message: payment.providerMessage, transactionCode: payment.transactionCode }, user: user ? safeUser(user) : undefined });
   } catch (err) {
     res.status(400).json({ success: false, message: "Could not check payment status." });
   }
@@ -814,7 +949,7 @@ app.delete("/api/admin/advertisements/:id", requireAuth, requireAdmin, csrfCheck
 app.get("/api/admin/users", requireAuth, requireAdmin, async (req, res) => {
   const users = await User.find({}).sort({ createdAt: -1 }).limit(1000).lean();
   res.json({ success: true, users: users.map(u => ({
-    id: String(u._id), email: u.email, phoneNumber: u.phoneNumber,
+    id: String(u._id), email: u.email, phoneNumber: u.phoneNumber, country: u.country || "KE",
     role: u.role, selectedPackage: u.selectedPackage || null, isActivated: u.isActivated, membershipStatus: u.membershipStatus || (u.isActivated ? "active" : "pending_approval"), vipExpiresAt: u.vipExpiresAt,
     createdAt: u.createdAt
   })) });
@@ -855,7 +990,7 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
 app.get("/api/payments/history", requireAuth, async (req, res) => {
   try {
     const payments = await Payment.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100).lean();
-    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), package: p.package, amount: p.amount, phone: p.phone, reference: p.reference, status: p.status, transactionCode: p.transactionCode, message: p.providerMessage, createdAt: p.createdAt, completedAt: p.completedAt })) });
+    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), package: p.package, amount: p.amount, currency: p.currency || "KES", country: p.country || "KE", provider: p.provider || "kenya_mpesa", phone: p.phone, reference: p.reference, status: p.status, transactionCode: p.transactionCode, message: p.providerMessage, createdAt: p.createdAt, completedAt: p.completedAt })) });
   } catch (err) { res.status(500).json({ success: false, message: "Could not load payment history." }); }
 });
 
@@ -888,7 +1023,7 @@ app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
 app.get("/api/admin/payments", requireAuth, requireAdmin, async (req, res) => {
   try {
     const payments = await Payment.find({}).populate("user", "email phoneNumber").sort({ createdAt: -1 }).limit(500).lean();
-    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), email: p.user?.email || "Deleted user", userPhone: p.user?.phoneNumber || "", phone: p.phone, package: p.package, amount: p.amount, reference: p.reference, transactionCode: p.transactionCode, status: p.status, createdAt: p.createdAt, completedAt: p.completedAt, message: p.providerMessage })) });
+    res.json({ success: true, payments: payments.map(p => ({ id: String(p._id), email: p.user?.email || "Deleted user", userPhone: p.user?.phoneNumber || "", phone: p.phone, package: p.package, amount: p.amount, currency: p.currency || "KES", country: p.country || "KE", provider: p.provider || "kenya_mpesa", reference: p.reference, transactionCode: p.transactionCode, status: p.status, createdAt: p.createdAt, completedAt: p.completedAt, message: p.providerMessage })) });
   } catch (err) { res.status(500).json({ success: false, message: "Could not load payment ledger." }); }
 });
 
