@@ -3300,6 +3300,174 @@ button,a{-webkit-tap-highlight-color:transparent}
   border-color: #54748a !important;
 }
 
+
+
+/* ==========================================================
+   VIP CURRENT TIPS — larger, evenly-spaced match cards
+   Every selection gets the same generous card treatment as
+   the final selection and accumulator panel.
+   ========================================================== */
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(88px, auto);
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  gap: 9px 14px;
+  width: 100% !important;
+  min-height: 188px;
+  margin: 0 0 10px !important;
+  padding: 20px 20px !important;
+  box-sizing: border-box;
+  border: 1px solid #b9def2 !important;
+  border-radius: 17px !important;
+  background: #e5f5ff !important;
+  overflow: hidden;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row):nth-child(even) {
+  background: #d8efff !important;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td {
+  display: block !important;
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 2px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+  color: #71869a !important;
+  font-size: .86rem !important;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(2) {
+  grid-column: 1;
+  grid-row: 2;
+  padding: 5px 0 !important;
+  color: #244f70 !important;
+  font-size: 1.12rem !important;
+  font-weight: 700;
+  line-height: 1.4;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(3) {
+  grid-column: 1;
+  grid-row: 3;
+  color: #607d94 !important;
+  font-size: .98rem !important;
+  font-weight: 500;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(4) {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  align-self: center;
+  text-align: center;
+}
+#premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(5) {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: end;
+  align-self: center;
+  text-align: center;
+}
+#premiumPanel table.tips-table:has(#premiumRows) .odds {
+  min-width: 72px;
+  padding: 9px 12px !important;
+  border-radius: 11px;
+  font-size: .96rem !important;
+}
+#premiumPanel table.tips-table:has(#premiumRows) .status {
+  min-width: 92px;
+  padding: 8px 11px !important;
+  border-radius: 10px;
+  font-size: .84rem !important;
+}
+
+/* Keep the same generous card spacing on narrow phones. */
+@media (max-width: 600px) {
+  #premiumPanel .table-scroll:has(#premiumRows) {
+    padding: 0 !important;
+    overflow-x: hidden !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) tbody {
+    display: block !important;
+    width: 100% !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) {
+    grid-template-columns: minmax(0, 1fr) minmax(84px, auto);
+    grid-template-rows: auto auto auto;
+    gap: 10px 12px;
+    min-height: 188px;
+    margin: 0 0 10px !important;
+    padding: 20px 18px !important;
+    border: 1px solid #b9def2 !important;
+    border-radius: 17px !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(1) {
+    font-size: .84rem !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(2) {
+    font-size: 1.08rem !important;
+    padding: 6px 0 !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(3) {
+    font-size: .94rem !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) .odds {
+    min-width: 70px;
+    padding: 9px 11px !important;
+    font-size: .94rem !important;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) .status {
+    min-width: 90px;
+    padding: 8px 10px !important;
+    font-size: .82rem !important;
+  }
+}
+@media (max-width: 360px) {
+  #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) {
+    min-height: 178px;
+    padding: 17px 14px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(76px, auto);
+    gap: 8px 9px;
+  }
+  #premiumPanel table.tips-table:has(#premiumRows) .status {
+    min-width: 76px;
+    font-size: .74rem !important;
+  }
+}
+
+/* Dark theme equivalent for the larger VIP match cards. */
+[data-theme="dark"] #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) {
+  background: #17364c !important;
+  border-color: #315b76 !important;
+}
+[data-theme="dark"] #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row):nth-child(even) {
+  background: #1b4059 !important;
+}
+[data-theme="dark"] #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(1),
+[data-theme="dark"] #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(3) {
+  color: #a9bfd1 !important;
+}
+[data-theme="dark"] #premiumPanel table.tips-table:has(#premiumRows) tbody tr:not(.total-odds-row) td:nth-child(2) {
+  color: #f0f8ff !important;
+}
+
 </style>
 </body>
 </html>
