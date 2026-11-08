@@ -3212,6 +3212,94 @@ button,a{-webkit-tap-highlight-color:transparent}
   border-color: #26384c;
 }
 
+
+
+/* VIP accumulator: match the Free Tips outlined inner panel exactly. */
+#premiumPanel .tips-table tbody tr.total-odds-row {
+  display: block !important;
+  width: 100%;
+  margin: 8px 0 0 !important;
+  padding: 14px 25px !important;
+  box-sizing: border-box;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: #d8efff !important;
+}
+#premiumPanel .tips-table tbody tr.total-odds-row td {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 12px 15px !important;
+  border: 1px solid #1d2935 !important;
+  border-radius: 14px !important;
+  background: transparent !important;
+  color: #315d7c !important;
+  text-align: left !important;
+  box-sizing: border-box;
+}
+#premiumPanel .tips-table .total-odds-label {
+  margin: 0 auto 0 0 !important;
+  color: #315d7c !important;
+  font-size: .76rem !important;
+  letter-spacing: .07em;
+  line-height: 1.35;
+}
+#premiumPanel .tips-table .total-odds-value {
+  flex: 0 0 auto;
+  min-width: 82px;
+  padding: 7px 12px;
+  border: 1px solid #1d2935 !important;
+  border-radius: 12px;
+  background: #fff !important;
+  color: #075985 !important;
+}
+@media (max-width: 700px) {
+  #premiumPanel .tips-table tbody tr.total-odds-row {
+    width: 100%;
+    margin: 8px 0 0 !important;
+    padding: 14px 15px !important;
+  }
+  #premiumPanel .tips-table tbody tr.total-odds-row td {
+    padding: 12px 13px !important;
+    gap: 8px !important;
+  }
+  #premiumPanel .tips-table .total-odds-label {
+    font-size: .69rem !important;
+    letter-spacing: .055em;
+  }
+  #premiumPanel .tips-table .total-odds-value {
+    min-width: 76px;
+    padding: 7px 9px;
+  }
+}
+@media (max-width: 360px) {
+  #premiumPanel .tips-table tbody tr.total-odds-row {
+    padding: 12px 10px !important;
+  }
+  #premiumPanel .tips-table .total-odds-label {
+    font-size: .62rem !important;
+  }
+}
+[data-theme="dark"] #premiumPanel .tips-table tbody tr.total-odds-row {
+  background: #17364c !important;
+}
+[data-theme="dark"] #premiumPanel .tips-table tbody tr.total-odds-row td {
+  border-color: #54748a !important;
+  color: #d6efff !important;
+}
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-label {
+  color: #bceaff !important;
+}
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-value {
+  background: #102b3d !important;
+  color: #bceaff !important;
+  border-color: #54748a !important;
+}
+
 </style>
 </body>
 </html>
