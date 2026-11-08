@@ -18,9 +18,8 @@ const COOKIE_NAME = "banker_tips_session";
 const TOKEN_TTL = "12h";
 const OPTIMAPAY_BASE_URL = "https://optimapaybridge.co.ke/api/v2";
 const OPTIMAPAY_GLOBAL_BASE_URL = "https://global.optimapaybridge.co.ke/api/v2";
-const PACKAGE_PRICES = Object.freeze({ daily: 150, weekly: 1500, monthly: 3500 });
-const COUNTRY_PACKAGE_PRICES = Object.freeze({
-  KE: PACKAGE_PRICES,
+const DEFAULT_VIP_PRICES = Object.freeze({
+  KE: Object.freeze({ daily: 250, weekly: 1500, monthly: 3500 }),
   TZ: Object.freeze({ daily: 5000, weekly: 35000, monthly: 75000 }),
   UG: Object.freeze({ daily: 5000, weekly: 50000, monthly: 110000 })
 });
@@ -147,6 +146,43 @@ const paymentSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const Tip = mongoose.model("Tip", tipSchema);
 const Payment = mongoose.model("Payment", paymentSchema);
+
+// One persistent document stores the editable VIP prices for all supported countries.
+const vipPricingSchema = new mongoose.Schema({
+  key: { type: String, unique: true, default: "default" },
+  prices: { type: mongoose.Schema.Types.Mixed, required: true }
+}, { timestamps: true, versionKey: false });
+const VipPricing = mongoose.model("VipPricing", vipPricingSchema);
+
+async function getVipPrices() {
+  const saved = await VipPricing.findOne({ key: "default" }).lean();
+  const stored = saved && saved.prices && typeof saved.prices === "object" ? saved.prices : {};
+  const result = {};
+  for (const country of ["KE", "TZ", "UG"]) {
+    result[country] = {};
+    for (const plan of ["daily", "weekly", "monthly"]) {
+      const value = Number(stored?.[country]?.[plan]);
+      result[country][plan] = Number.isSafeInteger(value) && value > 0
+        ? value : DEFAULT_VIP_PRICES[country][plan];
+    }
+  }
+  return result;
+}
+
+function validateVipPrices(input) {
+  const output = {};
+  for (const country of ["KE", "TZ", "UG"]) {
+    output[country] = {};
+    for (const plan of ["daily", "weekly", "monthly"]) {
+      const amount = Number(input?.[country]?.[plan]);
+      if (!Number.isSafeInteger(amount) || amount < 1 || amount > 100000000) {
+        throw new Error(`Enter a whole-number ${country} ${plan} price between 1 and 100,000,000.`);
+      }
+      output[country][plan] = amount;
+    }
+  }
+  return output;
+}
 
 const auditLogSchema = new mongoose.Schema({
   actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
@@ -580,6 +616,42 @@ app.get("/api/health", (req, res) => {
   res.json({ success: true, status: "ok", database: mongoose.connection.readyState === 1 ? "connected" : "connecting" });
 });
 
+// Public prices are read-only; only authenticated administrators can change them.
+app.get("/api/pricing", async (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store, max-age=0");
+    res.json({ success: true, prices: await getVipPrices() });
+  } catch (err) {
+    console.error("Public VIP pricing load failed:", err.message);
+    res.status(500).json({ success: false, message: "VIP prices are temporarily unavailable." });
+  }
+});
+
+app.get("/api/admin/vip-prices", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    res.set("Cache-Control", "private, no-store, max-age=0");
+    res.json({ success: true, prices: await getVipPrices() });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Could not load VIP pricing settings." });
+  }
+});
+
+app.put("/api/admin/vip-prices", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
+  try {
+    const prices = validateVipPrices(req.body?.prices);
+    await VipPricing.findOneAndUpdate(
+      { key: "default" },
+      { $set: { prices }, $setOnInsert: { key: "default" } },
+      { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
+    );
+    await recordAudit(req, "vip-prices.updated", "vip-pricing", "default", "Updated VIP package prices for Kenya, Tanzania and Uganda.");
+    res.set("Cache-Control", "no-store, max-age=0");
+    res.json({ success: true, prices, message: "VIP prices updated successfully." });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || "Could not save VIP prices." });
+  }
+});
+
 app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
   try {
     const email = String(req.body.email || "").trim().toLowerCase();
@@ -661,7 +733,8 @@ app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, re
   try {
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP subscription." });
     const packageKey = String(req.body.selectedPackage || "").toLowerCase();
-    if (!Object.prototype.hasOwnProperty.call(PACKAGE_PRICES, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
+    const currentPrices = await getVipPrices();
+    if (!Object.prototype.hasOwnProperty.call(currentPrices.KE, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
     req.user.selectedPackage = packageKey;
     if (req.user.membershipStatus === "active" && req.user.vipExpiresAt && new Date(req.user.vipExpiresAt) <= new Date()) {
       req.user.membershipStatus = "expired"; req.user.isActivated = false;
@@ -680,11 +753,12 @@ app.post("/api/payments/optimapay/stkpush", requireAuth, csrfCheck, async (req, 
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP payment." });
     if (!paymentConfigReady()) return res.status(503).json({ success: false, message: "M-Pesa payments are not configured yet. Please contact support." });
     const packageKey = req.user.selectedPackage;
-    if (!PACKAGE_PRICES[packageKey]) return res.status(400).json({ success: false, message: "Choose a VIP package before paying." });
+    const currentPrices = await getVipPrices();
+    if (!currentPrices.KE[packageKey]) return res.status(400).json({ success: false, message: "Choose a VIP package before paying." });
     const phone = normalizeKenyanPhone(req.body.phone || req.user.phoneNumber);
     if (!phone) return res.status(400).json({ success: false, message: "Enter a valid Kenyan M-Pesa number, e.g. 0712345678 or 254712345678." });
     const reference = `BT${Date.now().toString(36).toUpperCase()}${crypto.randomBytes(3).toString("hex").toUpperCase()}`.slice(0, 30);
-    payment = await Payment.create({ user: req.user._id, package: packageKey, amount: PACKAGE_PRICES[packageKey], phone, reference, status: "initiating" });
+    payment = await Payment.create({ user: req.user._id, package: packageKey, amount: currentPrices.KE[packageKey], phone, reference, status: "initiating" });
     const provider = await optimapayPost("stkpush.php", {
       payment_account_id: Number(kenyaOptimaPayConfig().accountId),
       phone,
@@ -717,7 +791,8 @@ app.post("/api/payments/optimapay/global", requireAuth, csrfCheck, async (req, r
     const country = String(req.user.country || "KE").toUpperCase();
     if (!["TZ", "UG"].includes(country)) return res.status(400).json({ success: false, message: "This checkout is for Tanzania and Uganda. Kenya payments continue through the existing M-Pesa checkout." });
     const packageKey = req.user.selectedPackage;
-    const prices = COUNTRY_PACKAGE_PRICES[country];
+    const allPrices = await getVipPrices();
+    const prices = allPrices[country];
     if (!prices || !prices[packageKey]) return res.status(400).json({ success: false, message: "Choose a valid VIP package before paying." });
     const phone = normalizePhoneForCountry(req.body.phone || req.user.phoneNumber, country);
     if (!phone) return res.status(400).json({ success: false, message: `Enter a valid ${country === "TZ" ? "Tanzanian" : "Ugandan"} mobile number in local or international format.` });
