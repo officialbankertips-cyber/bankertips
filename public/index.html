@@ -2834,6 +2834,384 @@ button,a{-webkit-tap-highlight-color:transparent}
  .advert-panel,.advert-cta{transition:none}
 }
 
+
+
+/* ==========================================================
+   FINAL TIPS TABLE REFINEMENT
+   Uses the Free Tips layout as the shared design foundation.
+   VIP keeps its crown separator and premium heading.
+   ========================================================== */
+#freePanel .card:has(#freeRows),
+#premiumPanel .card:has(#premiumRows) {
+  padding: 10px 12px 0;
+  border-radius: 22px;
+  background: var(--surface);
+  overflow: hidden;
+}
+#freePanel .table-scroll,
+#premiumPanel .table-scroll {
+  overflow: visible;
+  border-radius: 16px;
+}
+#freePanel table.tips-table,
+#premiumPanel table.tips-table {
+  width: 100%;
+  min-width: 0 !important;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  background: transparent;
+}
+#freePanel .tips-table thead th,
+#premiumPanel .tips-table thead th {
+  position: static;
+  padding: 12px 13px;
+  background: #edf7ff;
+  color: #55748d;
+  border: 0;
+  border-bottom: 1px solid #d7eaf7;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  white-space: normal;
+}
+#freePanel .tips-table tbody tr:not(.total-odds-row) td,
+#premiumPanel .tips-table tbody tr:not(.total-odds-row) td {
+  padding: 15px 13px;
+  background: #e5f5ff;
+  color: #315d7c;
+  border: 0;
+  border-top: 1px solid #b9def2;
+  border-bottom: 1px solid #b9def2;
+  font-size: .88rem;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+#freePanel .tips-table tbody tr:not(.total-odds-row) td:first-child,
+#premiumPanel .tips-table tbody tr:not(.total-odds-row) td:first-child {
+  border-left: 1px solid #b9def2;
+  border-radius: 12px 0 0 12px;
+}
+#freePanel .tips-table tbody tr:not(.total-odds-row) td:last-child,
+#premiumPanel .tips-table tbody tr:not(.total-odds-row) td:last-child {
+  border-right: 1px solid #b9def2;
+  border-radius: 0 12px 12px 0;
+}
+#freePanel .tips-table tbody tr:not(.total-odds-row):nth-child(even) td,
+#premiumPanel .tips-table tbody tr:not(.total-odds-row):nth-child(even) td {
+  background: #d8efff;
+}
+#freePanel .tips-table .match,
+#premiumPanel .tips-table .match {
+  color: #244f70;
+  font-size: .96rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+#freePanel .tips-table .odds,
+#premiumPanel .tips-table .odds {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  padding: 7px 11px;
+  border: 1px solid #a8d7f0;
+  border-radius: 10px;
+  background: #c8eaff;
+  color: #075985;
+  font-size: .9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#freePanel .tips-table .status,
+#premiumPanel .tips-table .status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  font-size: .78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+#freePanel .tips-table .pending,
+#premiumPanel .tips-table .pending {background:#fff0c2;color:#925d00}
+#freePanel .tips-table .won,
+#premiumPanel .tips-table .won {background:#d8f8e6;color:#17663a}
+#freePanel .tips-table .lost,
+#premiumPanel .tips-table .lost {background:#ffe0e2;color:#a51e2b}
+#freePanel .tips-table .void,
+#premiumPanel .tips-table .void {background:#e7edf2;color:#4b5966}
+
+#freePanel .tips-table .total-odds-row td,
+#premiumPanel .tips-table .total-odds-row td {
+  padding: 13px 15px !important;
+  border: 1px solid #a8d7f0 !important;
+  border-radius: 12px !important;
+  background: #d8efff !important;
+  color: #315d7c !important;
+  text-align: right;
+  font-weight: 800;
+}
+#freePanel .tips-table .total-odds-label,
+#premiumPanel .tips-table .total-odds-label {
+  display: inline-block;
+  margin-right: 12px;
+  color: #315d7c;
+  font-size: .76rem;
+  letter-spacing: .07em;
+}
+#freePanel .tips-table .total-odds-value,
+#premiumPanel .tips-table .total-odds-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  padding: 7px 12px;
+  border: 1px solid #1d2935;
+  border-radius: 12px;
+  background: #fff;
+  color: #075985;
+  font-size: .95rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+#freePanel #freeNotice,
+#premiumPanel #premiumNotice {
+  margin: 8px -12px 0;
+  padding: 15px 20px;
+  border-top: 1px solid #e1edf5;
+  background: #fbfdff;
+  color: #718198;
+  font-size: .84rem;
+}
+
+/* VIP's existing gold crown divider remains between the table and notice. */
+#premiumPanel .premium-bottom-crown {
+  margin: 5px 0 0;
+  padding: 13px 8px;
+}
+#premiumPanel #premiumNotice {
+  margin-top: 0;
+}
+
+@media (max-width: 700px) {
+  #freePanel .card:has(#freeRows),
+  #premiumPanel .card:has(#premiumRows) {
+    padding: 10px 10px 0;
+    border-radius: 20px;
+  }
+  #freePanel table.tips-table,
+  #premiumPanel table.tips-table {
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
+    border-spacing: 0;
+    table-layout: auto;
+  }
+  #freePanel .tips-table thead,
+  #premiumPanel .tips-table thead {display:none !important}
+  #freePanel .tips-table tbody,
+  #premiumPanel .tips-table tbody {
+    display: block;
+    width: 100%;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) minmax(82px,auto);
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    gap: 5px 12px;
+    width: 100%;
+    margin: 0 0 8px;
+    padding: 14px 15px;
+    border: 1px solid #b9def2;
+    border-radius: 13px;
+    background: #e5f5ff;
+    box-sizing: border-box;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row):nth-child(even),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row):nth-child(even) {
+    background: #d8efff;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row) td,
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 2px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #315d7c;
+    font-size: .85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(1),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    color: #71869a;
+    font-size: .76rem;
+    font-weight: 800;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(2),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 4px 0 6px !important;
+    color: #244f70;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.38;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(3),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(3) {
+    grid-column: 1;
+    grid-row: 3;
+    color: #607d94;
+    font-size: .84rem;
+    font-weight: 600;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(4),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(4) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    justify-self: end;
+    align-self: center;
+    text-align: center;
+  }
+  #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(5),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(5) {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: end;
+    align-self: center;
+    text-align: center;
+  }
+  #freePanel .tips-table .odds,
+  #premiumPanel .tips-table .odds {
+    min-width: 68px;
+    padding: 7px 10px;
+    font-size: .86rem;
+  }
+  #freePanel .tips-table .status,
+  #premiumPanel .tips-table .status {
+    min-width: 84px;
+    padding: 7px 9px;
+    font-size: .75rem;
+  }
+  #freePanel .tips-table tbody tr.total-odds-row,
+  #premiumPanel .tips-table tbody tr.total-odds-row {
+    display: block;
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 0;
+    border: 1px solid #a8d7f0;
+    border-radius: 13px;
+    background: #d8efff;
+    box-sizing: border-box;
+  }
+  #freePanel .tips-table .total-odds-row td,
+  #premiumPanel .tips-table .total-odds-row td {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 14px !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: transparent !important;
+    text-align: left;
+  }
+  #freePanel .tips-table .total-odds-label,
+  #premiumPanel .tips-table .total-odds-label {
+    margin-right: auto;
+    font-size: .7rem;
+    line-height: 1.35;
+  }
+  #freePanel .tips-table .total-odds-value,
+  #premiumPanel .tips-table .total-odds-value {
+    min-width: 76px;
+    padding: 7px 9px;
+    font-size: .88rem;
+  }
+  #freePanel #freeNotice,
+  #premiumPanel #premiumNotice {
+    margin: 9px -10px 0;
+    padding: 14px 17px;
+    font-size: .8rem;
+  }
+  #premiumPanel .premium-bottom-crown {
+    padding: 12px 8px;
+  }
+}
+@media (max-width: 360px) {
+  #freePanel .tips-table tbody tr:not(.total-odds-row),
+  #premiumPanel .tips-table tbody tr:not(.total-odds-row) {
+    grid-template-columns: minmax(0,1fr) minmax(72px,auto);
+    gap: 5px 8px;
+    padding: 12px;
+  }
+  #freePanel .tips-table .status,
+  #premiumPanel .tips-table .status {min-width:74px;font-size:.7rem}
+  #freePanel .tips-table .total-odds-label,
+  #premiumPanel .tips-table .total-odds-label {font-size:.64rem}
+}
+
+/* Dark mode: retain the same blue card structure with accessible contrast. */
+[data-theme="dark"] #freePanel .tips-table tbody tr:not(.total-odds-row) td,
+[data-theme="dark"] #premiumPanel .tips-table tbody tr:not(.total-odds-row) td {
+  background: #17364c !important;
+  color: #d6efff !important;
+  border-color: #315b76 !important;
+}
+[data-theme="dark"] #freePanel .tips-table tbody tr:not(.total-odds-row):nth-child(even) td,
+[data-theme="dark"] #premiumPanel .tips-table tbody tr:not(.total-odds-row):nth-child(even) td {
+  background: #1b4059 !important;
+}
+[data-theme="dark"] #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(1),
+[data-theme="dark"] #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(3),
+[data-theme="dark"] #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(1),
+[data-theme="dark"] #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(3) {
+  color: #a9bfd1 !important;
+}
+[data-theme="dark"] #freePanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(2),
+[data-theme="dark"] #premiumPanel .tips-table tbody tr:not(.total-odds-row) td:nth-child(2) {
+  color: #f0f8ff !important;
+}
+[data-theme="dark"] #freePanel .tips-table .total-odds-row td,
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-row td {
+  background: #17364c !important;
+  border-color: #315b76 !important;
+  color: #d6efff !important;
+}
+[data-theme="dark"] #freePanel .tips-table .total-odds-label,
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-label {color:#bceaff}
+[data-theme="dark"] #freePanel .tips-table .total-odds-value,
+[data-theme="dark"] #premiumPanel .tips-table .total-odds-value {
+  background: #102b3d;
+  color: #bceaff;
+  border-color: #54748a;
+}
+[data-theme="dark"] #freePanel #freeNotice,
+[data-theme="dark"] #premiumPanel #premiumNotice {
+  background: #10263b;
+  color: #a9bfd1;
+  border-color: #26384c;
+}
+
 </style>
 </body>
 </html>
