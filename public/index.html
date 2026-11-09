@@ -634,6 +634,84 @@ button, input, select, textarea {
 .vip-pricing-admin{margin-top:30px}.vip-pricing-banner{display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:15px;border:1px solid #d8e8f5;border-radius:17px;background:linear-gradient(110deg,#eef7ff,#f8fbff)}.vip-pricing-icon{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:14px;background:#dceeff;color:#0879b9;font-size:1.1rem}.vip-pricing-banner strong{display:block;color:#16324d;font-size:.93rem}.vip-pricing-banner p{margin:4px 0 0;color:#61758a;font-size:.78rem;line-height:1.5}.vip-pricing-secure{margin-left:auto;white-space:nowrap;color:#087b55;font-size:.72rem;font-weight:800}.vip-price-country-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.vip-price-country{padding:18px;min-width:0}.vip-price-country-head{display:flex;align-items:center;gap:11px;padding-bottom:15px;margin-bottom:15px;border-bottom:1px solid var(--line)}.vip-country-flag{font-size:1.8rem}.vip-price-country-head h3{margin:0;font-size:1.02rem}.vip-price-country-head small{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}.vip-country-code{margin-left:auto;padding:5px 8px;border-radius:8px;background:var(--soft);color:var(--blue2);font-size:.68rem;font-weight:900}.vip-price-fields{display:grid;gap:12px}.vip-price-fields .field{gap:5px}.vip-price-fields .field label{font-size:.7rem}.vip-price-input{display:flex;align-items:center;border:1px solid var(--line);border-radius:11px;background:var(--bg);overflow:hidden}.vip-price-input>span{padding:0 10px;color:var(--muted);font-size:.76rem;font-weight:800}.vip-price-input input{width:100%;min-width:0;border:0!important;border-radius:0!important;background:transparent!important;padding:11px 10px!important;color:var(--ink);font-weight:800;box-shadow:none!important}.vip-price-input:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px #0284c71c}.vip-pricing-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding:14px 16px;border:1px solid var(--line);border-radius:15px;background:var(--surface)}.vip-pricing-hint{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.76rem}.vip-pricing-hint i{color:var(--blue)}[data-theme=dark] .vip-pricing-banner{background:#132a3d;border-color:#28465d}[data-theme=dark] .vip-pricing-banner strong{color:#e8f4ff}[data-theme=dark] .vip-pricing-banner p{color:#a7bbce}[data-theme=dark] .vip-pricing-icon{background:#1b4059;color:#7dd3fc}
 @media(max-width:850px){.vip-price-country-grid{grid-template-columns:1fr 1fr}.vip-price-country:last-child{grid-column:1/-1}}
 @media(max-width:600px){.vip-price-country-grid{grid-template-columns:1fr}.vip-price-country:last-child{grid-column:auto}.vip-pricing-banner{align-items:flex-start;flex-wrap:wrap}.vip-pricing-secure{margin-left:58px}.vip-pricing-actions{align-items:stretch;flex-direction:column}.vip-pricing-actions .btn{width:100%}}
+
+/* Banker Tips account and subscription upgrade refinement */
+#paymentPanel{min-width:0}
+#paymentPanel .account-unified-card{width:100%;max-width:100%;margin-inline:auto}
+#paymentPanel .profile-name,#paymentPanel .profile-email{overflow-wrap:anywhere;word-break:break-word}
+#paymentPanel .profile-detail strong{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+#paymentPanel .account-unified-card .membership-card{min-width:0}
+#paymentPanel .account-unified-card .account-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.upgrade-card{margin-top:20px;padding:clamp(17px,2.5vw,25px);border:1px solid rgba(105,151,196,.25);border-radius:20px;background:rgba(255,255,255,.66);color:#17314d;box-shadow:0 8px 24px rgba(30,67,108,.055);min-width:0}
+.upgrade-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:17px}
+.upgrade-kicker{display:inline-flex;align-items:center;gap:7px;color:#0879b9;font-size:.68rem;font-weight:800;letter-spacing:.12em}
+.upgrade-heading h3{margin:7px 0 4px;font-size:clamp(1.12rem,2vw,1.35rem);letter-spacing:-.04em;color:#17314d}
+.upgrade-heading p{margin:0;color:#60758d;font-size:.82rem;line-height:1.55}
+.upgrade-secure{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #dbe8f3;border-radius:999px;background:#f8fbff;color:#54708c;font-size:.7rem;font-weight:800;white-space:nowrap}
+.upgrade-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.upgrade-plan{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:17px;border:1px solid #dce7f1;border-radius:17px;background:#fff;box-shadow:0 4px 14px rgba(20,50,80,.035);overflow:hidden}
+.upgrade-plan-featured{border:1.5px solid #1685c4;box-shadow:0 8px 22px rgba(8,121,185,.10)}
+.upgrade-popular{position:absolute;right:0;top:0;padding:6px 10px;border-radius:0 0 0 12px;background:#e8f5ff;color:#08679e;font-size:.58rem;font-weight:900;letter-spacing:.08em}
+.upgrade-plan-top{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.upgrade-plan-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#edf6fd;color:#0879b9;font-size:1rem}
+.upgrade-plan-duration{color:#75869a;font-size:.7rem;font-weight:800}
+.upgrade-plan h4{margin:13px 0 4px;color:#1a3551;font-size:1rem}
+.upgrade-plan p{min-height:39px;margin:0;color:#718198;font-size:.73rem;line-height:1.5}
+.upgrade-price{margin:13px 0 1px;color:#075985;font-size:clamp(1.22rem,2.4vw,1.55rem);font-weight:900;letter-spacing:-.045em}
+.upgrade-price-note{margin-bottom:14px;color:#8291a3;font-size:.68rem}
+.upgrade-action{width:100%;margin-top:auto;min-height:42px;padding:10px 12px;font-size:.75rem}
+.upgrade-footnote{display:flex;align-items:flex-start;gap:8px;margin:15px 2px 0;color:#718198;font-size:.7rem;line-height:1.55}
+.upgrade-footnote i{margin-top:2px;color:#16815a}
+.upgrade-message{display:none;margin-top:12px;padding:10px 12px;border-radius:11px;background:#edf6fd;color:#075985;font-size:.78rem;line-height:1.5}
+.upgrade-message.show{display:block}
+.upgrade-plan.is-current{border-color:#d5b66b;background:linear-gradient(145deg,#fffdf7,#fff)}
+.upgrade-plan.is-current .upgrade-plan-icon{background:#fff5d9;color:#987020}
+.upgrade-plan.is-current .upgrade-action{background:#f7f0df;color:#795c1e;border:1px solid #ead9ad;box-shadow:none}
+[data-theme="dark"] .upgrade-card{background:rgba(17,30,48,.92);border-color:#2b4660;color:var(--ink)}
+[data-theme="dark"] .upgrade-heading h3,[data-theme="dark"] .upgrade-plan h4{color:#eff6ff}
+[data-theme="dark"] .upgrade-heading p,[data-theme="dark"] .upgrade-plan p,[data-theme="dark"] .upgrade-footnote{color:#a8b8ca}
+[data-theme="dark"] .upgrade-plan{background:#13263b;border-color:#30465d}
+[data-theme="dark"] .upgrade-plan-featured{border-color:#248bc2}
+[data-theme="dark"] .upgrade-price{color:#8bd8ff}
+[data-theme="dark"] .upgrade-secure{background:#172f43;border-color:#30465d;color:#bfd2e4}
+[data-theme="dark"] .upgrade-plan.is-current{background:#302b1e;border-color:#8c7137}
+@media(min-width:1000px){
+ #paymentPanel .account-unified-card{padding:26px 30px}
+ #paymentPanel .account-unified-card .profile-card{padding:8px 6px 23px}
+ #paymentPanel .account-unified-card .profile-avatar{width:82px;height:82px}
+ #paymentPanel .account-unified-card .profile-details{gap:18px;padding:17px 20px}
+ #paymentPanel .account-unified-card .membership-card{padding-top:23px!important}
+}
+@media(max-width:760px){
+ #paymentPanel .account-unified-card .account-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .upgrade-plan-grid{grid-template-columns:1fr}
+ .upgrade-plan{display:grid;grid-template-columns:1fr auto;column-gap:12px;padding:15px}
+ .upgrade-plan-top{grid-column:1/-1}
+ .upgrade-plan h4{margin:10px 0 3px}
+ .upgrade-plan p{grid-column:1;min-height:0}
+ .upgrade-price{grid-column:1;margin:10px 0 0}
+ .upgrade-price-note{grid-column:1;margin:0 0 3px}
+ .upgrade-action{grid-column:2;grid-row:3/5;align-self:center;width:auto;min-width:132px}
+}
+@media(max-width:480px){
+ #paymentPanel .account-unified-card{padding:13px;border-radius:19px}
+ #paymentPanel .account-unified-card .profile-top{align-items:flex-start}
+ #paymentPanel .account-unified-card .profile-status{max-width:60%;white-space:normal;text-align:center;justify-content:center;font-size:.68rem;padding:7px 9px}
+ #paymentPanel .account-unified-card .profile-name{font-size:1.35rem}
+ #paymentPanel .account-unified-card .profile-details{grid-template-columns:1fr}
+ #paymentPanel .account-unified-card .account-summary{grid-template-columns:1fr}
+ #paymentPanel .account-unified-card .summary-tile{display:flex;justify-content:space-between;align-items:center;gap:9px}
+ #paymentPanel .account-unified-card .summary-tile span{text-align:right}
+ .upgrade-heading{display:block}
+ .upgrade-secure{margin-top:12px}
+ .upgrade-plan{grid-template-columns:minmax(0,1fr) auto;column-gap:8px;padding:13px}
+ .upgrade-action{min-width:112px;max-width:124px;font-size:.68rem;white-space:normal}
+}
+@media(max-width:360px){
+ .upgrade-plan{display:flex}
+ .upgrade-action{width:100%;max-width:none;margin-top:12px}
+}
+
 </style>
 
 <style id="membership-approval-redesign">
@@ -1068,6 +1146,20 @@ img{max-width:100%}
   <div class="account-unified-card" aria-label="Account profile and VIP membership">
    <section class="profile-card" aria-labelledby="profileTitle"><div class="profile-top"><div class="profile-avatar" id="profileAvatar" aria-hidden="true">BT</div><span class="profile-status" id="profileStatus"><span class="status-dot"></span> Guest</span></div><h2 id="profileTitle" class="profile-name">Your Profile</h2><p class="profile-email" id="profileEmail">Sign in to view your account details</p><div class="profile-details"><div class="profile-detail"><span>Subscription plan</span><strong id="profilePlan">No active plan</strong></div><div class="profile-detail"><span>Membership expiry</span><strong id="profileExpiry">—</strong></div><div class="profile-detail"><span>Account email</span><strong id="profileEmailDetail">—</strong></div></div></section>
    <div class="card pad membership-card"><div class="payment-card-heading"><span class="payment-icon"><i class="fa-solid fa-crown"></i></span><div><h3 style="margin:0">Your VIP membership</h3><p>Plan details and current access status</p></div><span class="vip-gold-mark">VIP</span></div><div class="account-summary"><div class="summary-tile"><strong id="memberPlanValue">Not selected</strong><span>Selected package</span></div><div class="summary-tile"><strong id="memberStatusValue">Guest</strong><span>Membership status</span></div><div class="summary-tile"><strong id="memberExpiryValue">—</strong><span>Expiry date & time (EAT)</span></div><div class="summary-tile countdown-tile"><strong id="memberCountdownValue">—</strong><span>Time remaining</span></div></div><div class="notice" id="memberStatusNotice" style="margin-top:12px">Register and choose a package to view your membership status here.</div></div>
+
+    <section class="upgrade-card" aria-labelledby="upgradeTitle">
+     <div class="upgrade-heading">
+      <div><span class="upgrade-kicker"><i class="fa-solid fa-arrow-trend-up"></i> MEMBERSHIP OPTIONS</span><h3 id="upgradeTitle">Upgrade your VIP plan</h3><p>Choose a longer plan for uninterrupted access to premium tips.</p></div>
+      <span class="upgrade-secure"><i class="fa-solid fa-shield-halved"></i> Secure checkout</span>
+     </div>
+     <div class="upgrade-plan-grid">
+      <article class="upgrade-plan" data-upgrade-card="daily"><div class="upgrade-plan-top"><span class="upgrade-plan-icon"><i class="fa-solid fa-bolt"></i></span><span class="upgrade-plan-duration">1 day</span></div><h4>Daily VIP</h4><p>Flexible access for today’s selections.</p><div class="upgrade-price" id="upgradePriceDaily">—</div><small class="upgrade-price-note">One-day access</small><button class="btn secondary upgrade-action" type="button" data-upgrade-package="daily">Choose Daily</button></article>
+      <article class="upgrade-plan upgrade-plan-featured" data-upgrade-card="weekly"><span class="upgrade-popular">POPULAR</span><div class="upgrade-plan-top"><span class="upgrade-plan-icon"><i class="fa-solid fa-calendar-week"></i></span><span class="upgrade-plan-duration">7 days</span></div><h4>Weekly VIP</h4><p>More time to follow every premium pick.</p><div class="upgrade-price" id="upgradePriceWeekly">—</div><small class="upgrade-price-note">Seven-day access</small><button class="btn upgrade-action" type="button" data-upgrade-package="weekly">Upgrade to Weekly</button></article>
+      <article class="upgrade-plan" data-upgrade-card="monthly"><div class="upgrade-plan-top"><span class="upgrade-plan-icon"><i class="fa-solid fa-crown"></i></span><span class="upgrade-plan-duration">30 days</span></div><h4>Monthly VIP</h4><p>Best for consistent, month-long access.</p><div class="upgrade-price" id="upgradePriceMonthly">—</div><small class="upgrade-price-note">Thirty-day access</small><button class="btn secondary upgrade-action" type="button" data-upgrade-package="monthly">Choose Monthly</button></article>
+     </div>
+     <p class="upgrade-footnote"><i class="fa-solid fa-lock"></i> Your selected plan is charged through the existing mobile-money checkout. Membership changes only after payment is verified.</p>
+     <div class="upgrade-message" id="upgradeMessage" role="status" aria-live="polite"></div>
+    </section>
   </div>
   <div class="card admin-members payment-history-card"><div class="section-head" style="padding:20px 20px 0"><div><h3 style="margin:0">Payment history</h3><p>Review recent payments and their confirmation status.</p></div><button class="btn secondary small" id="paymentHistoryReload"><i class="fa-solid fa-rotate"></i> Refresh</button></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Status</th><th>Receipt / Reference</th></tr></thead><tbody id="customerPaymentsRows"><tr><td colspan="5">Sign in to view your payment history.</td></tr></tbody></table></div><div class="notice" id="customerPaymentsNotice">Your VIP access is activated after your payment has been confirmed.</div></div>
   <div class="card pad payment-method-card" id="paymentOptionsCard">
@@ -1517,6 +1609,16 @@ function updateAccountUI() {
   const adminNav=$('adminNavButton');
   if(adminNav) adminNav.classList.toggle('hidden',!admin);
   const accountState=$('accountState'); if(accountState) accountState.textContent=currentUser ? (currentUser.membershipStatus==='active' ? 'VIP Active' : 'Membership: '+String(currentUser.membershipStatus||'pending_approval').replaceAll('_',' ')) : 'Guest account';
+   const profileTitle=$('profileTitle'),profileEmail=$('profileEmail'),profileEmailDetail=$('profileEmailDetail'),profileAvatar=$('profileAvatar'),profileStatus=$('profileStatus'),profilePlan=$('profilePlan'),profileExpiry=$('profileExpiry');
+   const email=String(currentUser?.email||'');
+   const accountLabel=currentUser?(email.split('@')[0]||'VIP Member').replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()):'Your Profile';
+   if(profileTitle)profileTitle.textContent=accountLabel;
+   if(profileEmail)profileEmail.textContent=currentUser?email:'Sign in to view your account details';
+   if(profileEmailDetail)profileEmailDetail.textContent=currentUser?email:'—';
+   if(profileAvatar)profileAvatar.textContent=currentUser?accountLabel.split(/\s+/).filter(Boolean).slice(0,2).map(v=>v[0]).join('').toUpperCase():'BT';
+   if(profileStatus){const status=currentUser?(currentUser.membershipStatus||'pending_approval'):'guest';const label={pending_approval:'Pending approval',active:'VIP active',rejected:'Request rejected',expired:'Membership expired',guest:'Guest'}[status]||status.replaceAll('_',' ');profileStatus.innerHTML='<span class="status-dot"></span> '+label;profileStatus.classList.toggle('is-active',status==='active');}
+   if(profilePlan)profilePlan.textContent=currentUser?packageLabel(currentUser.selectedPackage):'No active plan';
+   if(profileExpiry)profileExpiry.textContent=currentUser?.vipExpiresAt?new Date(currentUser.vipExpiresAt).toLocaleString('en-KE',{timeZone:'Africa/Nairobi',day:'2-digit',month:'short',year:'numeric'}):'Not set';
   const planEl=$('memberPlanValue'), statusEl=$('memberStatusValue'), expiryEl=$('memberExpiryValue'), countdownEl=$('memberCountdownValue'), noticeEl=$('memberStatusNotice');
   if(planEl) planEl.textContent=currentUser ? packageLabel(currentUser.selectedPackage) : 'Not selected';
   if(statusEl) statusEl.textContent=currentUser ? ({pending_approval:'Pending review',active:'Active',rejected:'Rejected',expired:'Expired'}[currentUser.membershipStatus] || (currentUser.isActivated?'Active':'Pending review')) : 'Guest';
@@ -1542,13 +1644,22 @@ setInterval(renderMembershipCountdown,1000);
 
 const packageNames={daily:'Daily VIP',weekly:'Weekly VIP',monthly:'Monthly VIP'};
 function packageLabel(key){ return packageNames[key]||'Not selected'; }
+document.addEventListener('click',function(event){
+  const upgradeButton=event.target.closest('[data-upgrade-package]');
+  if(!upgradeButton)return;
+  const plan=upgradeButton.dataset.upgradePackage;
+  if(!['daily','weekly','monthly'].includes(plan))return;
+  const message=$('upgradeMessage');
+  if(message){message.textContent=currentUser&&currentUser.selectedPackage===plan?'This is already your selected package. You can continue to secure checkout if you need to complete or retry payment.':'Selected '+packageLabel(plan)+'. Continue to secure mobile-money checkout to confirm your subscription.';message.classList.add('show');}
+  beginRegistration(plan);
+});
 async function beginRegistration(packageKey){
   if(!['daily','weekly','monthly'].includes(packageKey)){ setPanel('subscriptionPanel'); return; }
   if(currentUser){
     try { const renewal=await api('/api/membership/renew-package',{method:'POST',body:JSON.stringify({selectedPackage:packageKey})}); currentUser=renewal.user||({...currentUser,selectedPackage:packageKey}); }
     catch(err){ const note=$('renewalPaymentNotice'); if(note) note.textContent=err.message||'Could not select this renewal package. Please try again.'; openModal('renewModal'); return; }
     updateAccountUI(); updatePaymentUI();
-    closeModal('renewModal'); setPanel('paymentPanel');
+    closeModal('renewModal'); if(window.navigateBankerTips) window.navigateBankerTips('/checkout'); else { setPanel('paymentPanel'); if(typeof sectionFilter==='function') sectionFilter('checkout'); }
     const msg=$('mpesaPaymentNotice'); if(msg) msg.textContent='Renewing '+packageLabel(packageKey)+'. Complete payment and wait for verified confirmation before access is restored.';
     return;
   }
@@ -1567,6 +1678,21 @@ function applyVipPrices(prices){
   }
   renderPublicVipPrices();updateRegistrationFlow();updatePaymentUI();
 }
+function renderUpgradePlans(){
+  const country=activeCountry(),cfg=countryPackagePrices[country]||countryPackagePrices.KE;
+  const ids={daily:'upgradePriceDaily',weekly:'upgradePriceWeekly',monthly:'upgradePriceMonthly'};
+  for(const plan of ['daily','weekly','monthly']){
+    const price=$(ids[plan]);if(price)price.textContent=formatCountryAmount(country,cfg.prices[plan]);
+    const card=document.querySelector('[data-upgrade-card="'+plan+'"]');
+    const button=document.querySelector('[data-upgrade-package="'+plan+'"]');
+    const isCurrent=!!currentUser&&currentUser.selectedPackage===plan;
+    if(card)card.classList.toggle('is-current',isCurrent);
+    if(button){
+      button.textContent=isCurrent?'Selected plan':(currentUser&&currentUser.membershipStatus==='active'?'Switch to '+(plan==='daily'?'Daily':plan==='weekly'?'Weekly':'Monthly'):'Choose '+(plan==='daily'?'Daily':plan==='weekly'?'Weekly':'Monthly'));
+      button.setAttribute('aria-pressed',String(isCurrent));
+    }
+  }
+}
 function renderPublicVipPrices(){
   const displayCountry=activeCountry(),displayPrices=countryPackagePrices[displayCountry].prices;
   const publicLabels={daily:'publicPriceDaily',weekly:'publicPriceWeekly',monthly:'publicPriceMonthly'};
@@ -1576,6 +1702,7 @@ function renderPublicVipPrices(){
     const card=$(publicLabels[plan]);if(card)card.innerHTML=amount+' <span>/ '+(plan==='daily'?'daily access':plan==='weekly'?'7-day access':'30-day access')+'</span>';
     const renew=$(renewLabels[plan]);if(renew){const icon=plan==='daily'?'fa-bolt':plan==='weekly'?'fa-calendar-week':'fa-crown';const country=activeCountry();const renewAmount=formatCountryAmount(country,countryPackagePrices[country].prices[plan]);renew.innerHTML='<i class="fa-solid '+icon+'"></i> Renew '+packageLabel(plan)+' · '+renewAmount;}
   }
+  renderUpgradePlans();
 }
 async function loadVipPricing(){try{const data=await api('/api/pricing');if(data.prices)applyVipPrices(data.prices);}catch(err){console.warn('VIP pricing could not be refreshed:',err.message);}}
 function readVipPricingForm(){const prices={};for(const country of ['KE','TZ','UG']){prices[country]={};for(const plan of ['daily','weekly','monthly']){const field=$('vipPrice'+country+plan);prices[country][plan]=Number(field?.value);}}return prices;}
@@ -2118,7 +2245,7 @@ loadPerformanceStats();
  let navigating=false;
  const norm=p=>{p=(p||'/').replace(/\/+$/,'')||'/';return p};
  function closeRouteModals(){document.querySelectorAll('.modal.open').forEach(m=>{m.classList.remove('open');m.setAttribute('aria-hidden','true')})}
- function sectionFilter(section){const panel=document.getElementById('paymentPanel');if(!panel)return;const hero=panel.querySelector('.payment-hero');const steps=panel.querySelector('.payment-steps');const profile=panel.querySelector('.profile-card');const membership=panel.querySelector('.membership-card');const payments=panel.querySelector('.payment-history-card');const method=panel.querySelector('.payment-method-card');[hero,steps,profile,membership,payments,method].forEach(el=>{if(el)el.classList.remove('route-subsection-hidden')});if(section==='membership'){[hero,steps,profile,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='payments'){[hero,steps,profile,membership,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='checkout'){[hero,steps,profile,membership,payments].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='account'){[steps,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}}
+ function sectionFilter(section){const panel=document.getElementById('paymentPanel');if(!panel)return;const hero=panel.querySelector('.payment-hero');const steps=panel.querySelector('.payment-steps');const profile=panel.querySelector('.profile-card');const membership=panel.querySelector('.membership-card');const payments=panel.querySelector('.payment-history-card');const method=panel.querySelector('.payment-method-card');const upgrade=panel.querySelector('.upgrade-card');[hero,steps,profile,membership,upgrade,payments,method].forEach(el=>{if(el)el.classList.remove('route-subsection-hidden')});if(section==='membership'){[hero,steps,profile,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='payments'){[hero,steps,profile,membership,upgrade,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='checkout'){[hero,steps,profile,membership,upgrade,payments].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}else if(section==='account'){[steps,payments,method].forEach(el=>el&&el.classList.add('route-subsection-hidden'))}}
  function ensureContact(){let el=document.getElementById('routeContactPage');if(!el){el=document.createElement('section');el.id='routeContactPage';el.className='panel';el.innerHTML='<div class="card pad" style="max-width:760px;margin:0 auto"><span class="eyebrow">BANKER TIPS SUPPORT</span><h1>Contact us</h1><p>For account, subscription or payment assistance, contact the support channel published by Banker Tips. Never share your M-Pesa PIN or password.</p><p>If you have paid, keep your transaction receipt and account email ready when contacting support.</p><p><a class="btn" href="/my-account" data-route="/my-account">Open My Account</a></p></div>';document.querySelector('main')?.appendChild(el)}return el}
  function routeTo(path,opts={}){path=norm(path);const url=new URL(path,location.origin);const route=routes[url.pathname];if(!route){location.assign('/404');return}if(navigating)return;navigating=true;const loading=document.getElementById('routeLoadingBar');if(loading)loading.hidden=false;
   closeRouteModals();document.querySelectorAll('.panel').forEach(p=>{p.classList.remove('active','route-enter')});const oldContact=document.getElementById('routeContactPage');if(oldContact)oldContact.classList.remove('active');
