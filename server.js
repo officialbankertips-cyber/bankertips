@@ -734,7 +734,8 @@ app.post("/api/membership/renew-package", requireAuth, csrfCheck, async (req, re
     if (req.user.role === "admin") return res.status(400).json({ success: false, message: "Admin accounts do not need a VIP subscription." });
     const packageKey = String(req.body.selectedPackage || "").toLowerCase();
     const currentPrices = await getVipPrices();
-    if (!Object.prototype.hasOwnProperty.call(currentPrices.KE, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
+    const country = String(req.user.country || "KE").toUpperCase();
+    if (!["KE", "TZ", "UG"].includes(country) || !Object.prototype.hasOwnProperty.call(currentPrices[country] || {}, packageKey)) return res.status(400).json({ success: false, message: "Choose a valid VIP package." });
     req.user.selectedPackage = packageKey;
     if (req.user.membershipStatus === "active" && req.user.vipExpiresAt && new Date(req.user.vipExpiresAt) <= new Date()) {
       req.user.membershipStatus = "expired"; req.user.isActivated = false;
