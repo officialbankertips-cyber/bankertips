@@ -22,7 +22,7 @@ Edit `.env` and set:
 
 Then run:
 ```bash
-npm run dev
+npm start
 ```
 Open `http://localhost:3000`. The server reports status at `/api/health`.
 
@@ -44,7 +44,7 @@ Open the website's normal login form and use the exact `ADMIN_EMAIL` and `ADMIN_
 ## 5. Frontend
 Put the Banker Tips HTML file inside `public/index.html`. The API uses same-origin paths, so the frontend should call `/api/...` and browser fetch requests should use `credentials: "include"` for cookie sessions.
 
-If you are using the previously generated `banker_tips_fixed.html`, copy it to `public/index.html`. Its API calls may need to be adjusted to use `credentials: "include"` on every request and the endpoints listed below. The frontend must not store passwords or session JWTs in localStorage.
+The current frontend is included at `public/index.html` and calls the same-origin API. Cookie-based sessions are sent with credentials; passwords and session JWTs are not stored in browser local storage.
 
 ## 6. API endpoints
 ### Public/member
@@ -151,7 +151,7 @@ The subscription checkout supports Kenya, Tanzania and Uganda while retaining th
 
 | Package | Kenya (KES) | Tanzania (TZS) | Uganda (UGX) |
 | --- | ---: | ---: | ---: |
-| Daily VIP | 150 | 5,000 | 5,000 |
+| Daily VIP | 250 | 5,000 | 5,000 |
 | Weekly VIP | 1,500 | 35,000 | 50,000 |
 | Monthly VIP | 3,500 | 75,000 | 110,000 |
 
@@ -182,6 +182,3 @@ A collection response (including HTTP 202) is treated as pending, not paid. The 
 Before production use, configure valid OptimaPay credentials and complete provider-side KYC/merchant activation. Test real low-value transactions on each supported rail, including pending, success, failed, cancelled and timeout cases. Confirm the Global Wallet status endpoint's final response fields and Uganda network eligibility with OptimaPay for the merchant account.
 
 
-## GOAL API live scores and tip settlement
-
-Configure `GOAL_API_KEY`, `GOAL_SYNC_INTERVAL_MS=600000`, and `APP_TIME_ZONE=Africa/Nairobi` in Render Environment Variables. See `README-AUTO-RESULTS. txt` for the provider workflow, supported markets, safety rules, and admin sync endpoints. The API key must remain server-side.

@@ -116,6 +116,14 @@ const tipSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 }, { versionKey: false });
 
+// Prevent the same selection being entered more than once for the same
+// match date and category. The case-insensitive unique index also protects
+// against simultaneous admin requests reaching MongoDB at the same time.
+tipSchema.index(
+  { date: 1, type: 1, homeTeam: 1, awayTeam: 1, tip: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 }, name: "unique_tip_selection_per_day" }
+);
+
 tipSchema.pre("save", function(next) {
   this.updatedAt = new Date();
   next();
@@ -355,9 +363,9 @@ function hasActiveVip(user) {
 function cleanTipInput(body) {
   const type = body.type;
   const date = String(body.date || "");
-  let homeTeam = String(body.homeTeam || "").trim();
-  let awayTeam = String(body.awayTeam || "").trim();
-  const suppliedMatch = String(body.match || "").trim();
+  let homeTeam = String(body.homeTeam || "").trim().replace(/\s+/g, " ");
+  let awayTeam = String(body.awayTeam || "").trim().replace(/\s+/g, " ");
+  const suppliedMatch = String(body.match || "").trim().replace(/\s+/g, " ");
 
   if ((!homeTeam || !awayTeam) && suppliedMatch) {
     const parts = suppliedMatch.split(/\s+(?:vs?\.?)\s+|\s*[-–—]\s*/i);
@@ -368,19 +376,20 @@ function cleanTipInput(body) {
   }
 
   const match = suppliedMatch || `${homeTeam} vs ${awayTeam}`;
-  const tip = String(body.tip || "").trim();
+  const tip = String(body.tip || "").trim().replace(/\s+/g, " ");
   const odds = Number(body.odds);
   const incomingStatus = String(body.status || body.result || "Pending").toLowerCase();
   const statusToResult = { pending: "Pending", win: "Win", won: "Win", lose: "Lose", lost: "Lose", void: "Void" };
   const result = statusToResult[incomingStatus];
   if (!["free", "premium"].includes(type)) throw new Error("Type must be free or premium.");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date))) throw new Error("Date must be YYYY-MM-DD.");
+  const parsedDate = new Date(`${date}T00:00:00.000Z`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) throw new Error("Date must be a valid calendar date in YYYY-MM-DD format.");
   if (!homeTeam || !awayTeam || !match || !tip || !Number.isFinite(odds) || odds < 1 || odds > 1000) {
     throw new Error("Match must include both teams, a tip, and valid odds. Enter it as Home Team - Away Team.");
   }
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
-  if (time && time.length > 20) throw new Error("Invalid match time.");
+  if (time && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error("Kick-off time must use 24-hour HH:MM format.");
   const publicationStatus = String(body.publicationStatus || (date > footballDateISO() ? "scheduled" : "published")).toLowerCase();
   if (!["draft", "scheduled", "published"].includes(publicationStatus)) throw new Error("Invalid publication status.");
   const publishAt = publicationStatus === "scheduled"
@@ -686,15 +695,16 @@ app.post("/api/auth/register", authLimiter, csrfCheck, async (req, res) => {
       });
     }
 
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(409).json({ success: false, message: "An account with that email already exists." });
+    // Match legacy mixed-case records too; all new addresses are stored lowercase.
+    const exists = await User.findOne({ email: new RegExp("^" + email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$", "i") }).select("_id");
+    if (exists) return res.status(409).json({ success: false, code: "EMAIL_ALREADY_EXISTS", message: "This email address is already registered. Please log in or use a different email address." });
     
     const passwordHash = await bcrypt.hash(password, 12);
     const user = await User.create({ email, phoneNumber: "+" + normalizedRegistrationPhone, country, mobileMoneyProvider: country === "TZ" ? mobileMoneyProvider : "", passwordHash, role: "user", selectedPackage, isActivated: false, membershipStatus: "pending_approval", vipExpiresAt: null });
     setSession(res, user);
     res.status(201).json({ success: true, message: "Account created. VIP access remains locked until an administrator activates it.", user: safeUser(user) });
   } catch (err) {
-    if (err.code === 11000) return res.status(409).json({ success: false, message: "An account with that email already exists." });
+    if (err.code === 11000 && (err.keyPattern?.email || err.keyValue?.email || /email_1/i.test(err.message || ""))) return res.status(409).json({ success: false, code: "EMAIL_ALREADY_EXISTS", message: "This email address is already registered. Please log in or use a different email address." });
     console.error("Registration error:", err.message);
     res.status(500).json({ success: false, message: "Could not create account." });
   }
@@ -899,7 +909,7 @@ app.get("/api/tips", async (req, res) => {
   res.set("Pragma", "no-cache");
   try {
     const type = String(req.query.type || "free");
-    const date = String(req.query.date || new Date().toISOString().slice(0, 10));
+    const date = String(req.query.date || footballDateISO());
     if (!["free", "premium"].includes(type)) return res.status(400).json({ success: false, message: "Invalid tips type." });
     if (type === "premium") {
       const token = req.cookies[COOKIE_NAME];
@@ -1157,6 +1167,18 @@ app.get("/api/admin/audit-logs", requireAuth, requireAdmin, async (req, res) => 
   } catch (err) { res.status(500).json({ success: false, message: "Could not load administrator activity." }); }
 });
 
+async function findDuplicateTip(data, excludeId = null) {
+  const query = {
+    date: data.date,
+    type: data.type,
+    homeTeam: data.homeTeam,
+    awayTeam: data.awayTeam,
+    tip: data.tip
+  };
+  if (excludeId) query._id = { $ne: excludeId };
+  return Tip.findOne(query).collation({ locale: "en", strength: 2 }).select("_id match tip date type").lean();
+}
+
 app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
   const tips = await Tip.find({}).sort({ date: -1, createdAt: 1 }).limit(2000).lean();
   res.json({ success: true, tips: tips.map(publicTip) });
@@ -1165,10 +1187,13 @@ app.get("/api/admin/tips", requireAuth, requireAdmin, async (req, res) => {
 app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
     const data = cleanTipInput(req.body);
+    const duplicate = await findDuplicateTip(data);
+    if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `This ${data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}. Change the match, selection, date or category.` });
     const tip = await Tip.create({ ...data, createdBy: req.user._id });
     await recordAudit(req, "tip.created", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
     res.status(201).json({ success: true, tip: publicTip(tip) });
   } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: "This tip already exists for the selected date and category. Duplicate tips are not allowed." });
     res.status(400).json({ success: false, message: err.message || "Could not create tip." });
   }
 });
@@ -1176,11 +1201,14 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
 app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
   try {
     const data = cleanTipInput(req.body);
-    const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true });
+    const duplicate = await findDuplicateTip(data, req.params.id);
+    if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `Another ${data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}.` });
+    const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true, collation: { locale: "en", strength: 2 } });
     if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
     await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
     res.json({ success: true, tip: publicTip(tip) });
   } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: "This tip already exists for the selected date and category. Duplicate tips are not allowed." });
     res.status(400).json({ success: false, message: err.message || "Could not update tip." });
   }
 });
@@ -1314,6 +1342,24 @@ async function bootstrapAdmin() {
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("MongoDB connected.");
+    // Ensure the unique email constraint exists before accepting registrations.
+    // If legacy duplicate rows already exist, keep the server online: the
+    // registration endpoint still checks case-insensitively before creating users.
+    try {
+      await User.createIndexes();
+    } catch (indexError) {
+      console.error("Email unique index could not be verified. Check for existing duplicate email records:", indexError.message);
+    }
+    // Existing duplicate tip rows can prevent MongoDB from building this index;
+    // the API also performs a duplicate check and reports a clear 409 response.
+    try {
+      await Tip.collection.createIndex(
+        { date: 1, type: 1, homeTeam: 1, awayTeam: 1, tip: 1 },
+        { unique: true, collation: { locale: "en", strength: 2 }, name: "unique_tip_selection_per_day" }
+      );
+    } catch (indexError) {
+      console.error("Tip duplicate-protection index could not be created. Check for existing duplicate tips:", indexError.message);
+    }
     await bootstrapAdmin();
     const repairedAdmins = await User.updateMany(
       { role: "admin" },

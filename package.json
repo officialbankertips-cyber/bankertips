@@ -2,7 +2,7 @@
   "name": "banker-tips",
   "version": "1.0.0",
   "private": true,
-  "description": "Banker Tips football tips platform with GOAL API live scores and automatic result settlement",
+  "description": "Banker Tips football predictions, VIP memberships and mobile-money payments",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
