@@ -1348,6 +1348,7 @@ async function api(path, options = {}) {
       response.status === 403 ? 'You do not have permission to complete this action.' :
       response.status === 404 ? 'This information is not available right now.' :
       response.status >= 500 ? 'We could not complete your request. Please try again shortly.' :
+      (data && typeof data.message === 'string' && data.message.trim()) ? data.message :
       'Please check your details and try again.';
     const err = new Error(publicMessage);
     err.status = response.status;

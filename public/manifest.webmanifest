@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Banker Tips",
   "short_name": "Banker Tips",
-  "description": "Football tips, historical results and VIP membership.",
+  "description": "Daily football predictions, results history and secure VIP membership.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
