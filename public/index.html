@@ -1163,22 +1163,79 @@ img{max-width:100%}
   </div>
   <div class="card admin-members payment-history-card"><div class="section-head" style="padding:20px 20px 0"><div><h3 style="margin:0">Payment history</h3><p>Review recent payments and their confirmation status.</p></div><button class="btn secondary small" id="paymentHistoryReload"><i class="fa-solid fa-rotate"></i> Refresh</button></div><div class="table-scroll"><table><thead><tr><th>Date</th><th>Package</th><th>Amount</th><th>Status</th><th>Receipt / Reference</th></tr></thead><tbody id="customerPaymentsRows"><tr><td colspan="5">Sign in to view your payment history.</td></tr></tbody></table></div><div class="notice" id="customerPaymentsNotice">Your VIP access is activated after your payment has been confirmed.</div></div>
   <div class="card pad payment-method-card" id="paymentOptionsCard">
-   <div class="payment-options-heading"><div><span class="payment-kicker"><i class="fa-solid fa-shield-halved"></i> SECURE CHECKOUT</span><h3>Payment methods</h3><p>Select an available option to view its checkout instructions.</p></div><span class="payment-lock"><i class="fa-solid fa-lock"></i> Protected</span></div>
+   <div class="payment-options-heading"><div><span class="payment-kicker"><i class="fa-solid fa-shield-halved"></i> SECURE CHECKOUT</span><h3>Payment methods</h3><p>Select an available payment option below to view step-by-step checkout instructions.</p></div><span class="payment-lock"><i class="fa-solid fa-lock"></i> Protected</span></div>
    <div class="payment-methods payment-method-grid" role="group" aria-label="Choose a payment method">
     <button class="pay-method selected" type="button" data-payment-method="mpesa" aria-pressed="true"><span class="method-icon mpesa-icon"><i class="fa-solid fa-mobile-screen-button"></i></span><span class="method-copy"><strong>M-Pesa</strong><small>Mobile money</small></span><span class="method-status available">Available</span><i class="fa-solid fa-circle-check method-check" aria-hidden="true"></i></button>
-    <button class="pay-method unavailable" type="button" disabled aria-disabled="true"><span class="method-icon card-icon"><i class="fa-regular fa-credit-card"></i></span><span class="method-copy"><strong>Card payment</strong><small>Visa · Mastercard</small></span><span class="method-status soon">Coming soon</span></button>
-    <button class="pay-method unavailable" type="button" disabled aria-disabled="true"><span class="method-icon skrill-icon"><i class="fa-solid fa-wallet"></i></span><span class="method-copy"><strong>Skrill</strong><small>Digital wallet</small></span><span class="method-status soon">Coming soon</span></button>
+    <button class="pay-method" type="button" data-payment-method="skrill" aria-pressed="false"><span class="method-icon skrill-icon"><i class="fa-solid fa-wallet"></i></span><span class="method-copy"><strong>Skrill</strong><small>Digital wallet</small></span><span class="method-status available">Available</span><i class="fa-solid fa-circle-check method-check" aria-hidden="true"></i></button>
+    <button class="pay-method" type="button" data-payment-method="eversend" aria-pressed="false"><span class="method-icon eversend-icon"><i class="fa-solid fa-money-bill-transfer"></i></span><span class="method-copy"><strong>Eversend</strong><small>Digital payments</small></span><span class="method-status available">Available</span><i class="fa-solid fa-circle-check method-check" aria-hidden="true"></i></button>
+    <button class="pay-method" type="button" data-payment-method="binance" aria-pressed="false"><span class="method-icon binance-icon"><i class="fa-brands fa-bitcoin"></i></span><span class="method-copy"><strong>Binance Pay</strong><small>Crypto payments</small></span><span class="method-status available">Available</span><i class="fa-solid fa-circle-check method-check" aria-hidden="true"></i></button>
+    <button class="pay-method unavailable" type="button" disabled aria-disabled="true"><span class="method-icon gpay-icon"><i class="fa-brands fa-google-pay"></i></span><span class="method-copy"><strong>Google Pay</strong><small>Express wallet</small></span><span class="method-status soon">Coming soon</span></button>
     <button class="pay-method unavailable" type="button" disabled aria-disabled="true"><span class="method-icon paypal-icon"><i class="fa-brands fa-paypal"></i></span><span class="method-copy"><strong>PayPal</strong><small>Online wallet</small></span><span class="method-status soon">Coming soon</span></button>
-    <button class="pay-method unavailable" type="button" disabled aria-disabled="true"><span class="method-icon eversend-icon"><i class="fa-solid fa-money-bill-transfer"></i></span><span class="method-copy"><strong>Eversend</strong><small>Digital payments</small></span><span class="method-status soon">Coming soon</span></button>
-    <button class="pay-method unavailable" type="button" disabled aria-disabled="true"><span class="method-icon binance-icon"><i class="fa-brands fa-bitcoin"></i></span><span class="method-copy"><strong>Binance Pay</strong><small>Crypto payments</small></span><span class="method-status soon">Coming soon</span></button>
    </div>
-   <div class="checkout-current"><span class="checkout-live-dot"></span><span>CURRENT CHECKOUT</span><strong>M-Pesa</strong></div>
-   <div class="mpesa-panel">
-    <div class="mpesa-brand"><span class="mpesa-logo"><i class="fa-solid fa-mobile-screen-button"></i></span><div><strong>M-Pesa</strong><small>Instant phone prompt</small></div><span class="recommended-label"><i class="fa-solid fa-star"></i> Recommended</span></div>
-    <h3>Pay securely with mobile money</h3><p>Enter your registered mobile-money number. A payment prompt will be sent to your phone.</p>
+   <div class="checkout-current"><span class="checkout-live-dot"></span><span>CURRENT CHECKOUT</span><strong id="currentCheckoutLabel">M-Pesa</strong></div>
+
+   <!-- M-Pesa Checkout View -->
+   <div id="mpesaCheckoutView">
+    <div class="mpesa-panel">
+     <div class="mpesa-brand"><span class="mpesa-logo"><i class="fa-solid fa-mobile-screen-button"></i></span><div><strong>M-Pesa</strong><small>Instant phone prompt</small></div><span class="recommended-label"><i class="fa-solid fa-star"></i> Recommended</span></div>
+     <h3>Pay securely with mobile money</h3><p>Enter your registered mobile-money number. A payment prompt will be sent to your phone.</p>
+    </div>
+    <form id="mpesaPaymentForm" class="mpesa-checkout-form"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><div class="phone-input-wrap"><span class="phone-prefix"><i class="fa-solid fa-phone"></i> KE</span><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20" aria-describedby="mpesaPhoneHelp"></div><small class="subtext" id="mpesaPhoneHelp">Use the mobile-money number that should receive the payment prompt.</small></div><div class="field full" id="checkoutProviderWrap" style="display:none"><label for="checkoutProvider">Tanzania mobile-money network</label><select id="checkoutProvider" class="form-control"><option value="">Select network</option><option value="VODACOM">Vodacom</option><option value="YAS">YAS</option><option value="AIRTEL">Airtel</option><option value="HALOTEL">Halotel</option></select></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Continue with M-Pesa <i class="fa-solid fa-arrow-right"></i></button></div></div></form>
+    <div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div><p class="payment-safety-note"><i class="fa-solid fa-shield-halved"></i> Never share your M-Pesa PIN or one-time verification codes with anyone.</p>
    </div>
-   <form id="mpesaPaymentForm" class="mpesa-checkout-form"><div class="form-grid"><div class="field full"><label for="mpesaPhone">M-Pesa phone number</label><div class="phone-input-wrap"><span class="phone-prefix"><i class="fa-solid fa-phone"></i> KE</span><input id="mpesaPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="0712345678 or 254712345678" required maxlength="20" aria-describedby="mpesaPhoneHelp"></div><small class="subtext" id="mpesaPhoneHelp">Use the mobile-money number that should receive the payment prompt.</small></div><div class="field full" id="checkoutProviderWrap" style="display:none"><label for="checkoutProvider">Tanzania mobile-money network</label><select id="checkoutProvider" class="form-control"><option value="">Select network</option><option value="VODACOM">Vodacom</option><option value="YAS">YAS</option><option value="AIRTEL">Airtel</option><option value="HALOTEL">Halotel</option></select></div><div class="field full"><button class="btn" id="mpesaPayButton" type="submit"><i class="fa-solid fa-lock"></i> Continue with M-Pesa <i class="fa-solid fa-arrow-right"></i></button></div></div></form>
-   <div class="notice" id="mpesaPaymentNotice" role="status" aria-live="polite" style="margin-top:12px">Sign in and select a package to pay. Your VIP access is activated only after the payment is verified.</div><p class="payment-safety-note"><i class="fa-solid fa-shield-halved"></i> Never share your M-Pesa PIN or one-time verification codes with anyone.</p>
+
+   <!-- Manual / Digital Wallet Checkout Views (Skrill, Eversend, Binance Pay) -->
+   <div id="altCheckoutView" class="alt-checkout-view" hidden>
+    <div class="alt-pay-banner" id="altPayBanner">
+     <div class="alt-pay-header">
+      <span class="alt-pay-logo" id="altPayLogo"><i class="fa-solid fa-wallet"></i></span>
+      <div>
+       <strong id="altPayName">Skrill</strong>
+       <small id="altPayTagline">Fast digital wallet transfer</small>
+      </div>
+      <span class="alt-pay-badge"><i class="fa-solid fa-circle-check"></i> Active Method</span>
+     </div>
+     <h3 id="altPayHeading">Send payment via Skrill</h3>
+     <p id="altPayIntro">Transfer your selected VIP subscription fee to the official Banker Tips Skrill account below, then submit your proof on WhatsApp for instant verification.</p>
+
+     <div class="alt-detail-box">
+      <div class="alt-detail-meta">
+       <span class="alt-detail-label" id="altDetailLabel">SKRILL PAYMENT ADDRESS</span>
+       <strong class="alt-detail-value" id="altDetailValue">emmanuelrotichke@gmail.com</strong>
+      </div>
+      <button type="button" class="btn secondary small alt-copy-btn" id="altCopyBtn"><i class="fa-regular fa-copy"></i> Copy</button>
+     </div>
+
+     <div class="alt-steps-card">
+      <h4><i class="fa-solid fa-list-check"></i> Payment &amp; Verification Instructions</h4>
+      <ol class="alt-steps-list" id="altStepsList"></ol>
+     </div>
+
+     <div class="alt-verify-box">
+      <div class="alt-verify-head">
+       <span class="alt-wa-icon"><i class="fa-brands fa-whatsapp"></i></span>
+       <div>
+        <strong>Submit Payment Proof for Verification</strong>
+        <p>Once payment is complete, send your <b>Registered Email Address</b> and a <b>Screenshot / Receipt of Payment</b> to our official WhatsApp desk.</p>
+       </div>
+      </div>
+      <div class="alt-verify-grid">
+       <div class="field">
+        <label for="altVerifyEmail">Your Registered Email Address</label>
+        <input type="email" id="altVerifyEmail" placeholder="you@example.com" autocomplete="email">
+       </div>
+       <div class="field">
+        <label for="altVerifyPackage">Selected VIP Package</label>
+        <input type="text" id="altVerifyPackage" readonly value="Select a VIP package above">
+       </div>
+      </div>
+      <a class="btn alt-wa-btn" id="altWhatsappBtn" href="https://wa.me/254101047400" target="_blank" rel="noopener noreferrer">
+       <i class="fa-brands fa-whatsapp"></i> Submit Email &amp; Proof on WhatsApp <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+     </div>
+    </div>
+    <p class="payment-safety-note"><i class="fa-solid fa-shield-halved"></i> Always double-check the recipient details above before confirming your transfer. VIP access activates immediately upon verification.</p>
+   </div>
   </div>
  </section>
 
@@ -2025,6 +2082,193 @@ document.querySelectorAll('[data-reg-package]').forEach(button=>button.addEventL
 $('authNavButton').addEventListener('click',handleAuthButton);
 document.querySelectorAll('.choose-package').forEach(b=>b.addEventListener('click',()=>beginRegistration(b.dataset.package)));
 $('mpesaPaymentForm').addEventListener('submit',handleMpesaPayment);
+
+// Interactive payment method switcher (M-Pesa, Skrill, Eversend, Binance Pay)
+(function(){
+  const WHATSAPP_NUMBER = '254101047400';
+  const altMethods = {
+    skrill: {
+      name: 'Skrill',
+      tagline: 'Instant Skrill wallet transfer',
+      theme: 'theme-skrill',
+      icon: '<i class="fa-solid fa-wallet"></i>',
+      heading: 'Pay via Skrill Wallet',
+      intro: 'Send your VIP subscription payment directly to our verified Skrill account below, then submit your registered email and payment screenshot on WhatsApp for verification.',
+      detailLabel: 'SKRILL PAYMENT ADDRESS',
+      detailValue: 'emmanuelrotichke@gmail.com',
+      steps: [
+        'Log in to your <strong>Skrill</strong> account and select <strong>Send Money / Skrill to Skrill</strong>.',
+        'Enter the official Skrill Payment Address: <strong>emmanuelrotichke@gmail.com</strong>.',
+        'Enter the exact amount for your chosen VIP plan and confirm the transfer.',
+        'Take a screenshot of the completed Skrill transaction confirmation.',
+        'Enter your registered email below and click <strong>Submit Email &amp; Proof on WhatsApp</strong> to activate your VIP access.'
+      ]
+    },
+    eversend: {
+      name: 'Eversend',
+      tagline: 'Fast cross-border mobile & wallet transfer',
+      theme: 'theme-eversend',
+      icon: '<i class="fa-solid fa-money-bill-transfer"></i>',
+      heading: 'Pay via Eversend',
+      intro: 'Transfer your VIP subscription amount to our official Eversend number below, then submit your registered email and payment proof on WhatsApp for verification.',
+      detailLabel: 'EVERSEND PAYMENT NUMBER',
+      detailValue: '+254748018000',
+      steps: [
+        'Open the <strong>Eversend</strong> app and choose <strong>Send Money</strong> (Eversend user or Mobile Money).',
+        'Enter the official Eversend Payment Number: <strong>+254748018000</strong>.',
+        'Send the exact amount corresponding to your selected VIP package.',
+        'Capture a clear screenshot or receipt showing the completed transfer reference.',
+        'Provide your registered email below and tap <strong>Submit Email &amp; Proof on WhatsApp</strong> for prompt activation.'
+      ]
+    },
+    binance: {
+      name: 'Binance Pay',
+      tagline: 'Zero-fee instant crypto transfer',
+      theme: 'theme-binance',
+      icon: '<i class="fa-brands fa-bitcoin"></i>',
+      heading: 'Pay via Binance Pay',
+      intro: 'Send USDT or supported crypto via Binance Pay using our official Pay ID (UID) below, then send your registered email and payment receipt on WhatsApp for verification.',
+      detailLabel: 'BINANCE PAY UID',
+      detailValue: '484743101',
+      steps: [
+        'Open your <strong>Binance</strong> app, go to <strong>Pay</strong>, and tap <strong>Send</strong>.',
+        'Select <strong>Pay ID</strong> and enter our official Binance Pay UID: <strong>484743101</strong>.',
+        'Enter the equivalent USDT amount for your selected VIP plan and authorize the payment.',
+        'Screenshot the <strong>Payment Successful</strong> page showing the Order ID / timestamp.',
+        'Confirm your registered email below and click <strong>Submit Email &amp; Proof on WhatsApp</strong> for verification.'
+      ]
+    }
+  };
+
+  let selectedMethod = 'mpesa';
+
+  function updateWhatsappLink() {
+    const waBtn = $('altWhatsappBtn');
+    if (!waBtn) return;
+    const cfg = altMethods[selectedMethod];
+    if (!cfg) return;
+    const emailInput = $('altVerifyEmail');
+    const emailVal = (emailInput && emailInput.value.trim()) || (currentUser && currentUser.email) || '[Enter Registered Email]';
+    const pkgVal = (currentUser && currentUser.selectedPackage)
+      ? packageLabel(currentUser.selectedPackage)
+      : ($('altVerifyPackage')?.value || 'VIP Subscription');
+    const message = [
+      'Hello Banker Tips Support,',
+      '',
+      `I have completed my *${cfg.name}* payment and would like to verify my VIP membership.`,
+      `• *Payment Method:* ${cfg.name}`,
+      `• *VIP Package:* ${pkgVal}`,
+      `• *Registered Email:* ${emailVal}`,
+      '',
+      'I am attaching my payment proof/screenshot below.'
+    ].join('\n');
+    waBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  }
+
+  function syncAltCheckoutUserFields() {
+    const emailInput = $('altVerifyEmail');
+    const pkgInput = $('altVerifyPackage');
+    if (emailInput && currentUser && currentUser.email && !emailInput.value.trim()) {
+      emailInput.value = currentUser.email;
+    }
+    if (pkgInput) {
+      if (currentUser && currentUser.selectedPackage) {
+        const country = activeCountry();
+        const amt = countryPackagePrices[country]?.prices?.[currentUser.selectedPackage];
+        pkgInput.value = amt
+          ? `${packageLabel(currentUser.selectedPackage)} (${formatCountryAmount(country, amt)})`
+          : packageLabel(currentUser.selectedPackage);
+      } else {
+        pkgInput.value = 'Select a VIP package first';
+      }
+    }
+    updateWhatsappLink();
+  }
+
+  function selectPaymentMethod(methodKey) {
+    selectedMethod = methodKey;
+    document.querySelectorAll('.pay-method[data-payment-method]').forEach(btn => {
+      const isSelected = btn.dataset.paymentMethod === methodKey;
+      btn.classList.toggle('selected', isSelected);
+      btn.setAttribute('aria-pressed', String(isSelected));
+    });
+
+    const mpesaView = $('mpesaCheckoutView');
+    const altView = $('altCheckoutView');
+    const currentLabel = $('currentCheckoutLabel');
+
+    if (methodKey === 'mpesa') {
+      if (mpesaView) mpesaView.hidden = false;
+      if (altView) altView.hidden = true;
+      if (currentLabel) currentLabel.textContent = (activeCountry() === 'KE' ? 'M-Pesa' : 'Mobile Money');
+      if (typeof updatePaymentUI === 'function') updatePaymentUI();
+      return;
+    }
+
+    const cfg = altMethods[methodKey];
+    if (!cfg) return;
+    if (mpesaView) mpesaView.hidden = true;
+    if (altView) altView.hidden = false;
+    if (currentLabel) currentLabel.textContent = cfg.name;
+
+    const banner = $('altPayBanner');
+    if (banner) {
+      banner.className = 'alt-pay-banner ' + cfg.theme;
+    }
+    if ($('altPayLogo')) $('altPayLogo').innerHTML = cfg.icon;
+    if ($('altPayName')) $('altPayName').textContent = cfg.name;
+    if ($('altPayTagline')) $('altPayTagline').textContent = cfg.tagline;
+    if ($('altPayHeading')) $('altPayHeading').textContent = cfg.heading;
+    if ($('altPayIntro')) $('altPayIntro').textContent = cfg.intro;
+    if ($('altDetailLabel')) $('altDetailLabel').textContent = cfg.detailLabel;
+    if ($('altDetailValue')) $('altDetailValue').textContent = cfg.detailValue;
+    if ($('altStepsList')) {
+      $('altStepsList').innerHTML = cfg.steps.map(step => `<li>${step}</li>`).join('');
+    }
+    const copyBtn = $('altCopyBtn');
+    if (copyBtn) copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+    syncAltCheckoutUserFields();
+  }
+
+  document.addEventListener('click', function(e) {
+    const methodBtn = e.target.closest('.pay-method[data-payment-method]');
+    if (methodBtn && !methodBtn.disabled) {
+      selectPaymentMethod(methodBtn.dataset.paymentMethod);
+    }
+  });
+
+  $('altCopyBtn')?.addEventListener('click', async function() {
+    const val = $('altDetailValue')?.textContent?.trim();
+    if (!val) return;
+    try {
+      await navigator.clipboard.writeText(val);
+      this.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+      setTimeout(() => { this.innerHTML = '<i class="fa-regular fa-copy"></i> Copy'; }, 2000);
+    } catch (_) {
+      const range = document.createRange();
+      range.selectNodeContents($('altDetailValue'));
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+
+  $('altVerifyEmail')?.addEventListener('input', updateWhatsappLink);
+
+  const origUpdatePaymentUI = window.updatePaymentUI;
+  if (typeof origUpdatePaymentUI === 'function') {
+    window.updatePaymentUI = function() {
+      origUpdatePaymentUI.apply(this, arguments);
+      if (selectedMethod !== 'mpesa') {
+        const cfg = altMethods[selectedMethod];
+        const currentLabel = $('currentCheckoutLabel');
+        if (cfg && currentLabel) currentLabel.textContent = cfg.name;
+        syncAltCheckoutUserFields();
+      }
+    };
+  }
+})();
+
 $('regCountrySelect')?.addEventListener('change',()=>{registrationPackage='';updateRegistrationFlow();});
 
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
@@ -2572,6 +2816,70 @@ body[data-theme="dark"] {
 @media(max-width:560px){.payment-method-grid{gap:9px!important}.pay-method{min-height:88px;padding:11px 10px;gap:9px;border-radius:15px}.method-icon{width:41px;height:41px;flex-basis:41px;border-radius:13px;font-size:1.05rem}.method-copy strong{font-size:.82rem}.method-copy small{font-size:.68rem}.method-status{font-size:.59rem;padding:5px 7px}.payment-options-heading{gap:8px}.payment-options-heading p{font-size:.78rem}.payment-lock{font-size:.64rem;padding:7px 8px}.mpesa-panel{padding:17px!important}.mpesa-logo{width:47px;height:47px;flex-basis:47px}.recommended-label{font-size:.61rem;padding:7px 9px}.phone-prefix{padding:0 10px;font-size:.77rem}}
 @media(max-width:370px){.payment-method-grid{grid-template-columns:1fr!important}.pay-method{min-height:76px}.method-copy strong{font-size:.9rem}.method-status{font-size:.65rem}}
 @media(prefers-reduced-motion:reduce){.pay-method,.phone-input-wrap{transition:none}}
+
+/* Active digital wallet checkout styles (Skrill, Eversend, Binance Pay & Google Pay) */
+.gpay-icon{background:#e8f1fc;color:#1a73e8;font-size:1.45rem}
+.pay-method.selected .method-status.available{background:#087b49;color:#fff}
+.pay-method[data-payment-method="skrill"].selected{border-color:#a879d6;background:linear-gradient(135deg,#f8f2ff,#fcfaff);box-shadow:0 0 0 3px rgba(124,58,237,.09)}
+.pay-method[data-payment-method="eversend"].selected{border-color:#56b8ad;background:linear-gradient(135deg,#eefbf9,#f7fffd);box-shadow:0 0 0 3px rgba(20,121,110,.09)}
+.pay-method[data-payment-method="binance"].selected{border-color:#e2b94b;background:linear-gradient(135deg,#fffbeb,#fefdf6);box-shadow:0 0 0 3px rgba(217,119,6,.09)}
+.alt-checkout-view{margin-top:4px}
+.alt-pay-banner{padding:22px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(145deg,var(--soft),var(--surface));color:var(--ink)}
+.alt-pay-banner.theme-skrill{border-color:#dcc7f5;background:linear-gradient(145deg,#f7f0ff,#fcf9ff)}
+.alt-pay-banner.theme-eversend{border-color:#bce6e0;background:linear-gradient(145deg,#edfaf8,#f8fffd)}
+.alt-pay-banner.theme-binance{border-color:#f3dfa2;background:linear-gradient(145deg,#fff9e6,#fffdf7)}
+.alt-pay-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.alt-pay-logo{width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;border-radius:16px;font-size:1.35rem;background:#623b87;color:#fff}
+.theme-skrill .alt-pay-logo{background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff}
+.theme-eversend .alt-pay-logo{background:linear-gradient(135deg,#0d9488,#115e59);color:#fff}
+.theme-binance .alt-pay-logo{background:linear-gradient(135deg,#eab308,#b45309);color:#fff}
+.alt-pay-header strong{display:block;font-size:1.08rem;color:var(--ink)}
+.alt-pay-header small{display:block;font-size:.76rem;color:var(--muted)}
+.alt-pay-badge{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:99px;background:#dcf7e9;color:#12653d;font-size:.7rem;font-weight:800}
+.alt-pay-banner h3{margin:18px 0 6px;font-size:clamp(1.2rem,2.8vw,1.48rem);letter-spacing:-.03em;color:var(--ink)}
+.alt-pay-banner>p{margin:0;font-size:.87rem;line-height:1.7;color:var(--muted)}
+.alt-detail-box{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0;padding:15px 17px;border:1.5px dashed color-mix(in srgb,var(--blue) 45%,var(--line));border-radius:15px;background:var(--surface)}
+.alt-detail-meta{min-width:0;flex:1}
+.alt-detail-label{display:block;font-size:.67rem;font-weight:900;letter-spacing:.11em;color:var(--muted);margin-bottom:4px}
+.alt-detail-value{display:block;font-size:clamp(.98rem,2.4vw,1.18rem);font-weight:900;color:var(--ink);letter-spacing:-.01em;overflow-wrap:anywhere;user-select:all}
+.alt-copy-btn{flex:0 0 auto;min-height:40px;padding:8px 14px;border-radius:11px;font-size:.8rem}
+.alt-steps-card{padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:16px}
+.alt-steps-card h4{margin:0 0 11px;font-size:.88rem;color:var(--ink);display:flex;align-items:center;gap:8px}
+.alt-steps-card h4 i{color:var(--blue)}
+.alt-steps-list{margin:0;padding-left:20px;display:grid;gap:8px;font-size:.83rem;line-height:1.6;color:var(--ink)}
+.alt-steps-list li strong{color:var(--blue2)}
+.alt-verify-box{padding:18px;border:1px solid #bfe6cf;border-radius:17px;background:linear-gradient(135deg,#f0fdf4,#ffffff)}
+.alt-verify-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}
+.alt-wa-icon{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:13px;background:#25D366;color:#fff;font-size:1.35rem;box-shadow:0 6px 16px rgba(37,211,102,.28)}
+.alt-verify-head strong{display:block;font-size:.96rem;color:#113926;margin-bottom:3px}
+.alt-verify-head p{margin:0;font-size:.81rem;line-height:1.55;color:#3d6350}
+.alt-verify-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+.alt-verify-grid .field input{background:#fff!important;min-height:45px;font-size:.86rem}
+.alt-wa-btn{width:100%;min-height:52px;border-radius:14px;background:linear-gradient(135deg,#22c55e,#15803d)!important;color:#fff!important;text-decoration:none;font-size:.92rem;box-shadow:0 10px 22px rgba(21,128,61,.24)}
+.alt-wa-btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+
+/* Dark mode support for active digital wallet checkout */
+[data-theme="dark"] .pay-method[data-payment-method="skrill"].selected{background:linear-gradient(135deg,#241938,#192338);border-color:#7c3aed}
+[data-theme="dark"] .pay-method[data-payment-method="eversend"].selected{background:linear-gradient(135deg,#113331,#142838);border-color:#14b8a6}
+[data-theme="dark"] .pay-method[data-payment-method="binance"].selected{background:linear-gradient(135deg,#332812,#1a2638);border-color:#eab308}
+[data-theme="dark"] .alt-pay-banner{background:linear-gradient(145deg,#13273d,#0f2033);border-color:var(--line)}
+[data-theme="dark"] .alt-pay-banner.theme-skrill{background:linear-gradient(145deg,#1e1833,#112236);border-color:#4c3575}
+[data-theme="dark"] .alt-pay-banner.theme-eversend{background:linear-gradient(145deg,#102c2b,#112236);border-color:#235c57}
+[data-theme="dark"] .alt-pay-banner.theme-binance{background:linear-gradient(145deg,#2b2312,#112236);border-color:#66501d}
+[data-theme="dark"] .alt-detail-box,[data-theme="dark"] .alt-steps-card{background:#0d1e30;border-color:#2b435c}
+[data-theme="dark"] .alt-steps-list li strong{color:#7dd3fc}
+[data-theme="dark"] .alt-verify-box{background:linear-gradient(135deg,#102b21,#0e222e);border-color:#265940}
+[data-theme="dark"] .alt-verify-head strong{color:#dcfce7}
+[data-theme="dark"] .alt-verify-head p{color:#a7cbb8}
+[data-theme="dark"] .alt-verify-grid .field input{background:#0b1929!important;border-color:#2b4b43!important;color:#fff!important}
+@media(max-width:600px){
+ .alt-pay-banner{padding:16px}
+ .alt-detail-box{flex-direction:column;align-items:stretch}
+ .alt-copy-btn{width:100%}
+ .alt-verify-grid{grid-template-columns:1fr}
+ .alt-pay-badge{margin-left:0}
+}
+
 
 /* ------------------------------------------------------------------
    Banker Tips — clean premium home hero
