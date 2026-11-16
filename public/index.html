@@ -1349,7 +1349,14 @@ img{max-width:100%}
 
 <script>
 'use strict';
-const API_BASE = '';
+// If the frontend is hosted separately from Express, set this to the backend URL,
+// e.g. https://your-banker-tips-api.onrender.com (no trailing slash).
+// Prefer a Vercel rewrite to the API so authentication cookies remain first-party.
+const API_BASE = String(
+  window.BANKER_TIPS_API_BASE ||
+  document.querySelector('meta[name="banker-tips-api-base"]')?.content ||
+  ''
+).trim().replace(/\\/+$/, '');
 const $ = (id) => document.getElementById(id);
 let registrationPackage = '';
 // Fail-safe registration modal opener: this is registered before the rest of the
@@ -1395,18 +1402,28 @@ let lastTips = [];
 async function api(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (options.body && !headers.has('Content-Type')) headers.set('Content-Type','application/json');
-  const response = await fetch(API_BASE + path, {
-    ...options, headers, credentials:'include', cache:'no-store'
-  });
+  let response;
+  try {
+    response = await fetch(API_BASE + path, {
+      ...options, headers, credentials:'include', cache:'no-store'
+    });
+  } catch (cause) {
+    const endpoint = (API_BASE || window.location.origin) + path;
+    const err = new Error(`Cannot reach Banker Tips API (${endpoint}). Check the backend URL, CORS settings and browser network connection.`);
+    err.cause = cause;
+    err.isNetworkError = true;
+    throw err;
+  }
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json') ? await response.json() : null;
   if (!response.ok) {
-    const publicMessage = response.status === 401 ? 'Please sign in again to continue.' :
-      response.status === 403 ? 'You do not have permission to complete this action.' :
-      response.status === 404 ? 'This information is not available right now.' :
-      response.status >= 500 ? 'We could not complete your request. Please try again shortly.' :
-      (data && typeof data.message === 'string' && data.message.trim()) ? data.message :
-      'Please check your details and try again.';
+    const serverMessage = data && typeof data.message === 'string' && data.message.trim()
+      ? data.message.trim() : '';
+    const publicMessage = response.status === 401 ? (serverMessage || 'Please sign in again to continue.') :
+      response.status === 403 ? (serverMessage || 'You do not have permission to complete this action.') :
+      response.status === 404 ? (serverMessage || 'API endpoint not found. Check the configured backend URL.') :
+      response.status >= 500 ? (serverMessage || 'The Banker Tips server encountered an error. Please try again shortly.') :
+      serverMessage || 'Please check your details and try again.';
     const err = new Error(publicMessage);
     err.status = response.status;
     throw err;
@@ -1490,8 +1507,9 @@ async function loadFreeTips({silent=false} = {}) {
     renderTipRows(lastTips,'freeRows');
     $('freeNotice').textContent=`${lastTips.length} Free selection(s) for ${prettyDate(date)}.`;
   } catch(e) {
-    if(!silent) showEmpty('freeRows',5,'Tips could not be loaded.');
-    if(!silent) $('freeNotice').textContent='Tips could not be refreshed. Please try again.';
+    console.error('Free Tips request failed:', e);
+    if(!silent) showEmpty('freeRows',5,'Tips could not be loaded. Check the connection and refresh.');
+    if(!silent) $('freeNotice').textContent = e.message || 'Tips could not be refreshed. Please try again.';
   }
 }
 async function loadHistory() {
@@ -1645,7 +1663,12 @@ async function loadPremium({silent=false} = {}) {
     $('vipSubheading').textContent='Authorized premium member';
     $('premiumNotice').textContent=`${tips.length} Premium selection(s) for ${prettyDate(selectedDate)}.`;
   } catch(e) {
-    if(!silent){ $('vipSubheading').textContent='Membership verification required'; showEmpty('premiumRows',5,e.message); $('premiumNotice').textContent='Access is pending verification. If you have paid, contact support or sign in with the activated account.'; }
+    console.error('VIP Premium Tips request failed:', e);
+    if(!silent){
+      $('vipSubheading').textContent='Membership verification required';
+      showEmpty('premiumRows',5,e.message || 'Premium tips could not be loaded.');
+      $('premiumNotice').textContent = e.message || 'Access is pending verification. If you have paid, contact support or sign in with the activated account.';
+    }
   }
 }
 async function checkSession() {
