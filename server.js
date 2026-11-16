@@ -53,19 +53,16 @@ app.use(helmet({
   }
 }));
 
-// The Vercel production frontend must be allowed to call this API.
-// Set FRONTEND_ORIGIN to a comma-separated list when using preview/custom domains.
-const allowedOrigins = (process.env.FRONTEND_ORIGIN || "https://bankertips.vercel.app")
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || "")
   .split(",").map(v => v.trim()).filter(Boolean);
 app.use(cors({
   origin(origin, callback) {
-    // Non-browser requests (health checks, server-to-server calls) have no Origin.
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Origin not allowed by CORS"));
   },
-  credentials: true,
-  methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+  credentials: true
 }));
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: false, limit: "100kb" }));
@@ -247,7 +244,7 @@ function cookieOptions() {
   return {
     httpOnly: true,
     secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
-    sameSite: String(process.env.COOKIE_SAME_SITE || (process.env.NODE_ENV === "production" ? "none" : "lax")).toLowerCase(),
+    sameSite: "lax",
     path: "/",
     maxAge: 12 * 60 * 60 * 1000
   };
@@ -259,7 +256,7 @@ function clearSession(res) {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
     secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
-    sameSite: String(process.env.COOKIE_SAME_SITE || (process.env.NODE_ENV === "production" ? "none" : "lax")).toLowerCase(),
+    sameSite: "lax",
     path: "/"
   });
 }
