@@ -3557,6 +3557,275 @@ header,.site-header,.topbar,.main-header{
   *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
 
+
+
+/* =========================================================
+   BANKER TIPS — EMERALD METALLIC SEAL DESIGN SYSTEM
+   Inspired by the supplied green verification seal.
+   Theme switching remains controlled by bankerTipsTheme.
+   ========================================================= */
+:root{
+  color-scheme:light;
+  --bg:#e7ece9;
+  --surface:#f8faf8;
+  --surface-2:#edf2ee;
+  --elevated:#ffffff;
+  --ink:#172b23;
+  --muted:#61736a;
+  --muted-2:#829188;
+  --line:#cbd6cf;
+  --soft:#e1eee6;
+  --blue:#07865a;
+  --blue2:#075b3d;
+  --brand-navy:#073d2b;
+  --brand-cyan:#20b982;
+  --brand-gold:#e4d7b2;
+  --green:#167447;
+  --greenbg:#d9f0e2;
+  --success:#167447;
+  --success-bg:#d9f0e2;
+  --red:#a72e35;
+  --redbg:#f8e1e1;
+  --danger:#a72e35;
+  --danger-bg:#f8e1e1;
+  --amber:#93620a;
+  --amberbg:#f8edcf;
+  --warning:#93620a;
+  --warning-bg:#f8edcf;
+  --table-blue:#38bd88;
+  --table-blue-deep:#08764f;
+  --table-blue-pale:#e4f2e9;
+  --table-blue-cell:#d8ebdf;
+  --table-blue-border:#b6d4c1;
+  --table-blue-text:#285741;
+  --overview-accent:#16875b;
+  --overview-border:#c5d9cc;
+  --overview-card:#f8faf8;
+  --overview-copy:#203d2e;
+  --overview-muted:#65796c;
+  --bt-focus:0 0 0 3px rgba(27,153,101,.2);
+  --bt-radius:18px;
+  --bt-shadow:0 12px 32px rgba(22,61,42,.10);
+  --radius:18px;
+  --shadow:0 12px 32px rgba(22,61,42,.10);
+}
+[data-theme="dark"],[data-theme=dark]{
+  color-scheme:dark;
+  --bg:#091710;
+  --surface:#11251a;
+  --surface-2:#193326;
+  --elevated:#1b3828;
+  --ink:#edf8f0;
+  --muted:#adc2b3;
+  --muted-2:#829b8b;
+  --line:#31513e;
+  --soft:#1b3b2a;
+  --blue:#45ce91;
+  --blue2:#a1edc1;
+  --brand-navy:#071b12;
+  --brand-cyan:#39c98c;
+  --brand-gold:#d9c99e;
+  --green:#8be2ad;
+  --greenbg:#183e2a;
+  --success:#8be2ad;
+  --success-bg:#183e2a;
+  --red:#ffaaaa;
+  --redbg:#49252a;
+  --danger:#ffaaaa;
+  --danger-bg:#49252a;
+  --amber:#f2d58a;
+  --amberbg:#453819;
+  --warning:#f2d58a;
+  --warning-bg:#453819;
+  --table-blue:#27885e;
+  --table-blue-deep:#45ce91;
+  --table-blue-pale:#173b29;
+  --table-blue-cell:#1d4631;
+  --table-blue-border:#37694b;
+  --table-blue-text:#d8f2df;
+  --overview-accent:#65d99d;
+  --overview-border:#31513e;
+  --overview-card:#11251a;
+  --overview-copy:#e7f5eb;
+  --overview-muted:#adc2b3;
+  --bt-focus:0 0 0 3px rgba(69,206,145,.22);
+  --bt-shadow:0 14px 34px rgba(0,0,0,.28);
+  --shadow:0 14px 34px rgba(0,0,0,.28);
+}
+html{background:var(--bg)}
+body{
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(255,255,255,.72),transparent 38%),
+    linear-gradient(145deg,var(--bg),color-mix(in srgb,var(--bg) 78%,#b8c8bd));
+  color:var(--ink);
+}
+[data-theme=dark] body{
+  background:
+    radial-gradient(ellipse at 12% 0%,rgba(69,206,145,.08),transparent 38%),
+    linear-gradient(145deg,#07130d,var(--bg));
+}
+header{
+  background:color-mix(in srgb,var(--surface) 92%,transparent);
+  border-bottom:1px solid var(--line);
+  box-shadow:0 5px 22px rgba(12,54,34,.08);
+}
+.brand-mark{
+  background:linear-gradient(145deg,#fafffb,#cbded1);
+  border:1px solid #9fbaa9;
+  border-radius:50%;
+  box-shadow:inset 0 2px 5px #fff,0 5px 14px rgba(8,72,43,.16);
+}
+[data-theme=dark] .brand-mark{
+  background:linear-gradient(145deg,#315b43,#10271a);
+  border-color:#47765a;
+  box-shadow:inset 0 1px 5px #ffffff20,0 5px 16px #0006;
+}
+.brand-name span{color:var(--blue)}
+.icon-btn,.menu-btn{
+  color:var(--ink);background:var(--surface);border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 12px rgba(16,61,38,.07);
+}
+.btn,.auth-submit{
+  color:#fff!important;
+  background:linear-gradient(145deg,#31c58a 0%,#078354 55%,#07583b 100%)!important;
+  border:1px solid #08764f;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 7px 18px rgba(5,105,66,.22);
+  text-shadow:0 1px 1px rgba(0,0,0,.12);
+}
+.btn:hover{filter:brightness(1.06);box-shadow:inset 0 1px 0 #ffffff55,0 10px 22px rgba(5,105,66,.25)}
+.btn.secondary,.btn.ghost{
+  background:var(--soft)!important;color:var(--blue2)!important;
+  border:1px solid var(--line);box-shadow:none;text-shadow:none;
+}
+.btn.danger{background:linear-gradient(145deg,#c84b50,#92252d)!important;border-color:#92252d}
+.hero,.payment-hero{
+  color:#fff;
+  background:
+    radial-gradient(circle at 83% 15%,rgba(168,255,209,.26),transparent 29%),
+    linear-gradient(125deg,#06452f 0%,#08784e 52%,#21b77b 100%);
+  border:1px solid rgba(3,85,53,.45);
+  box-shadow:0 18px 40px rgba(5,83,51,.22),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.hero p,.payment-hero p{color:#e5fff0}
+.hero .eyebrow,.payment-hero .eyebrow{color:#c9f8dc}
+.hero .btn,.payment-hero .btn{
+  color:#07583b!important;background:linear-gradient(145deg,#fffdf5,#e8e4d5)!important;
+  border:1px solid #d5d0bd;text-shadow:none;
+}
+.hero-icon{color:#d8ffea}
+.section-head h2{color:var(--ink)}
+.date-chip,.odds,.pay-pill{
+  background:var(--soft);color:var(--blue2);border-color:var(--line);
+}
+.card,.info-card,.subscription-card,.summary-tile,.modal-box,.payment-step,
+.membership-card,.payment-method-card,.history-day-card{
+  background:var(--surface);color:var(--ink);border-color:var(--line);
+  box-shadow:var(--bt-shadow);
+}
+.info-card i,.payment-icon,.payment-step>span{
+  background:linear-gradient(145deg,#dff5e7,#c3e6d0);color:#08764f;
+}
+[data-theme=dark] .info-card i,[data-theme=dark] .payment-icon,
+[data-theme=dark] .payment-step>span{background:#214b34;color:#8ce4b0}
+.banner{
+  background:linear-gradient(120deg,var(--soft),var(--surface));
+  border-color:var(--line);
+}
+.tips-table thead th,#adminPanel table thead th,#paymentPanel table thead th,
+.admin-layout table thead th{
+  background:linear-gradient(180deg,#36c58a 0%,#08764f 100%)!important;
+  color:#fff!important;border-color:#08764f!important;
+}
+.tips-table tbody td,#adminPanel table tbody td,#paymentPanel table tbody td,
+.admin-layout table tbody td{
+  background:var(--table-blue-pale)!important;color:var(--table-blue-text)!important;
+  border-color:var(--table-blue-border)!important;
+}
+.tips-table tbody tr:nth-child(even) td,#adminPanel table tbody tr:nth-child(even) td,
+#paymentPanel table tbody tr:nth-child(even) td,.admin-layout table tbody tr:nth-child(even) td{
+  background:var(--table-blue-cell)!important;
+}
+.tips-table tbody tr:hover td,#adminPanel table tbody tr:hover td,
+#paymentPanel table tbody tr:hover td,.admin-layout table tbody tr:hover td{
+  background:color-mix(in srgb,var(--table-blue-cell) 65%,var(--surface))!important;
+}
+.tips-table .match{color:var(--table-blue-text)}
+.tips-table .odds{
+  color:var(--blue2);background:color-mix(in srgb,var(--soft) 75%,var(--surface));
+  border:1px solid var(--table-blue-border);
+}
+.tips-table .pending,.pending{background:var(--amberbg)!important;color:var(--amber)!important}
+.tips-table .won,.won{background:var(--greenbg)!important;color:var(--green)!important}
+.tips-table .lost,.lost{background:var(--redbg)!important;color:var(--red)!important}
+.status{border:1px solid color-mix(in srgb,currentColor 16%,transparent)}
+.field input,.field select,.field textarea,input,select,textarea{
+  background:var(--surface-2);color:var(--ink);border-color:var(--line);
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--blue);box-shadow:var(--bt-focus);outline:0;
+}
+.notice,.history-overall-notice,.history-empty{
+  background:var(--surface-2);color:var(--muted);border-color:var(--line);
+}
+.history-day-heading{background:linear-gradient(115deg,var(--soft),var(--surface))}
+.history-day-title h3,.history-empty strong{color:var(--ink)}
+.history-day-title p{color:var(--muted)}
+.history-day-icon,.history-day-badge,.history-count{
+  background:var(--soft);color:var(--blue2);border-color:var(--line);
+}
+.history-day-rule{background:linear-gradient(90deg,#08764f,#43d39a,#d9f5e4)}
+.history-day-card .tips-table thead th{background:var(--soft)!important;color:var(--blue2)!important}
+.history-day-card .tips-table tbody tr:nth-child(even){background:var(--surface-2)}
+.history-separator{color:var(--blue)}
+.history-separator i{background:var(--soft);border-color:var(--line);color:var(--blue)}
+.bottom-nav{
+  background:color-mix(in srgb,var(--surface) 95%,transparent);
+  border-color:var(--line);box-shadow:0 -8px 28px rgba(13,55,35,.10);
+}
+.bottom-nav button{color:var(--muted)}
+.bottom-nav button.active{color:var(--blue2);background:var(--soft)}
+.bottom-nav button.active:before{background:linear-gradient(90deg,#08764f,#42d39a)}
+.modal{background:rgba(3,22,13,.72)}
+.modal-box{border-color:var(--line)}
+.close{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+.profile-card{
+  background:radial-gradient(circle at 90% 0%,rgba(104,231,161,.2),transparent 36%),
+  linear-gradient(135deg,#073d2a 0%,#08734b 58%,#169a68 100%);
+  border-color:#287c55;
+}
+.profile-avatar{border-color:#70e5a5;background:linear-gradient(145deg,#39c98c,#07583b)}
+.membership-status.active{background:var(--greenbg);color:var(--green)}
+.mpesa-panel{background:linear-gradient(135deg,#e5f7eb,#f8fcf8);border-color:#b9ddc5;color:#17472e}
+.mpesa-logo{background:#08764f}
+.recommended-label{background:#d7f3e1;color:#17633c}
+.visitor-counter-title i{color:var(--blue)}
+a{color:var(--blue2)}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 65%,transparent);outline-offset:3px}
+[data-theme=dark] .tips-table thead th,#adminPanel[data-theme=dark] table thead th{
+  background:linear-gradient(180deg,#27885e,#145b3c)!important;color:#f0fff5!important;
+}
+[data-theme=dark] .tips-table tbody td,[data-theme=dark] #adminPanel table tbody td,
+[data-theme=dark] #paymentPanel table tbody td,[data-theme=dark] .admin-layout table tbody td{
+  background:#173b29!important;color:#d8f2df!important;border-color:#37694b!important;
+}
+[data-theme=dark] .tips-table tbody tr:nth-child(even) td,
+[data-theme=dark] #adminPanel table tbody tr:nth-child(even) td,
+[data-theme=dark] #paymentPanel table tbody tr:nth-child(even) td,
+[data-theme=dark] .admin-layout table tbody tr:nth-child(even) td{background:#1d4631!important}
+[data-theme=dark] .tips-table .odds{background:#214b34;color:#b8f2ce;border-color:#37694b}
+[data-theme=dark] .history-day-card .tips-table thead th{background:#193b29!important;color:#c9f4d8!important}
+[data-theme=dark] .history-day-card .tips-table tbody tr:nth-child(even){background:#142c1e}
+[data-theme=dark] .mpesa-panel{background:linear-gradient(135deg,#102c1d,#14291d);border-color:#315e40;color:#e0fff0}
+[data-theme=dark] .mpesa-panel>p,[data-theme=dark] .mpesa-brand small{color:#a9cbb5}
+[data-theme=dark] .recommended-label{background:#194b34;color:#b7f7d0}
+[data-theme=dark] .auth-content .field input,[data-theme=dark] .auth-content .field select,
+[data-theme=dark] .auth-content .form-control{background:var(--surface-2)!important;color:var(--ink)!important;border-color:var(--line)!important}
+[data-theme=dark] .auth-modal .close{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+@media(max-width:700px){
+  .hero,.payment-hero{box-shadow:0 12px 28px rgba(5,83,51,.18)}
+  .bottom-nav{backdrop-filter:blur(18px)}
+}
+
 </style>
 
 <script>
