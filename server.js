@@ -218,6 +218,21 @@ const advertisementSchema = new mongoose.Schema({
 advertisementSchema.index({ position: 1, status: 1, updatedAt: -1 });
 const Advertisement = mongoose.model("Advertisement", advertisementSchema);
 
+// Privacy-conscious website analytics: anonymous random visitor IDs only.
+const visitorEventSchema = new mongoose.Schema({
+  visitorId: { type: String, required: true, index: true },
+  path: { type: String, required: true, maxlength: 180, index: true },
+  createdAt: { type: Date, default: Date.now, index: true }
+}, { versionKey: false });
+visitorEventSchema.index({ createdAt: 1 }, { expireAfterSeconds: 400 * 24 * 60 * 60 });
+const VisitorEvent = mongoose.model("VisitorEvent", visitorEventSchema);
+const visitorPresenceSchema = new mongoose.Schema({
+  visitorId: { type: String, required: true, unique: true },
+  lastSeen: { type: Date, required: true }
+}, { versionKey: false });
+visitorPresenceSchema.index({ lastSeen: 1 }, { expireAfterSeconds: 15 *  60 });
+const VisitorPresence = mongoose.model("VisitorPresence", visitorPresenceSchema);
+
 async function recordAudit(req, action, entityType, entityId, summary) {
   try { await AuditLog.create({ actor: req.user?._id || null, actorEmail: req.user?.email || "system", action, entityType, entityId: String(entityId || ""), summary }); }
   catch (err) { console.error("Audit log write failed:", err.message); }
@@ -1097,6 +1112,87 @@ app.get("/api/stats/performance", async (req, res) => {
     res.set("Cache-Control", "public, max-age=60");
     res.json({ success: true, ...total, winRate: total.wins + total.losses ? Math.round(total.wins / (total.wins + total.losses) * 1000) / 10 : null, methodology: "Settled recorded tips only; void tips excluded from win-rate denominator. " });
   } catch (err) { res.status(500).json({ success: false, message: "Performance statistics unavailable." }); }
+});
+
+// Record a page view. Admin sessions are deliberately excluded server-side.
+app.post("/api/analytics/visit", apiLimiter, async (req, res) => {
+  try {
+    const token = req.cookies?.[COOKIE_NAME];
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const account = await User.findById(decoded.sub).select("role").lean();
+        if (account?.role === "admin") return res.status(204).end();
+      } catch (_) { /* Expired/invalid sessions are treated as anonymous visitors. */ }
+    }
+    let visitorId = req.cookies?.bt_visitor_id;
+    if (!visitorId || !/^[a-f0-9]{64}$/.test(visitorId)) {
+      visitorId = crypto.randomBytes(32).toString("hex");
+      res.cookie("bt_visitor_id", visitorId, {
+        httpOnly: true, secure: process.env.NODE_ENV === "production",
+        sameSite: "lax", maxAge: 365 * 24 * 60 * 60 * 1000, path: "/"
+      });
+    }
+    const rawPath = typeof req.body?.path === "string" ? req.body.path : "/";
+    const pagePath = rawPath.startsWith("/") && !rawPath.startsWith("//")
+      ? rawPath.split(/[?#]/)[0].slice(0, 180) || "/" : "/";
+    const seenAt = new Date();
+    await VisitorPresence.updateOne({ visitorId }, { $set: { lastSeen: seenAt } }, { upsert: true });
+    if (req.body?.heartbeat !== true) {
+      await VisitorEvent.create({ visitorId, path: pagePath, createdAt: seenAt });
+    }
+    return res.status(204).end();
+  } catch (err) {
+    console.error("Visitor tracking failed:", err.message);
+    return res.status(204).end(); // Analytics must never interrupt the website.
+  }
+});
+
+app.get("/api/admin/visitors", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const now = new Date();
+    const since30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const todayParts = nairobiDateParts(now);
+    const sinceToday = new Date(Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day, -3, 0, 0, 0));
+    const sinceOnline = new Date(now.getTime() - 5 * 60 * 1000);
+    const [totals, today, online, daily, topPages] = await Promise.all([
+      VisitorEvent.aggregate([
+        { $group: { _id: null, pageViews: { $sum: 1 }, visitors: { $addToSet: "$visitorId" } } },
+        { $project: { _id: 0, pageViews: 1, uniqueVisitors: { $size: "$visitors" } } }
+      ]),
+      VisitorEvent.aggregate([
+        { $match: { createdAt: { $gte: sinceToday } } },
+        { $group: { _id: null, pageViews: { $sum: 1 }, visitors: { $addToSet: "$visitorId" } } },
+        { $project: { _id: 0, pageViews: 1, uniqueVisitors: { $size: "$visitors" } } }
+      ]),
+      VisitorPresence.countDocuments({ lastSeen: { $gte: sinceOnline } }),
+      VisitorEvent.aggregate([
+        { $match: { createdAt: { $gte: since30 } } },
+        { $group: { _id: { $dateToString: { date: "$createdAt", format: "%Y-%m-%d", timezone: "Africa/Nairobi" } }, pageViews: { $sum: 1 }, visitors: { $addToSet: "$visitorId" } } },
+        { $project: { date: "$_id", _id: 0, pageViews: 1, uniqueVisitors: { $size: "$visitors" } } },
+        { $sort: { date: 1 } }
+      ]),
+      VisitorEvent.aggregate([
+        { $match: { createdAt: { $gte: since30 } } },
+        { $group: { _id: "$path", pageViews: { $sum: 1 } } },
+        { $sort: { pageViews: -1 } }, { $limit: 8 },
+        { $project: { _id: 0, path: "$_id", pageViews: 1 } }
+      ])
+    ]);
+    res.set("Cache-Control", "no-store");
+    return res.json({
+      success: true,
+      totals: totals[0] || { pageViews: 0, uniqueVisitors: 0 },
+      today: today[0] || { pageViews: 0, uniqueVisitors: 0 },
+      onlineNow: online,
+      daily, topPages,
+      period: "Last 30 days",
+      note: "Unique visitors are estimated using an anonymous first-party browser identifier. Online means activity in the last 5 minutes."
+    });
+  } catch (err) {
+    console.error("Admin visitor analytics failed:", err.message);
+    return res.status(500).json({ success: false, message: "Visitor analytics are temporarily unavailable." });
+  }
 });
 
 app.get("/api/admin/overview", requireAuth, requireAdmin, async (req, res) => {
