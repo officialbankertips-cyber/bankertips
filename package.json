@@ -1,16 +1,11 @@
 {
-  "name": "banker-tips",
-  "version": "1.0.0",
+  "name": "banker-tips-platform",
+  "version": "2.0.0",
   "private": true,
-  "description": "Banker Tips football predictions, VIP memberships and mobile-money payments",
+  "description": "Banker Tips football predictions platform",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "check": "node --check server.js && node --check tests/football-logic.test.js && node tests/football-logic.test.js"
-  },
-  "engines": {
-    "node": ">=18.18.0"
-  },
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
@@ -20,6 +15,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.5"
+    "mongoose": "^8.9.5",
+    "web-push": "^3.6.7"
   }
 }
