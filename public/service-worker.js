@@ -1,50 +1,7 @@
-'use strict';
-const CACHE_NAME = 'banker-tips-shell-v3';
-const SHELL = ['/', '/manifest.webmanifest', '/offline.html', '/images/bankertips-icon-192.png', '/images/bankertips-icon-512.png'];
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
-});
-self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
-});
-self.addEventListener('fetch', event => {
-  const request = event.request;
-  const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
-  if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).then(response => {
-      if (response && response.ok) caches.open(CACHE_NAME).then(cache => cache.put('/', response.clone()));
-      return response;
-    }).catch(async () => (await caches.match('/')) || (await caches.match('/offline.html'))));
-    return;
-  }
-  if (SHELL.includes(url.pathname) || url.pathname.startsWith('/images/')) {
-    event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response && response.ok) caches.open(CACHE_NAME).then(cache => cache.put(request, response.clone()));
-      return response;
-    })));
-  }
-});
-self.addEventListener('push', event => {
-  let data = {};
-  try { data = event.data ? event.data.json() : {}; } catch (_) { data = { body: event.data ? event.data.text() : '' }; }
-  const title = data.title || 'Banker Tips';
-  const options = {
-    body: data.body || 'There is a new update on Banker Tips.',
-    icon: '/images/bankertips-icon-192.png',
-    badge: '/images/bankertips-icon-192.png',
-    tag: data.tag || 'banker-tips-update',
-    renotify: true,
-    data: { url: data.url || '/' }
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const target = new URL(event.notification.data?.url || '/', self.location.origin).href;
-  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-    const existing = clients.find(client => new URL(client.url).origin === self.location.origin);
-    if (existing) { existing.navigate(target); return existing.focus(); }
-    return self.clients.openWindow(target);
-  }));
-});
+const CACHE_NAME = 'banker-tips-shell-v2';
+const APP_SHELL = ['/','/manifest.webmanifest'];
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+self.addEventListener('fetch',event=>{const req=event.request;const url=new URL(req.url);if(req.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;if(req.mode==='navigate'){event.respondWith(fetch(req).then(res=>{const copy=res.clone();caches.open(CACHE_NAME).then(c=>c.put('/',copy));return res;}).catch(()=>caches.match('/')));return;}event.respondWith(caches.match(req).then(cached=>cached||fetch(req).then(res=>{if(res.ok&&['style','script','image','font'].includes(req.destination)){const copy=res.clone();caches.open(CACHE_NAME).then(c=>c.put(req,copy));}return res;})));});
+self.addEventListener('push',event=>{let data={title:'Banker Tips',body:'There is a new update on Banker Tips.',url:'/'};try{if(event.data)data={...data,...event.data.json()};}catch(_){if(event.data)data.body=event.data.text();}event.waitUntil(self.registration.showNotification(data.title,{body:data.body,icon:'/images/bankertipslogo.png',badge:'/images/bankertipslogo.png',data:{url:data.url||'/'},tag:'banker-tips-update',renotify:true}));});
+self.addEventListener('notificationclick',event=>{event.notification.close();const target=new URL(event.notification.data?.url||'/',self.location.origin).href;event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const client of list){if(client.url.startsWith(self.location.origin)&&'focus'in client)return client.navigate(target).then(c=>c&&c.focus());}return clients.openWindow(target);}));});
