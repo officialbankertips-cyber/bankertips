@@ -10,8 +10,8 @@ const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const path = require("path");
 const crypto = require("crypto");
-let webPush = null;
-try { webPush = require("web-push"); } catch (_) { console.warn("web-push is not installed; browser push notifications are disabled until `npm install web-push` is run."); }
+let webpush = null;
+try { webpush = require("web-push"); } catch (_) { /* Optional until push is configured. */ }
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -96,8 +96,6 @@ const userSchema = new mongoose.Schema({
   membershipStatus: { type: String, enum: ["pending_approval", "active", "rejected", "expired"], default: "pending_approval", index: true },
   selectedPackage: { type: String, enum: ["daily", "weekly", "monthly"], default: null, index: true },
   vipExpiresAt: { type: Date, default: null },
-  vipReminder24hSentAt: { type: Date, default: null },
-  vipReminder3hSentAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 }, { versionKey: false });
 
@@ -155,33 +153,33 @@ const paymentSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 }, { versionKey: false });
 
-const matchSchema = new mongoose.Schema({
-  league: { type: String, required: true, trim: true, maxlength: 120 },
-  kickoff: { type: Date, required: true, index: true },
-  homeTeam: { type: String, required: true, trim: true, maxlength: 100 },
-  awayTeam: { type: String, required: true, trim: true, maxlength: 100 },
-  homeScore: { type: Number, min: 0, max: 99, default: null },
-  awayScore: { type: Number, min: 0, max: 99, default: null },
-  status: { type: String, enum: ["scheduled", "live", "finished", "postponed", "cancelled"], default: "scheduled", index: true },
-  venue: { type: String, trim: true, maxlength: 150, default: "" },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}, { versionKey: false });
-matchSchema.index({ kickoff: 1, league: 1 });
-const Match = mongoose.model("Match", matchSchema);
-
+const User = mongoose.model("User", userSchema);
+const Tip = mongoose.model("Tip", tipSchema);
+const Payment = mongoose.model("Payment", paymentSchema);
 const pushSubscriptionSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
   endpoint: { type: String, required: true, unique: true },
   subscription: { type: mongoose.Schema.Types.Mixed, required: true },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null, index: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, { versionKey: false });
 const PushSubscription = mongoose.model("PushSubscription", pushSubscriptionSchema);
 
-const User = mongoose.model("User", userSchema);
-const Tip = mongoose.model("Tip", tipSchema);
-const Payment = mongoose.model("Payment", paymentSchema);
+const matchFixtureSchema = new mongoose.Schema({
+  league: { type: String, trim: true, maxlength: 100, default: "" },
+  homeTeam: { type: String, required: true, trim: true, maxlength: 100 },
+  awayTeam: { type: String, required: true, trim: true, maxlength: 100 },
+  date: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/, index: true },
+  time: { type: String, trim: true, maxlength: 5, default: "" },
+  status: { type: String, enum: ["scheduled", "live", "finished", "postponed", "cancelled"], default: "scheduled", index: true },
+  homeScore: { type: Number, min: 0, max: 99, default: null },
+  awayScore: { type: Number, min: 0, max: 99, default: null },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { versionKey: false });
+matchFixtureSchema.index({ date: 1, time: 1, league: 1 });
+const MatchFixture = mongoose.model("MatchFixture", matchFixtureSchema);
+
 
 // One persistent document stores the editable VIP prices for all supported countries.
 const vipPricingSchema = new mongoose.Schema({
@@ -230,31 +228,6 @@ const auditLogSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, index: true }
 }, { versionKey: false });
 const AuditLog = mongoose.model("AuditLog", auditLogSchema);
-
-const VAPID_PUBLIC_KEY = String(process.env.VAPID_PUBLIC_KEY || "").trim();
-const VAPID_PRIVATE_KEY = String(process.env.VAPID_PRIVATE_KEY || "").trim();
-const PUSH_READY = Boolean(webPush && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY);
-if (PUSH_READY) webPush.setVapidDetails(process.env.VAPID_SUBJECT || "mailto:support@bankertips.co.ke", VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-async function sendPushToUser(userId, payload) {
-  if (!PUSH_READY) return 0;
-  const records = await PushSubscription.find({ user: userId }).lean();
-  let sent = 0;
-  for (const record of records) {
-    try { await webPush.sendNotification(record.subscription, JSON.stringify(payload)); sent++; }
-    catch (err) { if (err.statusCode === 404 || err.statusCode === 410) await PushSubscription.deleteOne({ _id: record._id }); }
-  }
-  return sent;
-}
-async function sendPushToAll(payload) {
-  if (!PUSH_READY) return 0;
-  const records = await PushSubscription.find({}).lean();
-  let sent = 0;
-  for (const record of records) {
-    try { await webPush.sendNotification(record.subscription, JSON.stringify(payload)); sent++; }
-    catch (err) { if (err.statusCode === 404 || err.statusCode === 410) await PushSubscription.deleteOne({ _id: record._id }); }
-  }
-  return sent;
-}
 
 const advertisementSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true, maxlength: 100 },
@@ -420,21 +393,6 @@ async function expireMemberships(now = new Date()) {
   );
   if (result.modifiedCount) console.log(`Automatically suspended ${result.modifiedCount} expired VIP membership(s).`);
   return result.modifiedCount || 0;
-}
-
-async function sendMembershipExpiryReminders(now = new Date()) {
-  if (!PUSH_READY) return 0;
-  let sent = 0;
-  for (const [hours, field] of [[24, "vipReminder24hSentAt"], [3, "vipReminder3hSentAt"]]) {
-    const from = new Date(now.getTime() + Math.max(0, hours - 1) * 60 * 60 * 1000);
-    const to = new Date(now.getTime() + hours * 60 * 60 * 1000);
-    const users = await User.find({ role: { $ne: "admin" }, isActivated: true, membershipStatus: "active", vipExpiresAt: { $gt: from, $lte: to }, [field]: null }).select("_id vipExpiresAt").limit(200);
-    for (const user of users) {
-      const count = await sendPushToUser(user._id, { title: hours === 24 ? "VIP expires in 24 hours" : "VIP expires in 3 hours", body: "Renew your Banker Tips subscription to keep uninterrupted access to premium tips.", url: "/subscription" });
-      if (count) { await User.updateOne({ _id: user._id, [field]: null }, { $set: { [field]: now } }); sent += count; }
-    }
-  }
-  return sent;
 }
 
 function hasActiveVip(user) {
@@ -648,15 +606,12 @@ async function activatePaidMembership(payment, providerStatus) {
     user.selectedPackage = payment.package;
     user.isActivated = true;
     user.membershipStatus = "active";
-    user.vipReminder24hSentAt = null;
-    user.vipReminder3hSentAt = null;
     await user.save();
     payment.status = "completed";
     payment.transactionCode = String(providerStatus.transaction_code || providerStatus.gateway_transaction_id || providerStatus.reference || "").slice(0, 100) || null;
     payment.providerMessage = `Payment verified with OptimaPay (${payment.currency || "KES"}).`;
     payment.completedAt = new Date();
     payment.updatedAt = new Date();
-    await sendPushToUser(user._id, { title: "VIP membership activated", body: "Your payment is verified and your Banker Tips VIP access is active.", url: "/my-account" });
     await payment.save();
   }
   return true;
@@ -706,6 +661,36 @@ function zonedDateTimeToEpoch(date, time, timeZone) {
 
 
 app.use("/api", apiLimiter);
+
+function pushConfigReady() { return Boolean(webpush && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY); }
+function configurePush() { if (pushConfigReady()) webpush.setVapidDetails(process.env.VAPID_SUBJECT || "mailto:officialbankertips@gmail.com", process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY); }
+async function sendPushToAll(payload) {
+  if (!pushConfigReady()) return; configurePush();
+  const rows = await PushSubscription.find({}).limit(500);
+  await Promise.all(rows.map(async row => { try { await webpush.sendNotification(row.subscription, JSON.stringify(payload)); } catch (err) { if (err.statusCode === 404 || err.statusCode === 410) await PushSubscription.deleteOne({ _id: row._id }); else console.warn("Push delivery failed:", err.statusCode || err.message); } }));
+}
+app.get("/api/push/public-key", (req, res) => {
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !webpush) return res.status(503).json({ success:false, message:"Push notifications are not configured yet. Add VAPID keys and install web-push on the server." });
+  res.set("Cache-Control", "public, max-age=3600"); res.json({ success:true, publicKey:process.env.VAPID_PUBLIC_KEY });
+});
+app.post("/api/push/subscribe", async (req, res) => {
+  try { const sub=req.body; if(!sub || typeof sub.endpoint!=="string" || !sub.endpoint.startsWith("https://") || !sub.keys?.p256dh || !sub.keys?.auth) return res.status(400).json({success:false,message:"Invalid push subscription."});
+    let user=null; const token=req.cookies?.[COOKIE_NAME]; if(token){try{const decoded=jwt.verify(token,JWT_SECRET);user=decoded.sub;}catch(_){}}
+    await PushSubscription.findOneAndUpdate({endpoint:sub.endpoint},{$set:{subscription:sub,user,updatedAt:new Date()},$setOnInsert:{createdAt:new Date()}},{upsert:true,new:true});
+    res.status(201).json({success:true,message:"Push subscription saved."});
+  } catch(err){console.error("Push subscription save failed:",err.message);res.status(500).json({success:false,message:"Could not save notification subscription."});}
+});
+app.post("/api/push/unsubscribe", async (req,res)=>{try{const endpoint=String(req.body?.endpoint||"");if(endpoint)await PushSubscription.deleteOne({endpoint});res.json({success:true});}catch(_){res.status(500).json({success:false,message:"Could not remove subscription."});}});
+app.post("/api/admin/notifications/broadcast", requireAuth, requireAdmin, csrfCheck, async (req,res)=>{try{const title=String(req.body?.title||"Banker Tips update").trim().slice(0,80);const body=String(req.body?.body||"").trim().slice(0,180);if(!body)return res.status(400).json({success:false,message:"Enter a notification message."});await sendPushToAll({title,body,url:"/"});await recordAudit(req,"notification.broadcast","push","all",title);res.json({success:true,message:"Notification sent to subscribed devices."});}catch(err){res.status(500).json({success:false,message:"Could not send notifications."});}});
+
+function fixturePayload(doc){const x=doc.toObject?doc.toObject():doc;return {id:String(x._id||x.id),league:x.league||"",homeTeam:x.homeTeam,awayTeam:x.awayTeam,date:x.date,time:x.time||"",status:x.status,homeScore:x.homeScore??null,awayScore:x.awayScore??null};}
+app.get("/api/matches", async (req,res)=>{try{const date=String(req.query.date||footballDateISO());if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return res.status(400).json({success:false,message:"Use a valid match date."});const matches=await MatchFixture.find({date}).sort({time:1,createdAt:1}).lean();res.set("Cache-Control","no-store");res.json({success:true,date,matches:matches.map(fixturePayload)});}catch(err){res.status(500).json({success:false,message:"Could not load fixtures."});}});
+app.get("/api/admin/matches/:id",requireAuth,requireAdmin,async(req,res)=>{const match=await MatchFixture.findById(req.params.id);if(!match)return res.status(404).json({success:false,message:"Fixture not found."});res.json({success:true,match:fixturePayload(match)});});
+function validateFixture(body){const data={league:String(body.league||"").trim().slice(0,100),homeTeam:String(body.homeTeam||"").trim().slice(0,100),awayTeam:String(body.awayTeam||"").trim().slice(0,100),date:String(body.date||""),time:String(body.time||"").trim(),status:String(body.status||"scheduled"),homeScore:body.homeScore===null||body.homeScore===""?null:Number(body.homeScore),awayScore:body.awayScore===null||body.awayScore===""?null:Number(body.awayScore)};if(!data.homeTeam||!data.awayTeam||data.homeTeam===data.awayTeam)throw new Error("Enter two different team names.");if(!/^\d{4}-\d{2}-\d{2}$/.test(data.date))throw new Error("Choose a valid match date.");if(data.time&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(data.time))throw new Error("Enter kick-off time in HH:MM format.");if(!["scheduled","live","finished","postponed","cancelled"].includes(data.status))throw new Error("Choose a valid fixture status.");for(const k of ["homeScore","awayScore"])if(data[k]!==null&&(!Number.isInteger(data[k])||data[k]<0||data[k]>99))throw new Error("Scores must be whole numbers from 0 to 99.");return data;}
+app.post("/api/admin/matches",requireAuth,requireAdmin,csrfCheck,async(req,res)=>{try{const match=await MatchFixture.create(validateFixture(req.body));await recordAudit(req,"match.created","match",match._id,`${match.homeTeam} vs ${match.awayTeam}`);res.status(201).json({success:true,match:fixturePayload(match)});}catch(err){res.status(400).json({success:false,message:err.message||"Could not create fixture."});}});
+app.put("/api/admin/matches/:id",requireAuth,requireAdmin,csrfCheck,async(req,res)=>{try{const match=await MatchFixture.findByIdAndUpdate(req.params.id,{...validateFixture(req.body),updatedAt:new Date()},{new:true,runValidators:true});if(!match)return res.status(404).json({success:false,message:"Fixture not found."});await recordAudit(req,"match.updated","match",match._id,`${match.homeTeam} vs ${match.awayTeam} · ${match.status}`);res.json({success:true,match:fixturePayload(match)});}catch(err){res.status(400).json({success:false,message:err.message||"Could not update fixture."});}});
+app.delete("/api/admin/matches/:id",requireAuth,requireAdmin,csrfCheck,async(req,res)=>{const match=await MatchFixture.findByIdAndDelete(req.params.id);if(!match)return res.status(404).json({success:false,message:"Fixture not found."});await recordAudit(req,"match.deleted","match",match._id,`${match.homeTeam} vs ${match.awayTeam}`);res.json({success:true,message:"Fixture deleted."});});
+
 
 app.get("/api/health", (req, res) => {
   res.json({ success: true, status: "ok", database: mongoose.connection.readyState === 1 ? "connected" : "connecting" });
@@ -990,63 +975,6 @@ app.get("/api/payments/:paymentId/status", requireAuth, async (req, res) => {
   }
 });
 
-// Browser push notifications: subscriptions are tied to the authenticated account.
-app.get("/api/notifications/config", (req, res) => res.json({ success: true, enabled: PUSH_READY, publicKey: PUSH_READY ? VAPID_PUBLIC_KEY : null }));
-app.post("/api/notifications/subscribe", requireAuth, csrfCheck, async (req, res) => {
-  try {
-    if (!PUSH_READY) return res.status(503).json({ success: false, message: "Push notifications are not configured on the server yet." });
-    const sub = req.body.subscription;
-    if (!sub || typeof sub.endpoint !== "string" || !sub.keys?.p256dh || !sub.keys?.auth || sub.endpoint.length > 2048) return res.status(400).json({ success: false, message: "Invalid browser subscription." });
-    await PushSubscription.findOneAndUpdate({ endpoint: sub.endpoint }, { $set: { user: req.user._id, endpoint: sub.endpoint, subscription: sub, updatedAt: new Date() } }, { upsert: true, new: true, setDefaultsOnInsert: true });
-    res.json({ success: true, message: "Notifications enabled for this device." });
-  } catch (err) { console.error("Push subscription error:", err.message); res.status(500).json({ success: false, message: "Could not save notification settings." }); }
-});
-app.delete("/api/notifications/subscribe", requireAuth, csrfCheck, async (req, res) => {
-  try { const endpoint = String(req.body.endpoint || ""); await PushSubscription.deleteOne({ user: req.user._id, endpoint }); res.json({ success: true, message: "Notifications disabled on this device." }); }
-  catch (_) { res.status(500).json({ success: false, message: "Could not update notification settings." }); }
-});
-
-function publicMatch(match) { return { id: String(match._id), league: match.league, kickoff: match.kickoff, homeTeam: match.homeTeam, awayTeam: match.awayTeam, homeScore: match.homeScore, awayScore: match.awayScore, status: match.status, venue: match.venue || "" }; }
-app.get("/api/matches", async (req, res) => {
-  try {
-    const from = req.query.from ? new Date(req.query.from) : new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const to = req.query.to ? new Date(req.query.to) : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-    if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || to <= from || to - from > 90 * 24 * 60 * 60 * 1000) return res.status(400).json({ success: false, message: "Choose a valid match date range of up to 90 days." });
-    const filter = { kickoff: { $gte: from, $lte: to } };
-    if (req.query.league) filter.league = new RegExp(String(req.query.league).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    const matches = await Match.find(filter).sort({ kickoff: 1 }).limit(300).lean();
-    res.set("Cache-Control", "public, max-age=30"); res.json({ success: true, matches: matches.map(publicMatch) });
-  } catch (err) { console.error("Match centre load error:", err.message); res.status(500).json({ success: false, message: "Could not load match centre." }); }
-});
-app.post("/api/admin/matches", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
-  try {
-    const league = String(req.body.league || "").trim(), homeTeam = String(req.body.homeTeam || "").trim(), awayTeam = String(req.body.awayTeam || "").trim(), kickoff = new Date(req.body.kickoff);
-    if (!league || !homeTeam || !awayTeam || homeTeam.toLowerCase() === awayTeam.toLowerCase() || !Number.isFinite(kickoff.getTime())) return res.status(400).json({ success: false, message: "Enter a league, two different teams and a valid kickoff date/time." });
-    const match = await Match.create({ league, homeTeam, awayTeam, kickoff, venue: String(req.body.venue || "").trim().slice(0,150) });
-    await recordAudit(req, "match.created", "match", match._id, `Added ${homeTeam} vs ${awayTeam}`);
-    res.status(201).json({ success: true, match: publicMatch(match) });
-  } catch (err) { res.status(400).json({ success: false, message: "Could not create fixture." }); }
-});
-app.patch("/api/admin/matches/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
-  try {
-    const match = await Match.findById(req.params.id); if (!match) return res.status(404).json({ success: false, message: "Fixture not found." });
-    if (req.body.status && !["scheduled", "live", "finished", "postponed", "cancelled"].includes(req.body.status)) return res.status(400).json({ success: false, message: "Invalid match status." });
-    const wasFinished = match.status === "finished";
-    for (const key of ["league", "homeTeam", "awayTeam", "venue", "status"]) if (req.body[key] !== undefined) match[key] = String(req.body[key]).trim();
-    if (req.body.kickoff !== undefined) { const date = new Date(req.body.kickoff); if (!Number.isFinite(date.getTime())) return res.status(400).json({ success: false, message: "Invalid kickoff date." }); match.kickoff = date; }
-    for (const key of ["homeScore", "awayScore"]) if (req.body[key] !== undefined) { const n = req.body[key] === null || req.body[key] === "" ? null : Number(req.body[key]); if (n !== null && (!Number.isInteger(n) || n < 0 || n > 99)) return res.status(400).json({ success: false, message: "Scores must be whole numbers from 0 to 99." }); match[key] = n; }
-    if (match.status === "finished" && (match.homeScore === null || match.awayScore === null)) return res.status(400).json({ success: false, message: "Enter both scores before marking a match finished." });
-    match.updatedAt = new Date(); await match.save();
-    await recordAudit(req, "match.updated", "match", match._id, `Updated ${match.homeTeam} vs ${match.awayTeam}`);
-    if (match.status === "finished" && !wasFinished) await sendPushToAll({ title: "Match result updated", body: `${match.homeTeam} ${match.homeScore}–${match.awayScore} ${match.awayTeam}`, url: "/match-centre" });
-    res.json({ success: true, match: publicMatch(match) });
-  } catch (err) { res.status(400).json({ success: false, message: "Could not update fixture." }); }
-});
-app.delete("/api/admin/matches/:id", requireAuth, requireAdmin, csrfCheck, async (req, res) => {
-  const match = await Match.findByIdAndDelete(req.params.id); if (!match) return res.status(404).json({ success: false, message: "Fixture not found." });
-  await recordAudit(req, "match.deleted", "match", match._id, `Deleted ${match.homeTeam} vs ${match.awayTeam}`); res.json({ success: true });
-});
-
 app.get("/api/tips", async (req, res) => {
   res.set("Cache-Control", "private, no-store, max-age=0");
   res.set("Pragma", "no-cache");
@@ -1206,7 +1134,6 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
       user.vipExpiresAt = calculatePackageExpiry(user.selectedPackage, user.vipExpiresAt, wasActive);
       user.isActivated = true;
       user.membershipStatus = "active";
-      user.vipReminder24hSentAt = null; user.vipReminder3hSentAt = null;
     } else if (action === "reject") {
       user.isActivated = false;
       user.membershipStatus = "rejected";
@@ -1220,8 +1147,6 @@ app.patch("/api/admin/users/:id/vip", requireAuth, requireAdmin, csrfCheck, asyn
     }
     await user.save();
     await recordAudit(req, `membership.${action}`, "user", user._id, `${action} membership for ${user.email}`);
-    if (action === "approve") await sendPushToUser(user._id, { title: "VIP membership activated", body: "Your Banker Tips VIP access is now active. Open your account to view the expiry date.", url: "/my-account" });
-    if (action === "revoke" || action === "reject") await sendPushToUser(user._id, { title: "VIP membership updated", body: "Your membership status has changed. Sign in to view the details.", url: "/my-account" });
     res.json({ success: true, message: action === "approve" ? "Membership approved and activated." : action === "reject" ? "Membership request rejected." : "VIP access revoked.", user: safeUser(user) });
   } catch (err) {
     console.error("VIP membership update error:", err.message);
@@ -1418,7 +1343,7 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
     if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `This ${data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}. Change the match, selection, date or category.` });
     const tip = await Tip.create({ ...data, createdBy: req.user._id });
     await recordAudit(req, "tip.created", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
-    if (tip.publicationStatus === "published") await sendPushToAll({ title: tip.type === "premium" ? "New VIP tips available" : "New Free Tips available", body: `New ${tip.type} selection(s) have been published for ${tip.date}.`, url: tip.type === "premium" ? "/premium-tips" : "/free-tips" });
+    if (tip.publicationStatus === "published") sendPushToAll({ title: tip.type === "premium" ? "New VIP tips available" : "New free tips published", body: "Open Banker Tips to view the latest football selections.", url: tip.type === "premium" ? "/premium-tips" : "/free-tips" }).catch(err => console.warn("Tip notification failed:", err.message));
     res.status(201).json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     if (err.code === 11000) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: "This tip already exists for the selected date and category. Duplicate tips are not allowed." });
@@ -1451,7 +1376,7 @@ app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (r
 const FRONTEND_ROUTES = new Set([
   "/", "/register", "/login", "/free-tips", "/free-tips-history",
   "/vip-packages", "/subscription", "/my-account", "/payment-history", "/checkout",
-  "/contact", "/premium-tips", "/vip-tips-history", "/admin", "/match-centre"
+  "/contact", "/premium-tips", "/vip-tips-history", "/match-centre", "/admin"
 ]);
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/") || req.path.includes(".")) return next();
@@ -1533,7 +1458,7 @@ async function publishScheduledTips() {
     { publicationStatus: "scheduled", publishAt: { $lte: now } },
     { $set: { publicationStatus: "published", updatedAt: now } }
   );
-  if (result.modifiedCount) { console.log(`Published ${result.modifiedCount} scheduled tip(s).`); await sendPushToAll({ title: "New Banker Tips selections", body: `${result.modifiedCount} scheduled tip set(s) are now available.`, url: "/free-tips" }); }
+  if (result.modifiedCount) console.log(`Published ${result.modifiedCount} scheduled tip(s).`);
   return result.modifiedCount || 0;
 }
 
@@ -1602,8 +1527,6 @@ mongoose.connect(process.env.MONGODB_URI)
       expireMemberships().catch(err => console.error("Membership expiry sweep failed:", err.message));
     }, MEMBERSHIP_SWEEP_INTERVAL_MS);
     if (typeof expirySweep.unref === "function") expirySweep.unref();
-    const membershipReminderSweep = setInterval(() => { sendMembershipExpiryReminders().catch(err => console.error("Membership reminder sweep failed:", err.message)); }, 60 * 1000);
-    if (typeof membershipReminderSweep.unref === "function") membershipReminderSweep.unref();
     const scheduledTipSweep = setInterval(() => {
       publishScheduledTips().catch(err => console.error("Scheduled-tip publication sweep failed:", err.message));
     }, 30 * 1000);
