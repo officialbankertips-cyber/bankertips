@@ -1,15 +1,18 @@
 {
   "id": "/",
-  "name": "Banker Tips",
+  "name": "Banker Tips — Football Intelligence",
   "short_name": "Banker Tips",
-  "description": "Daily football predictions, results history and secure VIP membership.",
+  "description": "Football fixtures, transparent prediction history and premium membership.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f6f9fc",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f3f6fb",
   "theme_color": "#075985",
+  "categories": ["sports", "finance"],
   "icons": [
-    {"src":"/images/bankertipslogo.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"/images/bankertipslogo.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    { "src": "/images/bankertips-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/images/bankertips-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
