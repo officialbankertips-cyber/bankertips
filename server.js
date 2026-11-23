@@ -434,9 +434,6 @@ function cleanTipInput(body) {
   if (!homeTeam || !awayTeam || !match || !tip || !Number.isFinite(odds) || odds < 1 || odds > 1000) {
     throw new Error("Match must include both teams, a tip, and valid odds. Enter it as Home Team - Away Team.");
   }
-  if (type === "two_plus" && odds < 2) {
-    throw new Error("2+ Odds selections must have decimal odds of 2.00 or higher.");
-  }
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
   if (time && !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error("Kick-off time must use 24-hour HH:MM format.");
@@ -1011,12 +1008,19 @@ app.get("/api/tips", async (req, res) => {
       }
     }
     const now = new Date();
-    const tips = await Tip.find({ type, date, ...(type === "two_plus" ? { odds: { $gte: 2 } } : {}), $or: [
+    let tips = await Tip.find({ type, date, $or: [
       { publicationStatus: { $exists: false } },
       { publicationStatus: "published" },
       { publicationStatus: "scheduled", publishAt: { $lte: now } }
-    ] }).sort({ createdAt: 1 }).lean();
-    res.json({ success: true, authorized: true, tips: tips.map(publicTip) });
+    ] }).sort({ createdAt: 1, _id: 1 }).lean();
+    let accumulator = null;
+    if (type === "two_plus") {
+      const totalOdds = tips.reduce((product, item) => product * Number(item.odds || 1), 1);
+      accumulator = { legCount: tips.length, totalOdds: Number(totalOdds.toFixed(2)), ready: tips.length >= 2 && totalOdds >= 2 };
+      // Only expose a complete multi-match accumulator to eligible members.
+      if (!accumulator.ready) tips = [];
+    }
+    res.json({ success: true, authorized: true, tips: tips.map(publicTip), ...(accumulator ? { accumulator } : {}) });
   } catch (err) {
     console.error("Tips error:", err.message);
     res.status(500).json({ success: false, message: "Could not load tips." });
@@ -1053,7 +1057,7 @@ app.get("/api/tips/history", async (req, res) => {
       }
       authorized = true;
     }
-    const tips = await Tip.find({ type, ...(type === "two_plus" ? { odds: { $gte: 2 } } : {}), $or: [
+    const tips = await Tip.find({ type, $or: [
       { publicationStatus: { $exists: false } },
       { publicationStatus: "published" },
       { publicationStatus: "scheduled", publishAt: { $lte: new Date() } }
