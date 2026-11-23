@@ -103,7 +103,7 @@ const tipSchema = new mongoose.Schema({
   date: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ , index: true },
   publicationStatus: { type: String, enum: ["draft", "scheduled", "published"], default: "published", index: true },
   publishAt: { type: Date, default: null, index: true },
-  type: { type: String, enum: ["free", "premium"], required: true, index: true },
+  type: { type: String, enum: ["free", "premium", "two_plus"], required: true, index: true },
   homeTeam: { type: String, required: true, trim: true, maxlength: 120 },
   awayTeam: { type: String, required: true, trim: true, maxlength: 120 },
   match: { type: String, required: true, trim: true, maxlength: 250 },
@@ -401,6 +401,12 @@ function hasActiveVip(user) {
   const notExpired = !user.vipExpiresAt || new Date(user.vipExpiresAt).getTime() > Date.now();
   return Boolean(user.isActivated && validStatus && notExpired);
 }
+// 2+ Odds is reserved for administrators and active Weekly / Monthly subscribers.
+function hasTwoPlusOddsAccess(user) {
+  if (!user) return false;
+  if (user.role === "admin") return true;
+  return hasActiveVip(user) && ["weekly", "monthly"].includes(String(user.selectedPackage || "").toLowerCase());
+}
 function cleanTipInput(body) {
   const type = body.type;
   const date = String(body.date || "");
@@ -422,11 +428,14 @@ function cleanTipInput(body) {
   const incomingStatus = String(body.status || body.result || "Pending").toLowerCase();
   const statusToResult = { pending: "Pending", win: "Win", won: "Win", lose: "Lose", lost: "Lose", void: "Void" };
   const result = statusToResult[incomingStatus];
-  if (!["free", "premium"].includes(type)) throw new Error("Type must be free or premium.");
+  if (!["free", "premium", "two_plus"].includes(type)) throw new Error("Type must be free, premium or two_plus.");
   const parsedDate = new Date(`${date}T00:00:00.000Z`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) throw new Error("Date must be a valid calendar date in YYYY-MM-DD format.");
   if (!homeTeam || !awayTeam || !match || !tip || !Number.isFinite(odds) || odds < 1 || odds > 1000) {
     throw new Error("Match must include both teams, a tip, and valid odds. Enter it as Home Team - Away Team.");
+  }
+  if (type === "two_plus" && odds < 2) {
+    throw new Error("2+ Odds selections must have decimal odds of 2.00 or higher.");
   }
   if (!result) throw new Error("Invalid result.");
   const time = String(body.time || "").trim();
@@ -979,19 +988,30 @@ app.get("/api/tips", async (req, res) => {
   res.set("Cache-Control", "private, no-store, max-age=0");
   res.set("Pragma", "no-cache");
   try {
-    const type = String(req.query.type || "free");
+    const type = String(req.query.type || "free").toLowerCase();
     const date = String(req.query.date || footballDateISO());
-    if (!["free", "premium"].includes(type)) return res.status(400).json({ success: false, message: "Invalid tips type." });
-    if (type === "premium") {
+    if (!["free", "premium", "two_plus"].includes(type)) {
+      return res.status(400).json({ success: false, message: "Invalid tips type." });
+    }
+    if (type === "premium" || type === "two_plus") {
       const token = req.cookies[COOKIE_NAME];
-      if (!token) return res.status(401).json({ success: false, message: "Log in to access premium tips." });
+      if (!token) return res.status(401).json({ success: false, message: "Log in to access these tips." });
       let decoded;
-      try { decoded = jwt.verify(token, JWT_SECRET); } catch { return res.status(401).json({ success: false, message: "Please log in again." }); }
+      try { decoded = jwt.verify(token, JWT_SECRET); }
+      catch { clearSession(res); return res.status(401).json({ success: false, message: "Please log in again." }); }
       const user = await User.findById(decoded.sub);
-      if (!user || !hasActiveVip(user)) return res.status(403).json({ success: false, message: "VIP access is not active. Contact the administrator after payment." });
+      if (!user) return res.status(401).json({ success: false, message: "Your account could not be verified." });
+      await expireUserIfNeeded(user);
+      const allowed = type === "premium" ? hasActiveVip(user) : hasTwoPlusOddsAccess(user);
+      if (!allowed) {
+        const message = type === "two_plus"
+          ? "2+ Odds is available to Admin, active Weekly and active Monthly subscribers only."
+          : "VIP access is not active. Contact the administrator after payment.";
+        return res.status(403).json({ success: false, authorized: false, message });
+      }
     }
     const now = new Date();
-    const tips = await Tip.find({ type, date, $or: [
+    const tips = await Tip.find({ type, date, ...(type === "two_plus" ? { odds: { $gte: 2 } } : {}), $or: [
       { publicationStatus: { $exists: false } },
       { publicationStatus: "published" },
       { publicationStatus: "scheduled", publishAt: { $lte: now } }
@@ -1008,45 +1028,42 @@ app.get("/api/tips/history", async (req, res) => {
   res.set("Pragma", "no-cache");
   try {
     const type = String(req.query.type || "free").toLowerCase();
-    if (!["free", "premium"].includes(type)) {
+    if (!["free", "premium", "two_plus"].includes(type)) {
       return res.status(400).json({ success: false, authorized: false, message: "Invalid tips type." });
     }
-
     let authorized = type === "free";
-    if (type === "premium") {
+    if (type === "premium" || type === "two_plus") {
       const token = req.cookies[COOKIE_NAME];
-      if (!token) {
-        return res.status(401).json({ success: false, authorized: false, message: "Log in to access premium history." });
-      }
+      if (!token) return res.status(401).json({ success: false, authorized: false, message: "Log in to access this tips history." });
       let decoded;
-      try {
-        decoded = jwt.verify(token, JWT_SECRET);
-      } catch {
+      try { decoded = jwt.verify(token, JWT_SECRET); }
+      catch {
         clearSession(res);
         return res.status(401).json({ success: false, authorized: false, message: "Your session has expired. Please log in again." });
       }
       const user = await User.findById(decoded.sub);
-      if (!user || !hasActiveVip(user)) {
-        return res.status(403).json({ success: false, authorized: false, message: "Active VIP membership is required to view premium history." });
+      if (!user) return res.status(401).json({ success: false, authorized: false, message: "Your account could not be verified." });
+      await expireUserIfNeeded(user);
+      const allowed = type === "premium" ? hasActiveVip(user) : hasTwoPlusOddsAccess(user);
+      if (!allowed) {
+        const message = type === "two_plus"
+          ? "2+ Odds history is available to Admin, active Weekly and active Monthly subscribers only."
+          : "Active VIP membership is required to view premium history.";
+        return res.status(403).json({ success: false, authorized: false, message });
       }
       authorized = true;
     }
-
-    const tips = await Tip.find({ type, $or: [
+    const tips = await Tip.find({ type, ...(type === "two_plus" ? { odds: { $gte: 2 } } : {}), $or: [
       { publicationStatus: { $exists: false } },
       { publicationStatus: "published" },
       { publicationStatus: "scheduled", publishAt: { $lte: new Date() } }
-    ] })
-      .sort({ date: -1, createdAt: 1, _id: 1 })
-      .limit(500)
-      .lean();
+    ] }).sort({ date: -1, createdAt: 1, _id: 1 }).limit(500).lean();
     return res.json({ success: true, authorized, type, count: tips.length, tips: tips.map(publicTip) });
   } catch (err) {
     console.error("History error:", err.message);
     return res.status(500).json({ success: false, authorized: false, message: "Could not load history." });
   }
 });
-
 
 // Public homepage advertisement: only the currently published homepage ad is returned.
 app.get("/api/advertisements/active", async (req, res) => {
@@ -1340,10 +1357,10 @@ app.post("/api/admin/tips", requireAuth, requireAdmin, csrfCheck, async (req, re
   try {
     const data = cleanTipInput(req.body);
     const duplicate = await findDuplicateTip(data);
-    if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `This ${data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}. Change the match, selection, date or category.` });
+    if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `This ${data.type === "two_plus" ? "2+ Odds" : data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}. Change the match, selection, date or category.` });
     const tip = await Tip.create({ ...data, createdBy: req.user._id });
     await recordAudit(req, "tip.created", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
-    if (tip.publicationStatus === "published") sendPushToAll({ title: tip.type === "premium" ? "New VIP tips available" : "New free tips published", body: "Open Banker Tips to view the latest football selections.", url: tip.type === "premium" ? "/premium-tips" : "/free-tips" }).catch(err => console.warn("Tip notification failed:", err.message));
+    if (tip.publicationStatus === "published") sendPushToAll({ title: tip.type === "two_plus" ? "New 2+ Odds selections available" : tip.type === "premium" ? "New VIP tips available" : "New free tips published", body: "Open Banker Tips to view the latest football selections.", url: tip.type === "two_plus" ? "/2-plus-odds" : tip.type === "premium" ? "/premium-tips" : "/free-tips" }).catch(err => console.warn("Tip notification failed:", err.message));
     res.status(201).json({ success: true, tip: publicTip(tip) });
   } catch (err) {
     if (err.code === 11000) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: "This tip already exists for the selected date and category. Duplicate tips are not allowed." });
@@ -1355,7 +1372,7 @@ app.put("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (req,
   try {
     const data = cleanTipInput(req.body);
     const duplicate = await findDuplicateTip(data, req.params.id);
-    if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `Another ${data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}.` });
+    if (duplicate) return res.status(409).json({ success: false, code: "DUPLICATE_TIP", message: `Another ${data.type === "two_plus" ? "2+ Odds" : data.type === "premium" ? "VIP" : "Free"} tip already exists for ${data.match} on ${data.date}.` });
     const tip = await Tip.findByIdAndUpdate(req.params.id, { ...data, updatedAt: new Date() }, { new: true, runValidators: true, collation: { locale: "en", strength: 2 } });
     if (!tip) return res.status(404).json({ success: false, message: "Tip not found." });
     await recordAudit(req, "tip.updated", "tip", tip._id, `${tip.type} tip for ${tip.match}`);
@@ -1376,7 +1393,7 @@ app.delete("/api/admin/tips/:id", requireAuth, requireAdmin, csrfCheck, async (r
 const FRONTEND_ROUTES = new Set([
   "/", "/register", "/login", "/free-tips", "/free-tips-history",
   "/vip-packages", "/subscription", "/my-account", "/payment-history", "/checkout",
-  "/contact", "/premium-tips", "/vip-tips-history", "/match-centre", "/admin"
+  "/contact", "/premium-tips", "/vip-tips-history", "/2-plus-odds", "/match-centre", "/admin"
 ]);
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/") || req.path.includes(".")) return next();
