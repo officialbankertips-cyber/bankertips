@@ -1144,14 +1144,14 @@ img{max-width:100%}
   <div class="card"><div class="table-scroll"><table class="tips-table"><thead><tr><th>Kick-off</th><th>Match</th><th>Tip</th><th>Odds</th><th>Result</th></tr></thead><tbody id="premiumRows"><tr><td colspan="5">Verifying access…</td></tr></tbody></table></div><div class="history-separator vip-history-separator premium-bottom-crown" role="separator" aria-label="End of VIP Premium tips"><span></span><i class="fa-solid fa-crown" aria-hidden="true"></i><span></span></div><div class="notice" id="premiumNotice">VIP selections appear here after your membership is approved.</div></div><div class="form-actions vip-history-actions"><button class="btn" type="button" id="copyVipTicket"><i class="fa-solid fa-copy"></i> Copy VIP Ticket</button><button class="btn secondary" type="button" id="vipHistoryButton"><i class="fa-solid fa-clock-rotate-left"></i> VIP Tips History</button><button class="btn ghost" type="button" data-panel="freePanel"><i class="fa-solid fa-house"></i> Home / Free Tips</button></div>
   <div class="two-plus-entry-card">
    <div class="two-plus-entry-icon"><i class="fa-solid fa-lock-open"></i></div>
-   <div class="two-plus-entry-copy"><span class="two-plus-kicker">EXCLUSIVE MEMBERS AREA</span><h3>2+ Odds</h3><p>View multi-match accumulators with combined odds of 2.00 or higher. Available to Admin, Weekly and Monthly members.</p></div>
+   <div class="two-plus-entry-copy"><span class="two-plus-kicker">EXCLUSIVE MEMBERS AREA</span><h3>2+ Odds</h3><p>Access today's 2+ Odds</p></div>
    <button class="btn" type="button" data-panel="twoPlusPanel">Open 2+ Odds <i class="fa-solid fa-arrow-right"></i></button>
   </div>
  </section>
 
  <section class="panel" id="twoPlusPanel">
   <div class="two-plus-hero">
-   <div><span class="two-plus-kicker">EXCLUSIVE · RESTRICTED ACCESS</span><h1><i class="fa-solid fa-bolt"></i> 2+ Odds</h1><p>Multiple match predictions combined into one accumulator. Individual match odds may be below 2.00; the combined accumulator odds must reach at least 2.00. Access is limited to Admin and active Weekly or Monthly subscribers.</p></div>
+   <div><span class="two-plus-kicker">EXCLUSIVE · RESTRICTED ACCESS</span><h1><i class="fa-solid fa-bolt"></i> 2+ Odds</h1><p>Best 2+ odds for daily winning consistency.</p></div>
    <div class="two-plus-hero-mark"><i class="fa-solid fa-lock"></i></div>
   </div>
   <div class="section-head two-plus-toolbar"><div><h2>Today's 2+ Odds Accumulator</h2><p id="twoPlusSubheading">Verifying your membership permissions…</p></div><div class="tip-date-control"><label for="twoPlusDate">Match date</label><input type="date" id="twoPlusDate" class="tip-date-picker" aria-label="Choose 2+ Odds date"></div></div>
@@ -1714,12 +1714,12 @@ async function loadTwoPlus({silent=false} = {}) {
     if (!canAccessTwoPlus(currentUser)) throw new Error('2+ Odds is available to Admin, active Weekly and active Monthly subscribers only.');
     const data = await api(`/api/tips?type=two_plus&date=${encodeURIComponent(date)}`);
     renderTipRows(Array.isArray(data.tips) ? data.tips : [], 'twoPlusRows');
-    if (subheading) subheading.textContent = currentUser?.role === 'admin' ? 'Administrator access verified' : `${packageLabel(currentUser.selectedPackage)} membership verified`;
+    if (subheading) subheading.textContent = currentUser?.role === 'admin' ? 'Access Verified ' : `${packageLabel(currentUser.selectedPackage)} membership verified`;
     if (notice) {
       const accumulator = data.accumulator || null;
       notice.textContent = accumulator?.ready
         ? `Complete accumulator: ${accumulator.legCount} match predictions · Combined odds ${Number(accumulator.totalOdds).toFixed(2)}.`
-        : `Accumulator is being prepared for ${prettyDate(date)}. Add at least 2 match predictions and make sure their combined odds reach 2.00 or higher.`;
+        : `Accumulator is being prepared for ${prettyDate(date)}.`;
     }
   } catch (e) {
     if (!silent) {
