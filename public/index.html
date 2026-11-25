@@ -25,27 +25,36 @@
 <style>
 :root{color-scheme:light;--bg:#f3f7fb;--surface:#fff;--ink:#102033;--muted:#617286;--line:#dce6ef;--blue:#0284c7;--blue2:#075985;--soft:#eaf6fd;--green:#15803d;--greenbg:#dcfce7;--red:#b91c1c;--redbg:#fee2e2;--amber:#a16207;--amberbg:#fef3c7;--radius:16px;--shadow:0 12px 35px rgba(15,53,82,.08)}
 [data-theme=dark]{color-scheme:dark;--bg:#08111e;--surface:#111e30;--ink:#f0f6fc;--muted:#a1b1c4;--line:#26384c;--soft:#172f43;--green:#86efac;--greenbg:#153c2b;--red:#fca5a5;--redbg:#481e27;--amber:#fcd34d;--amberbg:#493719;--shadow:0 12px 35px rgba(0,0,0,.22)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Comfortaa","Trebuchet MS",Arial,sans-serif;line-height:1.5;padding-bottom:calc(88px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui, Arial,sans-serif;line-height:1.5;padding-bottom:calc(88px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit}.wrap{width:min(1040px,100% - 32px);margin:auto}
 header{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.header-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none}.brand-mark{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);overflow:hidden}.brand-mark img{width:100%;height:100%;object-fit:contain;padding:2px}.brand-name{font:700 1.3rem "Comfortaa","Trebuchet MS",sans-serif;letter-spacing:-.5px}.brand-name span{color:var(--blue)}.head-actions{display:flex;align-items:center;gap:8px}.icon-btn,.menu-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}.menu-btn{display:none}
+.header-inner{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none}.brand-mark{width:43px;height:43px;border-radius:13px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);overflow:hidden}.brand-mark img{width:100%;height:100%;object-fit:contain;padding:2px}.brand-name{font:700 1.3rem system-ui, sans-serif;letter-spacing:-.5px}.brand-name span{color:var(--blue)}.head-actions{display:flex;align-items:center;gap:8px}.icon-btn,.menu-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}.menu-btn{display:none}
 .top-links{display:flex;gap:8px;align-items:center}.btn{border:0;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;font-weight:800;padding:11px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 5px 14px #0284c729}.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}.btn.secondary{background:var(--soft);color:var(--blue2);box-shadow:none;border:1px solid var(--line)}.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:1px solid var(--line)}.btn.danger{background:#b91c1c}.btn.small{padding:8px 11px;font-size:.85rem}
-main{padding:26px 0}.hero{background:linear-gradient(125deg,#075985,#0284c7 70%,#38bdf8);color:white;border-radius:22px;padding:clamp(22px,5vw,38px);display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:var(--shadow);overflow:hidden}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.74rem;font-weight:800;opacity:.8}.hero h1{font:700 clamp(1.8rem,4vw,2.7rem)/1.2 "Comfortaa","Trebuchet MS",sans-serif;margin:9px 0}.hero p{max-width:590px;margin:0;color:#e3f5ff}.hero .btn{background:white;color:#075985;box-shadow:none;margin-top:18px}.hero-icon{font-size:clamp(3rem,8vw,6rem);opacity:.22;padding:0 18px}
-.section{margin-top:27px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-head h2{font:700 1.45rem "Comfortaa","Trebuchet MS",sans-serif;margin:0}.section-head p{margin:3px 0 0;color:var(--muted);font-size:.9rem}.date-chip{background:var(--soft);color:var(--blue2);border:1px solid var(--line);border-radius:99px;padding:6px 11px;font-size:.8rem;font-weight:800;white-space:nowrap}
+main{padding:26px 0}.hero{background:linear-gradient(125deg,#075985,#0284c7 70%,#38bdf8);color:white;border-radius:22px;padding:clamp(22px,5vw,38px);display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:var(--shadow);overflow:hidden}.eyebrow{text-transform:uppercase;letter-spacing:.13em;font-size:.74rem;font-weight:800;opacity:.8}.hero h1{font:700 clamp(1.8rem,4vw,2.7rem)/1.2 system-ui, sans-serif;margin:9px 0}.hero p{max-width:590px;margin:0;color:#e3f5ff}.hero .btn{background:white;color:#075985;box-shadow:none;margin-top:18px}.hero-icon{font-size:clamp(3rem,8vw,6rem);opacity:.22;padding:0 18px}
+.section{margin-top:27px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px}.section-head h2{font:700 1.45rem system-ui, sans-serif;margin:0}.section-head p{margin:3px 0 0;color:var(--muted);font-size:.9rem}.date-chip{background:var(--soft);color:var(--blue2);border:1px solid var(--line);border-radius:99px;padding:6px 11px;font-size:.8rem;font-weight:800;white-space:nowrap}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:570px}.tips-table{width:100%;min-width:0!important;table-layout:fixed;border-collapse:separate;border-spacing:0}.tips-table th,.tips-table td{min-width:0;overflow-wrap:anywhere;word-break:normal;vertical-align:middle}.tips-table th:first-child{width:17%}.tips-table th:nth-child(2){width:31%}.tips-table th:nth-child(3){width:20%}.tips-table th:nth-child(4){width:12%}.tips-table th:last-child{width:20%}.tips-table .match{white-space:normal;line-height:1.35}.tips-table td .odds,.tips-table td .status{max-width:100%;white-space:normal;overflow-wrap:anywhere}th{background:var(--soft);color:var(--muted);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:13px 15px}td{padding:14px 15px;border-top:1px solid var(--line);font-size:.9rem;font-weight:600}tbody tr:hover{background:color-mix(in srgb,var(--soft) 45%,var(--surface))}.match{font-weight:800}.subtext{display:block;font-size:.75rem;color:var(--muted);font-weight:500}.odds{display:inline-block;border:1px solid var(--line);background:var(--soft);padding:4px 9px;border-radius:8px;font-weight:800;color:var(--blue2)}.status{display:inline-flex;padding:4px 9px;border-radius:99px;font-size:.76rem;font-weight:800}.pending{background:var(--amberbg);color:var(--amber)}.won{background:var(--greenbg);color:var(--green)}.lost{background:var(--redbg);color:var(--red)}.void{background:#e5e7eb;color:#374151}.notice{padding:13px 15px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
 .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.subscription-card{display:flex;flex-direction:column;align-items:flex-start}.subscription-card .btn{margin-top:auto}.package-price{font-size:1.45rem;font-weight:800;color:var(--blue);margin:4px 0}.package-price span{font-size:.9rem;color:var(--muted);font-weight:600}.featured-package{border:2px solid var(--blue)}.membership-status{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:.75rem;font-weight:800;background:var(--amberbg);color:var(--amber);white-space:nowrap}.membership-status.active{background:var(--greenbg);color:var(--green)}.membership-status.rejected,.membership-status.expired{background:var(--redbg);color:var(--red)}.admin-members{margin-top:18px}.admin-members .table-scroll{max-height:520px}.account-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.summary-tile{border:1px solid var(--line);border-radius:13px;padding:14px;background:var(--surface)}.summary-tile strong{display:block;font-size:1.25rem}.summary-tile span{font-size:.78rem;color:var(--muted)}@media(max-width:700px){.account-summary{grid-template-columns:1fr}}
-.info-card{padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}.info-card i{color:var(--blue);font-size:1.35rem}.info-card h3{margin:10px 0 4px;font:700 1.05rem "Comfortaa","Trebuchet MS",sans-serif}.info-card p{color:var(--muted);font-size:.88rem;margin:0}.banner{margin-top:24px;padding:24px;border-radius:18px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px}.banner h2{font:800 1.35rem Outfit,sans-serif;margin:0 0 4px}.banner p{margin:0;color:var(--muted);font-size:.9rem}.payment-methods{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pay-pill{padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-weight:700}
+.info-card{padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}.info-card i{color:var(--blue);font-size:1.35rem}.info-card h3{margin:10px 0 4px;font:700 1.05rem system-ui, sans-serif}.info-card p{color:var(--muted);font-size:.88rem;margin:0}.banner{margin-top:24px;padding:24px;border-radius:18px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px}.banner h2{font:800 1.35rem Outfit,sans-serif;margin:0 0 4px}.banner p{margin:0;color:var(--muted);font-size:.9rem}.payment-methods{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pay-pill{padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-weight:700}
 .panel{display:none;margin-top:22px}.panel.active{display:block;animation:panelEnter .22s ease both}@keyframes panelEnter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}.hidden{display:none!important}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--bg);color:var(--ink);outline:none}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0284c71f}.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.admin-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}.pad{padding:20px}.msg{margin-top:12px;font-size:.88rem;padding:10px 12px;border-radius:10px;display:none}.msg.show{display:block}.msg.error{background:var(--redbg);color:var(--red)}.msg.ok{background:var(--greenbg);color:var(--green)}.msg.info{background:var(--soft);color:var(--blue2)}
 
-/* Floating Telegram channel button — glossy 3D icon with a gentle pulse */
-.telegram-float{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(86px + env(safe-area-inset-bottom));z-index:40;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 18px;border:1px solid rgba(255,255,255,.48);border-radius:999px;background:linear-gradient(145deg,#42c8ff 0%,#229ed9 48%,#0876b9 100%);color:#fff;text-decoration:none;font-size:.86rem;font-weight:800;letter-spacing:.01em;box-shadow:0 7px 0 #075b91,0 12px 24px rgba(0,136,204,.34),inset 0 2px 3px rgba(255,255,255,.45);transition:transform .2s ease,filter .2s ease;animation:telegramPulse 2.2s ease-in-out infinite}
-.telegram-float i{font-size:1.85rem;line-height:1;filter:drop-shadow(0 3px 1px rgba(0,48,85,.35));text-shadow:0 2px 0 rgba(0,70,115,.35)}
-.telegram-float:hover{transform:translateY(-3px);filter:brightness(1.08);box-shadow:0 9px 0 #075b91,0 16px 30px rgba(0,136,204,.42),inset 0 2px 3px rgba(255,255,255,.5)}
-.telegram-float:active{transform:translateY(3px);box-shadow:0 3px 0 #075b91,0 7px 15px rgba(0,136,204,.3)}
-.telegram-float:focus-visible{outline:3px solid var(--blue);outline-offset:5px}
-@keyframes telegramPulse{0%,100%{box-shadow:0 7px 0 #075b91,0 12px 24px rgba(0,136,204,.34),0 0 0 0 rgba(34,158,217,.35),inset 0 2px 3px rgba(255,255,255,.45)}50%{box-shadow:0 7px 0 #075b91,0 14px 28px rgba(0,136,204,.4),0 0 0 9px rgba(34,158,217,0),inset 0 2px 3px rgba(255,255,255,.45)}}
-@media(min-width:701px){.telegram-float{bottom:calc(88px + env(safe-area-inset-bottom));right:max(24px,calc((100vw - 1040px)/2))}}
-@media(max-width:420px){.telegram-float{width:56px;height:56px;min-height:56px;padding:0}.telegram-float .telegram-label{display:none}}
-@media(prefers-reduced-motion:reduce){.telegram-float{animation:none;transition:none}}
+/* Compact, professional floating Telegram shortcut */
+.telegram-float{
+  position:fixed;right:max(16px,env(safe-area-inset-right));
+  bottom:calc(82px + env(safe-area-inset-bottom));z-index:40;
+  width:46px;height:46px;min-height:46px;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.72);border-radius:50%;
+  background:#229ED9;color:#fff;text-decoration:none;
+  box-shadow:0 4px 12px rgba(15,95,145,.24);
+  transition:transform .18s ease,background-color .18s ease,box-shadow .18s ease;
+}
+.telegram-float i{font-size:1.35rem;line-height:1;filter:none;text-shadow:none}
+.telegram-float .telegram-label{display:none}
+.telegram-float:hover{transform:translateY(-2px);background:#168ac4;box-shadow:0 6px 16px rgba(15,95,145,.3)}
+.telegram-float:active{transform:scale(.96)}
+.telegram-float:focus-visible{outline:3px solid var(--blue);outline-offset:4px}
+@media(min-width:701px){.telegram-float{right:max(22px,calc((100vw - 1040px)/2));bottom:calc(86px + env(safe-area-inset-bottom))}}
+@media(prefers-reduced-motion:reduce){.telegram-float{transition:none}}
+
 
 footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}
 /* Free visitor counter: compact, responsive footer widget */
@@ -53,7 +62,7 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;padding:28px 12px}
 .visitor-counter-title i{color:var(--blue);font-size:.95rem}
 .visitor-counter-description,.visitor-counter-help{margin:0;color:var(--muted);font-size:.76rem;line-height:1.5}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:25;display:flex;justify-content:center;gap:0;background:var(--surface);border-top:1px solid var(--line);padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px #0f172a0b}.bottom-nav button{border:0;background:transparent;color:var(--muted);font-size:.72rem;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;max-width:180px;padding:5px}.bottom-nav button i{font-size:1.15rem}.bottom-nav button.active{color:var(--blue)}
-.modal{display:flex;visibility:hidden;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:100;background:#071321b8;backdrop-filter:blur(5px);padding:18px;align-items:center;justify-content:center;transition:opacity .22s ease,visibility .22s ease}.modal.open{visibility:visible;opacity:1;pointer-events:auto}.modal-box{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 25px 80px #0003;transform:translateY(12px) scale(.985);transition:transform .22s ease}.modal.open .modal-box{transform:translateY(0) scale(1)}.modal-box h2{font:700 1.45rem "Comfortaa","Trebuchet MS",sans-serif;margin:0 40px 6px 0}.modal-box>p{color:var(--muted);font-size:.88rem;margin:0 0 17px}.close{position:absolute;right:15px;top:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px}.modal-box .btn{width:100%;margin-top:14px}
+.modal{display:flex;visibility:hidden;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:100;background:#071321b8;backdrop-filter:blur(5px);padding:18px;align-items:center;justify-content:center;transition:opacity .22s ease,visibility .22s ease}.modal.open{visibility:visible;opacity:1;pointer-events:auto}.modal-box{position:relative;width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:25px;box-shadow:0 25px 80px #0003;transform:translateY(12px) scale(.985);transition:transform .22s ease}.modal.open .modal-box{transform:translateY(0) scale(1)}.modal-box h2{font:700 1.45rem system-ui, sans-serif;margin:0 40px 6px 0}.modal-box>p{color:var(--muted);font-size:.88rem;margin:0 0 17px}.close{position:absolute;right:15px;top:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:9px;width:36px;height:36px}.modal-box .btn{width:100%;margin-top:14px}
 @media(max-width:700px){
 .tips-table{min-width:0;table-layout:auto}
 .tips-table thead{display:none}
@@ -514,7 +523,7 @@ img, video, canvas { max-width: 100%; height: auto; }
 
 /* Adaptive mobile typography — preserves the existing Outfit / Plus Jakarta Sans design */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body,button,input,select,textarea{font-family:"Comfortaa","Trebuchet MS",Arial,sans-serif}
+body,button,input,select,textarea{font-family:system-ui, Arial,sans-serif}
 h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-family:Outfit,"Plus Jakarta Sans",Arial,sans-serif}
 @media(max-width:700px){
   html{font-size:clamp(14px,3.8vw,16px)}
@@ -623,11 +632,11 @@ h1,h2,h3,h4,.brand-name,.package-price,.profile-name,.history-day-title h3{font-
 }
 
 
-/* Banker Tips typography: Comfortaa throughout the complete interface */
+/* Banker Tips typography: system-ui throughout the complete interface */
 html, body,
 body :not(i):not(svg):not(path):not([class*="fa-"]),
 button, input, select, textarea {
-  font-family: "Comfortaa", "Trebuchet MS", Arial, sans-serif !important;
+  font-family: system-ui, Arial, sans-serif !important;
 }
 
 
@@ -727,7 +736,7 @@ button, input, select, textarea {
 .membership-admin-actions .btn{white-space:nowrap}
 .membership-summary{grid-template-columns:repeat(4,minmax(0,1fr));margin:0!important}
 .membership-summary .summary-tile{border-color:#e4ebf3;background:linear-gradient(145deg,#fff,#f7faff);padding:14px 16px}
-.membership-summary .summary-tile strong{font:700 1.45rem "Comfortaa","Trebuchet MS",sans-serif;color:#123e60}
+.membership-summary .summary-tile strong{font:700 1.45rem system-ui, sans-serif;color:#123e60}
 .membership-summary .summary-tile span{font-size:.72rem;color:#718198}
 .membership-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid #edf1f6;background:#fbfdff}
 .membership-search{display:flex;align-items:center;gap:9px;width:min(430px,100%);padding:10px 13px;border:1px solid #dce6f0;border-radius:11px;background:#fff;color:#8292a6}
@@ -758,54 +767,6 @@ button, input, select, textarea {
 @media print{header,.bottom-nav,footer,.telegram-float,.membership-admin-actions,.membership-toolbar{display:none!important}}
 </style>
 
-<style id="comfortaa-professional-font">
-/* Banker Tips — unified Comfortaa typography */
-:root {
-  --font-ui: "Comfortaa", "Trebuchet MS", sans-serif;
-}
-html, body,
-body :not(i):not([class^="fa"]):not([class*=" fa-"]),
-button, input, select, textarea {
-  font-family: var(--font-ui) !important;
-}
-body {
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-h1, h2, h3, h4, h5, h6,
-.brand-name, .hero h1, .section-head h2,
-.subscription-card h3, .package-price,
-.modal-box h2, .profile-name, .history-day-title h3,
-.history-empty strong, .membership-summary strong {
-  font-family: var(--font-ui) !important;
-  font-weight: 700;
-  letter-spacing: -0.045em;
-}
-button, .btn, .bottom-nav button, .status,
-.membership-status, .date-chip, .field label,
-th, .visitor-counter-title {
-  font-weight: 700;
-}
-input, select, textarea {
-  font-weight: 500;
-}
-.tips-table td, .tips-table th,
-.admin-members table td, .admin-members table th {
-  letter-spacing: -0.02em;
-}
-.subtext, .notice, .section-head p, footer {
-  letter-spacing: -0.015em;
-}
-/* Preserve Font Awesome and other icon-font glyphs. */
-i, .fa, [class^="fa-"], [class*=" fa-"] {
-  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-}
-@media (max-width: 420px) {
-  body { letter-spacing: -0.03em; }
-}
-</style>
 
 
 <style id="vip-premium-tips-final-alignment">
@@ -913,9 +874,9 @@ i, .fa, [class^="fa-"], [class*=" fa-"] {
 
 
 <style id="bankertips-quality-upgrade">
-:root{font-family:"Comfortaa","Trebuchet MS",Arial,sans-serif}
-body,button,input,select,textarea{font-family:"Comfortaa","Trebuchet MS",Arial,sans-serif}
-h1,h2,h3,h4,.brand-name,.hero h1,.section-head h2,.modal-box h2,.subscription-card h3,.payment-hero h1{font-family:"Comfortaa","Trebuchet MS",Arial,sans-serif}
+:root{font-family:system-ui, Arial,sans-serif}
+body,button,input,select,textarea{font-family:system-ui, Arial,sans-serif}
+h1,h2,h3,h4,.brand-name,.hero h1,.section-head h2,.modal-box h2,.subscription-card h3,.payment-hero h1{font-family:system-ui, Arial,sans-serif}
 .skip-link{position:fixed;left:12px;top:10px;z-index:10001;transform:translateY(-160%);padding:11px 15px;border-radius:10px;background:#075985;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 5px 18px #0003}
 .skip-link:focus{transform:translateY(0)}
 :focus-visible{outline:3px solid #38bdf8!important;outline-offset:3px!important}
@@ -2128,9 +2089,21 @@ function downloadMembershipPdf() {
   if(!w){alert('Please allow pop-ups to generate the membership PDF.');return;}
   const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   w.document.write(`<!doctype html><html><head><title>Banker Tips - Membership Register</title><style>
-  @page{size:A4 landscape;margin:14mm}body{font:500 11px "Comfortaa","Trebuchet MS",sans-serif;color:#172b43}h1{font:700 21px "Comfortaa","Trebuchet MS",sans-serif;margin:0 0 5px;color:#075985}.meta{color:#64748b;margin-bottom:18px;font-size:10px}.brand{font-weight:bold;letter-spacing:2px;color:#0879c9;margin-bottom:7px}table{width:100%;border-collapse:collapse}th{background:#075985;color:#fff;text-align:left;padding:9px 7px;font-size:9px}td{padding:8px 7px;border-bottom:1px solid #dbe5ef;vertical-align:top;font-size:9px}tr:nth-child(even) td{background:#f2f7fb}.foot{margin-top:16px;color:#64748b;font-size:9px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
+  @page{size:A4 landscape;margin:14mm}body{font:500 11px system-ui, sans-serif;color:#172b43}h1{font:700 21px system-ui, sans-serif;margin:0 0 5px;color:#075985}.meta{color:#64748b;margin-bottom:18px;font-size:10px}.brand{font-weight:bold;letter-spacing:2px;color:#0879c9;margin-bottom:7px}table{width:100%;border-collapse:collapse}th{background:#075985;color:#fff;text-align:left;padding:9px 7px;font-size:9px}td{padding:8px 7px;border-bottom:1px solid #dbe5ef;vertical-align:top;font-size:9px}tr:nth-child(even) td{background:#f2f7fb}.foot{margin-top:16px;color:#64748b;font-size:9px}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
 <a class="skip-link" href="#mainContent">Skip to main content</a><div class="brand">BANKER TIPS</div><h1>Membership Approval Register</h1><div class="meta">Generated ${esc(new Date().toLocaleString('en-KE',{timeZone:'Africa/Nairobi'}))} EAT · Subscribers listed newest first</div><table><thead><tr><th>#</th><th>Email</th><th>Phone</th><th>Package</th><th>Payment date &amp; time</th><th>Status</th><th>Membership expiry</th></tr></thead><tbody>${rows.map(r=>'<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')}</tbody></table><div class="foot">Payment times are shown only where a payment timestamp is available in the membership data. All displayed times use East Africa Time (EAT).</div><script>window.onload=()=>{window.print();};<\/script>
 
+
+<style id="bankertips-final-device-font">
+:root{--font-system:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+html,body,body *:not(i):not(svg):not(path):not([class*="fa-"]),button,input,select,textarea{
+  font-family:var(--font-system)!important;
+}
+/* Keep icon fonts intact while using the device font for all interface text. */
+i.fa,i.fas,i.far,i.fab,[class^="fa-"],[class*=" fa-"]{
+  font-family:"Font Awesome 6 Free","Font Awesome 6 Brands"!important;
+}
+body{letter-spacing:normal;text-rendering:auto;-webkit-font-smoothing:auto}
+</style>
 </body></html>`);
   w.document.close();
 }
@@ -2958,9 +2931,9 @@ body[data-theme="dark"] {
 
 /* Premium payment-options experience — inherits the site's persisted day/night theme. */
 .payment-method-card{padding:clamp(18px,3vw,28px)!important;border-radius:22px!important;background:var(--surface)!important;border:1px solid var(--line)!important;box-shadow:0 14px 38px rgba(18,48,78,.07)!important}
-.payment-options-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}.payment-options-heading h3{margin:5px 0 4px;font:800 clamp(1.2rem,3vw,1.5rem) Outfit,"Comfortaa",sans-serif;letter-spacing:-.035em;color:var(--ink)}.payment-options-heading p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.55}.payment-kicker{font-size:.67rem;font-weight:900;letter-spacing:.13em;color:var(--blue)}.payment-kicker i{margin-right:5px}.payment-lock{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--muted);font-size:.72rem;font-weight:800;white-space:nowrap}
+.payment-options-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:20px}.payment-options-heading h3{margin:5px 0 4px;font:800 clamp(1.2rem,3vw,1.5rem) Outfit,system-ui,sans-serif;letter-spacing:-.035em;color:var(--ink)}.payment-options-heading p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.55}.payment-kicker{font-size:.67rem;font-weight:900;letter-spacing:.13em;color:var(--blue)}.payment-kicker i{margin-right:5px}.payment-lock{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--muted);font-size:.72rem;font-weight:800;white-space:nowrap}
 .payment-method-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px!important;margin:0!important}.pay-method{position:relative;display:flex;align-items:center;gap:12px;min-width:0;min-height:94px;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);text-align:left;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}.pay-method:not(:disabled):hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 8px 20px rgba(8,121,185,.09)}.pay-method.selected{border-color:#83c9a5;background:linear-gradient(135deg,#effcf5,#f8fffb);box-shadow:0 0 0 3px rgba(34,160,99,.08)}.method-icon{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border-radius:15px;font-size:1.25rem}.mpesa-icon{background:#dcf7e9;color:#087b49}.card-icon,.paypal-icon{background:#e8f1fc;color:#244c78}.skrill-icon{background:#f0e8fa;color:#623b87}.eversend-icon{background:#e1f5f1;color:#14796e}.binance-icon{background:#fbf1d9;color:#9b741c}.method-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}.method-copy strong{font-size:.94rem;line-height:1.25}.method-copy small{font-size:.75rem;color:var(--muted);line-height:1.35}.method-status{display:inline-flex;align-items:center;justify-content:center;padding:6px 9px;border-radius:99px;font-size:.66rem;font-weight:800;white-space:nowrap}.method-status.available{background:#dcf7e9;color:#167447}.method-status.soon{background:#eef4fa;color:#718096}.method-check{position:absolute;right:11px;top:10px;color:#168454;font-size:.78rem;opacity:0}.pay-method.selected .method-check{opacity:1}.pay-method.unavailable{cursor:not-allowed;opacity:.88}.checkout-current{display:flex;align-items:center;gap:9px;margin:25px 0 13px;color:var(--muted);font-size:.76rem;font-weight:800;letter-spacing:.1em}.checkout-current strong{color:var(--ink);font-size:.94rem;letter-spacing:0}.checkout-live-dot{width:9px;height:9px;border-radius:50%;background:#168454;box-shadow:0 0 0 5px rgba(22,132,84,.12)}
-.mpesa-panel{margin:0!important;padding:22px!important;border-radius:20px!important;border:1px solid #cde9d9!important;background:linear-gradient(140deg,#effcf5,#f9fffb)!important;color:#173e30!important}.mpesa-brand{gap:12px}.mpesa-logo{width:54px;height:54px;flex:0 0 54px;border-radius:17px;background:#087b49!important;font-size:1.35rem}.mpesa-brand strong{font-size:1.05rem}.mpesa-brand small{font-size:.76rem;color:#587768!important}.recommended-label{display:inline-flex;align-items:center;gap:6px;margin-left:auto;padding:8px 12px;background:#d9f8e7!important;color:#12653d!important;font-size:.7rem}.mpesa-panel h3{margin:19px 0 7px!important;font:800 clamp(1.25rem,3vw,1.55rem) Outfit,"Comfortaa",sans-serif!important;letter-spacing:-.035em}.mpesa-panel>p{max-width:700px;font-size:.88rem!important;line-height:1.75!important;color:#557365!important}.mpesa-checkout-form{margin-top:22px!important}.payment-method-card .field label{font-size:.72rem;letter-spacing:.09em}.phone-input-wrap{display:flex;align-items:center;gap:0;min-height:58px;border:1px solid var(--line);border-radius:15px;background:var(--bg);overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}.phone-input-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 13%,transparent)}.phone-prefix{display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--muted);font-size:.84rem;font-weight:800;border-right:1px solid var(--line);white-space:nowrap}.phone-input-wrap input#mpesaPhone{min-width:0;min-height:56px;flex:1;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:12px 14px!important;color:var(--ink)!important;font-size:1rem}.phone-input-wrap input#mpesaPhone:focus{outline:0}.payment-method-card #mpesaPayButton{min-height:56px;border-radius:15px;font-size:.96rem;letter-spacing:-.01em;background:linear-gradient(115deg,#0789c8,#075985);box-shadow:0 10px 22px rgba(7,121,185,.2)}.payment-method-card #mpesaPayButton:disabled{opacity:.65;cursor:wait;transform:none}.payment-method-card #mpesaPaymentNotice{border:1px solid var(--line);background:var(--bg);padding:13px 15px;line-height:1.6}.payment-safety-note{display:flex;align-items:flex-start;gap:8px;margin:16px 0 0;color:var(--muted);font-size:.76rem;line-height:1.55}.payment-safety-note i{color:var(--green);margin-top:2px}
+.mpesa-panel{margin:0!important;padding:22px!important;border-radius:20px!important;border:1px solid #cde9d9!important;background:linear-gradient(140deg,#effcf5,#f9fffb)!important;color:#173e30!important}.mpesa-brand{gap:12px}.mpesa-logo{width:54px;height:54px;flex:0 0 54px;border-radius:17px;background:#087b49!important;font-size:1.35rem}.mpesa-brand strong{font-size:1.05rem}.mpesa-brand small{font-size:.76rem;color:#587768!important}.recommended-label{display:inline-flex;align-items:center;gap:6px;margin-left:auto;padding:8px 12px;background:#d9f8e7!important;color:#12653d!important;font-size:.7rem}.mpesa-panel h3{margin:19px 0 7px!important;font:800 clamp(1.25rem,3vw,1.55rem) Outfit,system-ui,sans-serif!important;letter-spacing:-.035em}.mpesa-panel>p{max-width:700px;font-size:.88rem!important;line-height:1.75!important;color:#557365!important}.mpesa-checkout-form{margin-top:22px!important}.payment-method-card .field label{font-size:.72rem;letter-spacing:.09em}.phone-input-wrap{display:flex;align-items:center;gap:0;min-height:58px;border:1px solid var(--line);border-radius:15px;background:var(--bg);overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}.phone-input-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px color-mix(in srgb,var(--blue) 13%,transparent)}.phone-prefix{display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--muted);font-size:.84rem;font-weight:800;border-right:1px solid var(--line);white-space:nowrap}.phone-input-wrap input#mpesaPhone{min-width:0;min-height:56px;flex:1;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:12px 14px!important;color:var(--ink)!important;font-size:1rem}.phone-input-wrap input#mpesaPhone:focus{outline:0}.payment-method-card #mpesaPayButton{min-height:56px;border-radius:15px;font-size:.96rem;letter-spacing:-.01em;background:linear-gradient(115deg,#0789c8,#075985);box-shadow:0 10px 22px rgba(7,121,185,.2)}.payment-method-card #mpesaPayButton:disabled{opacity:.65;cursor:wait;transform:none}.payment-method-card #mpesaPaymentNotice{border:1px solid var(--line);background:var(--bg);padding:13px 15px;line-height:1.6}.payment-safety-note{display:flex;align-items:flex-start;gap:8px;margin:16px 0 0;color:var(--muted);font-size:.76rem;line-height:1.55}.payment-safety-note i{color:var(--green);margin-top:2px}
 [data-theme="dark"] .payment-method-card{background:var(--surface)!important;border-color:var(--line)!important;box-shadow:0 16px 40px rgba(0,0,0,.2)!important}[data-theme="dark"] .payment-lock{background:#0d1b2b;border-color:#2b4057;color:#a9bacd}[data-theme="dark"] .pay-method{background:#142337;border-color:#2b4057;color:#edf5fc}[data-theme="dark"] .pay-method.selected{background:linear-gradient(135deg,#12372e,#142c2b);border-color:#347c5c;box-shadow:0 0 0 3px rgba(74,222,128,.07)}[data-theme="dark"] .method-icon{filter:saturate(.9)}[data-theme="dark"] .method-status.soon{background:#26364a;color:#a9bacd}[data-theme="dark"] .method-status.available{background:#174631;color:#9ce7bb}[data-theme="dark"] .checkout-live-dot{background:#4ade80;box-shadow:0 0 0 5px rgba(74,222,128,.12)}[data-theme="dark"] .mpesa-panel{background:linear-gradient(140deg,#102b23,#132a25)!important;border-color:#285b43!important;color:#e4fff0!important}[data-theme="dark"] .mpesa-brand small,[data-theme="dark"] .mpesa-panel>p{color:#a8cbb8!important}[data-theme="dark"] .recommended-label{background:#194b34!important;color:#b7f7d0!important}[data-theme="dark"] .phone-input-wrap{background:#0d1b2b;border-color:#34485e}[data-theme="dark"] .phone-prefix{border-color:#34485e;color:#a9bacd}[data-theme="dark"] .payment-method-card #mpesaPaymentNotice{background:#0d1b2b;border-color:#2b4057;color:var(--muted)}
 @media(max-width:560px){.payment-method-grid{gap:9px!important}.pay-method{min-height:88px;padding:11px 10px;gap:9px;border-radius:15px}.method-icon{width:41px;height:41px;flex-basis:41px;border-radius:13px;font-size:1.05rem}.method-copy strong{font-size:.82rem}.method-copy small{font-size:.68rem}.method-status{font-size:.59rem;padding:5px 7px}.payment-options-heading{gap:8px}.payment-options-heading p{font-size:.78rem}.payment-lock{font-size:.64rem;padding:7px 8px}.mpesa-panel{padding:17px!important}.mpesa-logo{width:47px;height:47px;flex-basis:47px}.recommended-label{font-size:.61rem;padding:7px 9px}.phone-prefix{padding:0 10px;font-size:.77rem}}
 @media(max-width:370px){.payment-method-grid{grid-template-columns:1fr!important}.pay-method{min-height:76px}.method-copy strong{font-size:.9rem}.method-status{font-size:.65rem}}
@@ -3067,7 +3040,7 @@ body[data-theme="dark"] {
 .hero-copy{position:relative;z-index:2;max-width:690px;min-width:0}
 .hero .eyebrow{display:flex;align-items:center;gap:10px;color:#b9e6ff;font-size:.7rem;font-weight:800;letter-spacing:.16em;line-height:1.4}
 .hero-eyebrow-icon{width:30px;height:30px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.09);font-size:.9rem}
-.hero h1{margin:17px 0 14px;color:#fff;font:800 clamp(2rem,4.8vw,3.25rem)/1.1 "Comfortaa","Trebuchet MS",sans-serif;letter-spacing:-.065em}
+.hero h1{margin:17px 0 14px;color:#fff;font:800 clamp(2rem,4.8vw,3.25rem)/1.1 system-ui, sans-serif;letter-spacing:-.065em}
 .hero h1 span{color:#a8e2ff}
 .hero p{max-width:590px;margin:0;color:#dceefa;font-size:clamp(.9rem,1.5vw,1.02rem);line-height:1.8}
 .hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:25px}
@@ -3298,7 +3271,7 @@ body[data-theme="dark"] {
   background:transparent!important;
   color:var(--ink)!important;
   box-shadow:none!important;
-  font:600 .83rem "Comfortaa","Trebuchet MS",sans-serif;
+  font:600 .83rem system-ui, sans-serif;
 }
 .membership-search input::placeholder{color:var(--muted-2);opacity:1}
 .membership-sort-note{
