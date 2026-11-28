@@ -1036,8 +1036,84 @@ img{max-width:100%}
   }
 </style>
 
+
+<style id="bankertips-installed-app-gate-styles">
+/* Website access is intentionally restricted to the installed PWA. */
+html.bt-install-required,html.bt-install-required body{min-height:100%;overflow:hidden!important}
+html.bt-install-required body>*:not(#bankertipsAppGate){display:none!important}
+#bankertipsAppGate{display:none}
+html.bt-install-required #bankertipsAppGate{
+  display:flex!important;position:fixed;inset:0;z-index:2147483000;
+  align-items:center;justify-content:center;padding:22px;
+  overflow:auto;background:
+    radial-gradient(circle at 85% 8%,rgba(56,189,248,.22),transparent 30%),
+    linear-gradient(145deg,#071d35 0%,#083e66 55%,#087eb8 100%);
+  color:#10243a;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+#bankertipsAppGate .bt-gate-card{
+  width:min(440px,100%);padding:30px 25px 24px;border-radius:26px;
+  background:#fff;box-shadow:0 28px 90px rgba(0,0,0,.28);text-align:center;
+  border:1px solid rgba(255,255,255,.65)
+}
+#bankertipsAppGate .bt-gate-logo{
+  width:76px;height:76px;margin:0 auto 17px;border-radius:22px;
+  display:grid;place-items:center;background:#edf7ff;border:1px solid #d7eafa;
+  overflow:hidden
+}
+#bankertipsAppGate .bt-gate-logo img{width:100%;height:100%;object-fit:contain;padding:5px}
+#bankertipsAppGate .bt-gate-kicker{margin:0 0 8px;color:#0879b9;font-size:.7rem;font-weight:900;letter-spacing:.16em}
+#bankertipsAppGate h1{margin:0 0 11px;color:#102b46;font-size:clamp(1.55rem,6vw,2rem);line-height:1.15;letter-spacing:-.045em}
+#bankertipsAppGate .bt-gate-copy{margin:0 auto 19px;max-width:340px;color:#61758a;font-size:.91rem;line-height:1.65}
+#bankertipsAppGate .bt-gate-benefits{display:grid;gap:9px;margin:0 0 21px;padding:14px 15px;border:1px solid #dcecf8;border-radius:15px;background:#f5faff;text-align:left}
+#bankertipsAppGate .bt-gate-benefits span{display:flex;gap:10px;align-items:center;color:#31536e;font-size:.83rem;font-weight:750}
+#bankertipsAppGate .bt-gate-benefits i{color:#0784c7}
+#bankertipsAppGate .bt-gate-download{
+  width:100%;min-height:52px;border:0;border-radius:14px;padding:13px 18px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(135deg,#078bd5,#075985);color:#fff;
+  font-size:.96rem;font-weight:850;box-shadow:0 9px 20px rgba(7,121,185,.22)
+}
+#bankertipsAppGate .bt-gate-download:disabled{opacity:.65}
+#bankertipsAppGate .bt-gate-help{margin:13px 0 0;color:#8291a2;font-size:.72rem;line-height:1.5}
+#bankertipsAppGate .bt-gate-instructions{display:none;margin-top:15px;padding:13px 14px;text-align:left;border:1px solid #dcecf8;border-radius:13px;background:#f8fbff;color:#526b82;font-size:.8rem;line-height:1.55}
+#bankertipsAppGate .bt-gate-instructions.show{display:block}
+#bankertipsAppGate .bt-gate-instructions strong{color:#173e5d}
+@media(max-width:380px){#bankertipsAppGate .bt-gate-card{padding:25px 18px 20px;border-radius:22px}}
+</style>
+<script id="bankertips-installed-app-detection">
+(function(){
+  var standalone = false;
+  try {
+    standalone = window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.navigator.standalone === true;
+  } catch(e) {}
+  if (!standalone) document.documentElement.classList.add('bt-install-required');
+})();
+</script>
+
 </head>
 <body data-theme="light">
+
+<div id="bankertipsAppGate" role="dialog" aria-modal="true" aria-labelledby="btGateTitle">
+  <div class="bt-gate-card">
+    <div class="bt-gate-logo"><img src="/images/bankertipslogo.png" alt="Banker Tips"></div>
+    <p class="bt-gate-kicker">THE BANKER TIPS EXPERIENCE</p>
+    <h1 id="btGateTitle">Continue in the Banker Tips App</h1>
+    <p class="bt-gate-copy">To access our Free Tips and Premium Tips, please download and install the Banker Tips Web App on your phone. The website is available only through the installed app.</p>
+    <div class="bt-gate-benefits">
+      <span><i class="fa-solid fa-check-circle"></i> Access Free Tips in the app</span>
+      <span><i class="fa-solid fa-crown"></i> View Premium Tips with an active membership</span>
+      <span><i class="fa-solid fa-mobile-screen-button"></i> A clean, app-style mobile experience</span>
+    </div>
+    <button type="button" class="bt-gate-download" id="btGateInstall">
+      <i class="fa-solid fa-download"></i><span>Download the Web App</span>
+    </button>
+    <div class="bt-gate-instructions" id="btGateInstructions" aria-live="polite"></div>
+    <p class="bt-gate-help">Already installed? Close this browser tab and open Banker Tips from your phone's home screen.</p>
+  </div>
+</div>
+
 <script>
 (function(){
   var theme = document.documentElement.getAttribute('data-theme') || 'light';
@@ -2104,6 +2180,9 @@ i.fa,i.fas,i.far,i.fab,[class^="fa-"],[class*=" fa-"]{
 }
 body{letter-spacing:normal;text-rendering:auto;-webkit-font-smoothing:auto}
 </style>
+
+
+
 </body></html>`);
   w.document.close();
 }
@@ -3724,6 +3803,80 @@ header,.site-header,.topbar,.main-header{
  byId('matchBroadcastForm').addEventListener('submit',function(event){event.preventDefault();var title=byId('matchBroadcastTitle').value.trim();var body=byId('matchBroadcastBody').value.trim();fetch('/api/admin/notifications/broadcast',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:title,body:body})}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.message||'Could not send notification');return d;});}).then(function(d){byId('matchBroadcastMessage').textContent=d.message||'Notification sent.';byId('matchBroadcastBody').value='';}).catch(function(err){byId('matchBroadcastMessage').textContent=err.message;});});
  document.addEventListener('click',function(event){var edit=event.target.closest('[data-match-edit]');var del=event.target.closest('[data-match-delete]');if(edit){fetch('/api/admin/matches/'+encodeURIComponent(edit.getAttribute('data-match-edit')),{credentials:'include'}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.message);return d.match;});}).then(function(m){byId('matchAdminId').value=m.id;byId('matchAdminLeague').value=m.league||'';byId('matchAdminHome').value=m.homeTeam;byId('matchAdminAway').value=m.awayTeam;byId('matchAdminDate').value=m.date;byId('matchAdminTime').value=m.time||'';byId('matchAdminStatus').value=m.status;byId('matchAdminHomeScore').value=m.homeScore==null?'':m.homeScore;byId('matchAdminAwayScore').value=m.awayScore==null?'':m.awayScore;byId('matchAdminSave').textContent='Update fixture';adminCard.scrollIntoView({behavior:'smooth'});}).catch(function(err){alert(err.message);});}if(del&&window.confirm('Delete this fixture?')){fetch('/api/admin/matches/'+encodeURIComponent(del.getAttribute('data-match-delete')),{method:'DELETE',credentials:'include'}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.message);return d;});}).then(loadMatches).catch(function(err){alert(err.message);});}});
  window.loadBankerMatchCentre=function(){return checkAdmin().then(loadMatches);};window.loadBankerMatchCentre();
+})();
+</script>
+<script id="bankertips-installed-app-gate">
+(function(){
+  var root=document.documentElement;
+  var gate=document.getElementById('bankertipsAppGate');
+  var installButton=document.getElementById('btGateInstall');
+  var instructions=document.getElementById('btGateInstructions');
+  if(!gate || !installButton) return;
+
+  var deferredPrompt=null;
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent) &&
+    !(/windows/i.test(navigator.userAgent));
+  var isAndroid=/android/i.test(navigator.userAgent);
+
+  window.addEventListener('beforeinstallprompt',function(event){
+    event.preventDefault();
+    deferredPrompt=event;
+    installButton.querySelector('span').textContent='Install Banker Tips App';
+  });
+
+  function showInstructions(message){
+    instructions.innerHTML=message;
+    instructions.classList.add('show');
+  }
+
+  installButton.addEventListener('click',async function(){
+    installButton.disabled=true;
+    try{
+      if(deferredPrompt){
+        deferredPrompt.prompt();
+        var choice=await deferredPrompt.userChoice;
+        deferredPrompt=null;
+        if(choice && choice.outcome==='accepted'){
+          showInstructions('<strong>Installation started.</strong><br>After installation, open Banker Tips from your phone home screen to access the tips.');
+        }else{
+          showInstructions('<strong>Installation was not completed.</strong><br>Choose Install again when you are ready to add Banker Tips to your phone.');
+        }
+      }else if(isIOS){
+        showInstructions('<strong>Install on iPhone or iPad:</strong><br>1. Open this page in Safari.<br>2. Tap the Share button.<br>3. Select <strong>Add to Home Screen</strong>.<br>4. Tap <strong>Add</strong>, then launch Banker Tips using the new home-screen icon.');
+      }else if(isAndroid){
+        showInstructions('<strong>Install on Android:</strong><br>1. Open this page in Chrome.<br>2. Tap the browser menu (⋮).<br>3. Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.<br>4. Confirm, then open Banker Tips from your home screen.');
+      }else{
+        showInstructions('<strong>Install the Web App:</strong><br>Open this page in a supported mobile browser and use its menu or Share option to choose <strong>Install app</strong> or <strong>Add to Home Screen</strong>. Then launch Banker Tips from the installed app icon.');
+      }
+    }catch(error){
+      showInstructions('Your browser could not start installation. Use the browser menu and choose <strong>Install app</strong> or <strong>Add to Home Screen</strong>.');
+    }finally{
+      installButton.disabled=false;
+    }
+  });
+
+  window.addEventListener('appinstalled',function(){
+    showInstructions('<strong>Banker Tips has been installed.</strong><br>Open the Banker Tips icon from your phone home screen.');
+    installButton.querySelector('span').textContent='App Installed';
+    installButton.disabled=true;
+  });
+
+  // Keep the website locked in normal browser tabs. Installed standalone mode
+  // is the only mode allowed to reveal the actual platform.
+  function enforceGate(){
+    var standalone=window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.navigator.standalone===true;
+    root.classList.toggle('bt-install-required',!standalone);
+  }
+  enforceGate();
+  ['pageshow','focus'].forEach(function(name){window.addEventListener(name,enforceGate);});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)enforceGate();});
+  try{
+    var media=window.matchMedia('(display-mode: standalone)');
+    if(media.addEventListener) media.addEventListener('change',enforceGate);
+    else if(media.addListener) media.addListener(enforceGate);
+  }catch(e){}
 })();
 </script>
 </body>
